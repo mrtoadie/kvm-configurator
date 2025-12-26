@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+// XML structure
 // Root element
 type Domain struct {
 	XMLName xml.Name `xml:"domain"`
@@ -19,16 +20,17 @@ type Domain struct {
 }
 
 // Sub‑elements
+// RAM
 type Memory struct {
 	Unit  string `xml:"unit,attr,omitempty"`
 	Value int    `xml:",chardata"`
 }
-
+// CPU
 type VCPU struct {
 	Placement string `xml:"placement,attr,omitempty"`
 	Value     int    `xml:",chardata"`
 }
-
+// OS
 type OS struct {
 	Type OSBootType `xml:"type"`
 	Boot BootDevice `xml:"boot"`
@@ -43,7 +45,7 @@ type OSBootType struct {
 type BootDevice struct {
 	Dev string `xml:"dev,attr"`
 }
-
+// Disk
 type Devices struct {
 	Disk      Disk      `xml:"disk"`
 	Interface Interface `xml:"interface"`
@@ -87,7 +89,7 @@ type Graphics struct {
 	Type    string `xml:"type,attr"`
 	AutoPort string `xml:"autoport,attr,omitempty"`
 }
-
+// Main
 func main() {
 	d := Domain{
 		Type: "kvm",
@@ -113,7 +115,7 @@ func main() {
 				Type:   "file",
 				Device: "disk",
 				Driver: Driver{Name: "qemu", Type: "qcow2"},
-				Source: Source{File: "run/media/toadie/vm/QEMU/my-guest.qcow2"},
+				Source: Source{File: "run/media/toadie/vm/QEMU/my-guest.qcow2"}, // hardcoded path
 				Target: Target{Dev: "vda", Bus: "virtio"},
 			},
 			Interface: Interface{
