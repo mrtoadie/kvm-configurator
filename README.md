@@ -1,9 +1,7 @@
 # kvm-configurator
 # == alpha ==
-## alpha usage
-```bash
-go run ./xml.go > test.xml
-```
+![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) ![GitHub License](https://img.shields.io/github/license/mrtoadie/kvm-configurator)
+
 ## About kvm-configurator
 
 
