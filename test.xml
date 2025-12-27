@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain type="kvm">
+  <name>my-guest</name>
+  <memory unit="MiB">1024</memory>
+  <vcpu placement="static">2</vcpu>
+  <os>
+    <type arch="x86_64" machine="pc-q35-6.2">hvm</type>
+    <boot dev="hd"></boot>
+  </os>
+  <devices>
+    <disk type="file" device="disk">
+      <driver name="qemu" type="qcow2"></driver>
+      <source file="run/media/toadie/vm/QEMU/my-guest.qcow2"></source>
+      <target dev="vda" bus="virtio"></target>
+    </disk>
+    <interface type="network">
+      <source network="default"></source>
+    </interface>
+    <graphics type="spice" autoport="yes"></graphics>
+  </devices>
+</domain>
