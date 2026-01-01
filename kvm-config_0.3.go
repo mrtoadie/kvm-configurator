@@ -117,7 +117,7 @@ func xmlQuery() (DomainConfig, error) {
 		return cfg, fmt.Errorf("vCPU einlesen fehlgeschlagen: %w", err)
 	}
 	if cpuStr == "" {
-		cfg.VCPU = 1
+		cfg.VCPU = 1 
 	} else {
 		c, err := strconv.Atoi(cpuStr)
 		if err != nil {
