@@ -2,3 +2,4 @@ xml.go
 *.xml
 /template
 /testing
+kvm-config_03.go
