@@ -1,4 +1,1 @@
-/template/*
-/testing
-xml.go
-*.xml
+/template
