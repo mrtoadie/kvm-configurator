@@ -26,7 +26,7 @@ var osVariant = map[string]string{
 	"Ubuntu":     "ubuntu20.04",
 }
 
-// chooseVariant liefert den virt‑install‑Identifier für eine bekannte Distro.
+// chooseVariant checks if the distro is known for virt-install identifier
 func chooseVariant(distro string) (string, error) {
 	if v, ok := osVariant[distro]; ok {
 		return v, nil
@@ -34,7 +34,7 @@ func chooseVariant(distro string) (string, error) {
 	return "", fmt.Errorf("unknown distro %q", distro)
 }
 
-// ask stellt eine Frage und liest die Eingabe von stdin.
+// ask asks a question and reads the input from stdin
 func ask(prompt string, r *bufio.Reader) (string, error) {
 	fmt.Print(prompt)
 	text, err := r.ReadString('\n')
@@ -44,7 +44,7 @@ func ask(prompt string, r *bufio.Reader) (string, error) {
 	return strings.TrimSpace(text), nil
 }
 
-// buildVirtInstallCmd erzeugt die Argumentliste für virt‑install.
+// buildVirtInstallCmd generates the argument list for virt‑install
 func buildVirtInstallCmd(name, ram, cpus, diskPath, iso, variant string, diskSizeGB int) []string {
 	return []string{
 		"--name", name,
@@ -58,12 +58,12 @@ func buildVirtInstallCmd(name, ram, cpus, diskPath, iso, variant string, diskSiz
 	}
 }
 
-// writeXML speichert das XML in eine Datei.
+// writeXML saves XML file
 func writeXML(xmlData []byte, filename string) error {
 	return os.WriteFile(filename, xmlData, 0644)
 }
 
-// defineVM führt `virsh define <xml>` aus.
+// defineVM runs "virsh define <xml>"
 func defineVM(xmlPath string) error {
 	cmd := exec.Command("virsh", "define", xmlPath)
 	cmd.Stdout = os.Stdout
@@ -80,9 +80,7 @@ func renderTable(pairs map[string]string) {
 	w.Flush()
 }
 
-/* -------------------------------------------------
-   Prompt‑Formular (interaktive Bearbeitung)
-   ------------------------------------------------- */
+// Prompt form (interactive editing)
 func promptForm(cfg *DomainConfig) {
 	in := bufio.NewReader(os.Stdin)
 
@@ -117,7 +115,7 @@ func promptForm(cfg *DomainConfig) {
 			if v, err := strconv.Atoi(strings.TrimSpace(val)); err == nil {
 				cfg.MemMiB = v
 			} else {
-				fmt.Println("Ungültige Zahl – Wert bleibt unverändert.")
+				fmt.Println("Invalid number – value remains unchanged.")
 			}
 
 		case "3":
@@ -126,44 +124,40 @@ func promptForm(cfg *DomainConfig) {
 			if v, err := strconv.Atoi(strings.TrimSpace(val)); err == nil {
 				cfg.VCPU = v
 			} else {
-				fmt.Println("Ungültige Zahl – Wert bleibt unverändert.")
+				fmt.Println("Invalid number – value remains unchanged.")
 			}
 
 		case "4":
-			fmt.Print("Disk-Path (leer = keine Disk): ")
+			fmt.Print("Disk path (empty = no disk): ")
 			val, _ := in.ReadString('\n')
 			cfg.Disk = strings.TrimSpace(val)
 
 		case "5":
-			fmt.Print("Netzwerk (kommagetrennt): ")
+			fmt.Print("Network (comma-separated): ")
 			val, _ := in.ReadString('\n')
 			cfg.Network = strings.TrimSpace(val)
 
 		default:
-			fmt.Println("Unbekanntes Feld – bitte Name, RAM, vCPU, Disk oder Network eingeben.")
+			fmt.Println("Invalid input!")
 		}
 	}
 }
 
-/* -------------------------------------------------
-   VM‑Erstellung aus einer DomainConfig
-   ------------------------------------------------- */
+// VM‑creation from DomainConfig
 func createVMFromConfig(cfg DomainConfig) error {
 	r := bufio.NewReader(os.Stdin)
 
-	// ---------- 1️⃣ Werte, die nicht im Config stehen ----------
-	// Disk‑Größe (GB)
-	diskSizeStr, err := ask("Disk‑Größe in GB (z. B. 20): ", r)
+	diskSizeStr, err := ask("Disk size in GB (e.g., 20): ", r)
 	if err != nil {
 		return err
 	}
 	diskSizeGB, err := strconv.Atoi(diskSizeStr)
 	if err != nil {
-		return fmt.Errorf("ungültige Disk‑Größe: %w", err)
+		return fmt.Errorf("Invalid disk size: %w", err)
 	}
 
 	// Pfad zur ISO
-	iso, err := ask("Pfad zur Installations‑ISO: ", r)
+	iso, err := ask("Path to the installation ISO: ", r)
 	if err != nil {
 		return err
 	}
@@ -178,16 +172,18 @@ func createVMFromConfig(cfg DomainConfig) error {
 		return err
 	}
 
-	// virt‑install aufrufen ----------
+	// call virt‑install
 	name := cfg.Name
-	ram := strconv.Itoa(cfg.MemMiB) // virt‑install erwartet RAM als String (MB)
+	ram := strconv.Itoa(cfg.MemMiB)
 	cpus := strconv.Itoa(cfg.VCPU)
 
-	// Zielpfad für das Disk‑Image
+	// defaul virtual-disk path
 	diskPath := fmt.Sprintf("/run/media/toadie/vm/QEMU/%s.qcow2", name)
-iso = "/run/media/toadie/data/ISOs/ubuntu-24.04.3-desktop-amd64.iso"
+	// hard-coded iso path
+	iso = "/run/media/toadie/data/ISOs/ubuntu-24.04.3-desktop-amd64.iso"
+	// command arguments
 	cmdArgs := buildVirtInstallCmd(name, ram, cpus, diskPath, iso, variant, diskSizeGB)
-	virtCmd := exec.Command("virt-install", cmdArgs...)
+	virtCmd := exec.Command("virt-install", cmdArgs...) // for system VMs "sudo virt-install"
 	var out bytes.Buffer
 	//virtCmd.Stdout = &out
 	//virtCmd.Stderr = os.Stderr
@@ -209,14 +205,14 @@ iso = "/run/media/toadie/data/ISOs/ubuntu-24.04.3-desktop-amd64.iso"
 	if err := defineVM(xmlFile); err != nil {
 		return fmt.Errorf("virsh define fehlgeschlagen: %w", err)
 	}
-	fmt.Println("VM erfolgreich bei libvirt/qemu registriert (noch nicht gestartet).")
+	fmt.Println("VM successfully registered with libvirt/qemu (not yet started).")
 	return nil
 }
 // MAIN
 func main() {
 	// default config
 	cfg := DomainConfig{
-		Name:    "my‑guest",
+		Name:    "new-machine",
 		MemMiB:  1024,
 		VCPU:    2,
 		Disk:    "",
@@ -227,18 +223,18 @@ func main() {
 	promptForm(&cfg)
 
 	// config overview
-	fmt.Println("\n=== Endgültige Konfiguration ===")
+	fmt.Println("\n=== Summary ===")
 	renderTable(map[string]string{
 		"Name":      cfg.Name,
 		"RAM (MiB)": strconv.Itoa(cfg.MemMiB),
 		"vCPU":      strconv.Itoa(cfg.VCPU),
-		"Disk‑Pfad": cfg.Disk,
-		"Netzwerk":  cfg.Network,
+		"Disk-Path": cfg.Disk,
+		"Network":  cfg.Network,
 	})
 
-	// VM anlegen (virsh/virt‑install)
+	// create VM (virsh/virt‑install)
 	if err := createVMFromConfig(cfg); err != nil {
-		fmt.Fprintln(os.Stderr, "Fehler beim Anlegen der VM:", err)
+		fmt.Fprintln(os.Stderr, "Error creating the VM:", err)
 		os.Exit(1)
 	}
 }
