@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='utf-8'?>
+<domain type='kvm'>
+  <!-- Grundlegende Ressourcen -->
+  <name>my-vm</name>
+  <memory unit='KiB'>2097152</memory>          <!-- 2 GiB -->
+  <currentMemory unit='KiB'>2097152</currentMemory>
+  <vcpu placement='static'>2</vcpu>
+
+  <!-- Boot‑ und System‑Informationen -->
+  <os>
+    <type arch='x86_64' machine='pc-i440fx-2.9'>hvm</type>
+    <boot dev='hd'/>
+  </os>
+
+  <!-- Features, Clock und Verhalten bei Ereignissen -->
+  <features>
+    <acpi/>
+    <apic/>
+    <pae/>
+  </features>
+  <clock offset='utc'/>
+  <on_poweroff>destroy</on_poweroff>
+  <on_reboot>restart</on_reboot>
+  <on_crash>destroy</on_crash>
+
+  <!-- Geräte -->
+  <devices>
+    <!-- Festplatte -->
+    <disk type='file' device='disk'>
+      <driver name='qemu' type='qcow2'/>
+      <source file='/var/lib/libvirt/images/my-vm.qcow2'/>
+      <target dev='vda' bus='virtio'/>
+    </disk>
+
+    <!-- Netzwerk -->
+    <interface type='network'>
+      <source network='default'/>
+      <model type='virtio'/>
+    </interface>
+
+    <!-- Grafik (VNC) -->
+    <graphics type='vnc' port='-1' autoport='yes' listen='0.0.0.0'/>
+
+    <!-- Eingabe -->
+    <input type='mouse' bus='ps2'/>
+    <input type='keyboard' bus='ps2'/>
+
+    <!-- Console (virsh) -->
+    <console type='pty'>
+      <target type='serial' port='0'/>
+    </console>
+  </devices>
+
+  <!-- Optionales Sicherheitslabel (AppArmor) -->
+  <seclabel type='dynamic' model='apparmor' relabel='yes'/>
+</domain>
