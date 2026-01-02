@@ -1,0 +1,25 @@
+<domain type="kvm">
+  <name>{{ .Name }}</name>
+  <memory unit="MiB">{{ .MemMiB }}</memory>
+  <vcpu placement="static">{{ .VCPU }}</vcpu>
+
+  <!-- OS‑Block wird von den jeweiligen Distro‑Templates überschrieben -->
+  {{ block "os" . }}{{ end }}
+
+  <devices>
+    <graphics type="spice" autoport="yes"/>
+    {{ if .DiskPath }}
+      <disk type="file" device="disk">
+        <driver name="qemu" type="qcow2"/>
+        <source file="{{ .DiskPath }}"/>
+        <target dev="vda" bus="virtio"/>
+      </disk>
+    {{ end }}
+
+    {{ range .Networks }}
+      <interface type="network">
+        <source network="{{ . }}"/>
+      </interface>
+    {{ end }}
+  </devices>
+</domain>
