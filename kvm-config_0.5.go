@@ -86,7 +86,7 @@ func renderTable(pairs map[string]string) {
 func promptForm(cfg *DomainConfig) {
 	in := bufio.NewReader(os.Stdin)
 
-	// Tab‑Writer für das Formular
+	// Tab‑Writer Formular
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 
 	for {
