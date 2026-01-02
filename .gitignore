@@ -1,2 +1,4 @@
+/template/*
+/testing
 xml.go
 *.xml
