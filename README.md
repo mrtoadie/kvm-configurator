@@ -6,6 +6,7 @@
 
 
 ### Ideas & Roadmap
+- [ ] better code
 - [ ] Nice Menu
 - [ ] TUI Style
 - [ ] Saving XMLs as templates and reediting
