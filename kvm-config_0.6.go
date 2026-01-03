@@ -22,12 +22,14 @@ type DomainConfig struct {
 
 // mapping os variants
 var osVariant = map[string]string{
-	"Ubuntu 22.04 LTS":   "ubuntu22.04",
 	"Ubuntu 24.04 LTS":   "ubuntu24.04",
+	"Ubuntu 25.10":   		"ubuntu25.10",
 	"Debian 12":          "debian12",
-	"Fedora 40":          "fedora40",
+	"Debian 13":          "debian13",
+	"Fedora 43":          "fedora43",
 	"Arch Linux":         "archlinux",
-	"openSUSE Leap 15.6": "opensuse-leap15.6",
+	"openSUSE Leap 16.0": "opensuse16.0",
+	"Windows 10":					"win10"
 }
 
 // chooseVariant checks if the distro is known for virt-install identifier
@@ -40,7 +42,7 @@ func chooseVariant(key string) (string, error) {
 
 // ask asks a question and reads the input from stdin
 func selectOSMenu(r *bufio.Reader) (string, error) {
-	fmt.Println("\n=== Auswahl des Betriebssystems ===")
+	fmt.Println("\n=== Choosing the operating system ===")
 	
 	keys := make([]string, 0, len(osVariant))
 	for k := range osVariant {
