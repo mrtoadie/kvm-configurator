@@ -18,6 +18,7 @@ type DomainConfig struct {
 	VCPU    int
 	Disk    string
 	Network string
+	ISO 		string
 }
 
 // mapping os variants
@@ -55,7 +56,7 @@ func buildVirtInstallCmd(name, ram, cpus, diskPath, iso, variant string, diskSiz
 		"--cdrom", iso,
 		"--boot", "hd",
 		"--print-xml",
-		// … weitere Optionen können hier ergänzt werden …
+		// ... more options ...
 	}
 }
 
@@ -81,7 +82,7 @@ func renderTable(pairs map[string]string) {
 	w.Flush()
 }
 
-// promptForm lets the user edit the configuration interactively
+// Prompt form (interactive editing)
 func promptForm(cfg *DomainConfig) {
 	in := bufio.NewReader(os.Stdin)
 
@@ -148,8 +149,6 @@ func promptForm(cfg *DomainConfig) {
 func createVMFromConfig(cfg DomainConfig) error {
 	r := bufio.NewReader(os.Stdin)
 
-	// --- gather additional parameters -----------------------------------------
-
 	diskSizeStr, err := ask("Disk size in GB (e.g., 20): ", r)
 	if err != nil {
 		return err
@@ -173,8 +172,7 @@ func createVMFromConfig(cfg DomainConfig) error {
 		return err
 	}
 
-	// --- build virt‑install command -------------------------------------------
-
+	// call virt‑install
 	name := cfg.Name
 	ram := strconv.Itoa(cfg.MemMiB)
 	cpus := strconv.Itoa(cfg.VCPU)
@@ -232,6 +230,7 @@ func main() {
 		VCPU:    2,
 		Disk:    "",
 		Network: "default",
+		ISO:		 "test",
 	}
 
 	// interactive editing
@@ -245,7 +244,9 @@ func main() {
 		"vCPU":      strconv.Itoa(cfg.VCPU),
 		"Disk-Path": cfg.Disk,
 		"Network":   cfg.Network,
+		"ISO":			 cfg.ISO,
 	})
+	fmt.Println("\n===============")
 
 	// create the VM (virt‑install → XML → virsh define)
 	if err := createVMFromConfig(cfg); err != nil {
