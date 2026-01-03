@@ -1,19 +1,13 @@
-# kvm-configurator
-# == alpha ==
-![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) ![GitHub License](https://img.shields.io/github/license/mrtoadie/kvm-configurator)
-
-## About kvm-configurator
-```xml
 <domain type="kvm">
-  <name>new-machine</name>
-  <uuid>1f13456f-87da-4901-ab9e-fc942fe1764f</uuid>
+  <name>test-vm</name>
+  <uuid>b0c85ae5-67b8-481b-bc22-57fdf3a5a3de</uuid>
   <metadata>
     <libosinfo:libosinfo xmlns:libosinfo="http://libosinfo.org/xmlns/libvirt/domain/1.0">
       <libosinfo:os id="http://ubuntu.com/ubuntu/20.04"/>
     </libosinfo:libosinfo>
   </metadata>
-  <memory>1048576</memory>
-  <currentMemory>1048576</currentMemory>
+  <memory>2097152</memory>
+  <currentMemory>2097152</currentMemory>
   <vcpu>2</vcpu>
   <os>
     <type arch="x86_64" machine="q35">hvm</type>
@@ -38,7 +32,7 @@
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type="file" device="disk">
       <driver name="qemu" type="qcow2"/>
-      <source file="/run/media/toadie/vm/QEMU/new-machine.qcow2"/>
+      <source file="/run/media/toadie/vm/QEMU/test-vm.qcow2"/>
       <target dev="vda" bus="virtio"/>
     </disk>
     <controller type="usb" model="qemu-xhci" ports="15"/>
@@ -58,7 +52,7 @@
     <controller type="pci" model="pcie-root-port"/>
     <controller type="pci" model="pcie-root-port"/>
     <interface type="user">
-      <mac address="52:54:00:c2:70:03"/>
+      <mac address="52:54:00:65:6b:9b"/>
       <model type="virtio"/>
     </interface>
     <console type="pty"/>
@@ -85,14 +79,4 @@
     </rng>
   </devices>
 </domain>
-```
-
-### Ideas & Roadmap
-- [ ] better code
-- [ ] Nice Menu
-- [ ] TUI Style
-- [ ] Saving XMLs as templates and reediting
-- [ ] More & advanced VM parameters
-- [ ] Complex configs
-- [ ] More templates
 
