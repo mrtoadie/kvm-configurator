@@ -22,16 +22,52 @@ type DomainConfig struct {
 
 // mapping os variants
 var osVariant = map[string]string{
-	"Arch Linux": "archlinux",
-	"Ubuntu":     "ubuntu20.04",
+	"Ubuntu 22.04 LTS":   "ubuntu22.04",
+	"Ubuntu 24.04 LTS":   "ubuntu24.04",
+	"Debian 12":          "debian12",
+	"Fedora 40":          "fedora40",
+	"Arch Linux":         "archlinux",
+	"openSUSE Leap 15.6": "opensuse-leap15.6",
 }
 
 // chooseVariant checks if the distro is known for virt-install identifier
-func chooseVariant(distro string) (string, error) {
-	if v, ok := osVariant[distro]; ok {
+func chooseVariant(key string) (string, error) {
+	if v, ok := osVariant[key]; ok {
 		return v, nil
 	}
-	return "", fmt.Errorf("unknown distro %q", distro)
+	return "", fmt.Errorf("unknown distro %q", key)
+}
+
+// ask asks a question and reads the input from stdin
+func selectOSMenu(r *bufio.Reader) (string, error) {
+	fmt.Println("\n=== Auswahl des Betriebssystems ===")
+	
+	keys := make([]string, 0, len(osVariant))
+	for k := range osVariant {
+		keys = append(keys, k)
+	}
+
+	for i, name := range keys {
+		fmt.Printf("  %2d) %s\n", i+1, name)
+	}
+	fmt.Print("\nPlease enter a number (or press ENTER for default Ubuntu 24.04): ")
+
+	line, err := r.ReadString('\n')
+	if err != nil {
+		return "", err
+	}
+	line = strings.TrimSpace(line)
+
+	// ENTER default Ubuntu 24.04
+	if line == "" {
+		return "Ubuntu 24.04 LTS", nil
+	}
+
+	idx, err := strconv.Atoi(line)
+	if err != nil || idx < 1 || idx > len(keys) {
+		return "", fmt.Errorf("Invalid selection")
+	}
+	return keys[idx-1], nil
 }
 
 // ask asks a question and reads the input from stdin
@@ -55,7 +91,6 @@ func buildVirtInstallCmd(name, ram, cpus, diskPath, iso, variant string, diskSiz
 		"--cdrom", iso,
 		"--boot", "hd",
 		"--print-xml",
-		// ... more options ...
 	}
 }
 
@@ -63,7 +98,6 @@ func buildVirtInstallCmd(name, ram, cpus, diskPath, iso, variant string, diskSiz
 func writeXML(xmlData []byte, filename string) error {
 	return os.WriteFile(filename, xmlData, 0644)
 }
-
 // defineVM runs "virsh define <xml>"
 func defineVM(xmlPath string) error {
 	cmd := exec.Command("virsh", "define", xmlPath)
@@ -84,8 +118,6 @@ func renderTable(pairs map[string]string) {
 // Prompt form (interactive editing)
 func promptForm(cfg *DomainConfig) {
 	in := bufio.NewReader(os.Stdin)
-
-	// Tab‑Writer Formular
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 
 	for {
@@ -109,7 +141,6 @@ func promptForm(cfg *DomainConfig) {
 			fmt.Print(">> New Name: ")
 			val, _ := in.ReadString('\n')
 			cfg.Name = strings.TrimSpace(val)
-
 		case "2":
 			fmt.Print("RAM in MiB: ")
 			val, _ := in.ReadString('\n')
@@ -118,26 +149,22 @@ func promptForm(cfg *DomainConfig) {
 			} else {
 				fmt.Println("Invalid number – value remains unchanged.")
 			}
-
 		case "3":
-			fmt.Print("vCPU-Anzahl: ")
+			fmt.Print("vCPU: ")
 			val, _ := in.ReadString('\n')
 			if v, err := strconv.Atoi(strings.TrimSpace(val)); err == nil {
 				cfg.VCPU = v
 			} else {
 				fmt.Println("Invalid number – value remains unchanged.")
 			}
-
 		case "4":
 			fmt.Print("Disk path (empty = no disk): ")
 			val, _ := in.ReadString('\n')
 			cfg.Disk = strings.TrimSpace(val)
-
 		case "5":
 			fmt.Print("Network (comma-separated): ")
 			val, _ := in.ReadString('\n')
 			cfg.Network = strings.TrimSpace(val)
-
 		default:
 			fmt.Println("Invalid input!")
 		}
@@ -148,32 +175,33 @@ func promptForm(cfg *DomainConfig) {
 func createVMFromConfig(cfg DomainConfig) error {
 	r := bufio.NewReader(os.Stdin)
 
-	diskSizeStr, err := ask("Disk size in GB (e.g., 20): ", r)
+	// ask disk size
+	sizeStr, err := ask("Disk size in GB (e.g., 20): ", r)
 	if err != nil {
 		return err
 	}
-	diskSizeGB, err := strconv.Atoi(diskSizeStr)
+	diskSizeGB, err := strconv.Atoi(sizeStr)
 	if err != nil {
 		return fmt.Errorf("Invalid disk size: %w", err)
 	}
 
-	// Pfad zur ISO
+	// ask for ISO path
 	iso, err := ask("Path to the installation ISO: ", r)
 	if err != nil {
 		return err
 	}
 
-	// Distro (Ubuntu / Arch Linux)
-	distro, err := ask("Distro (Ubuntu / Arch Linux): ", r)
+	// ask for OS (submenu)
+	osChoice, err := selectOSMenu(r)
 	if err != nil {
-		return err
+		return fmt.Errorf("Invalid OS selection: %w", err)
 	}
-	variant, err := chooseVariant(distro)
+	variant, err := chooseVariant(osChoice)
 	if err != nil {
 		return err
 	}
 
-	// call virt‑install
+	// build the vm with virt‑install
 	name := cfg.Name
 	ram := strconv.Itoa(cfg.MemMiB)
 	cpus := strconv.Itoa(cfg.VCPU)
@@ -181,37 +209,46 @@ func createVMFromConfig(cfg DomainConfig) error {
 	// defaul virtual-disk path
 	diskPath := fmt.Sprintf("/run/media/toadie/vm/QEMU/%s.qcow2", name)
 	// hard-coded iso path
-	iso = "/run/media/toadie/data/ISOs/ubuntu-24.04.3-desktop-amd64.iso"
+	//iso = "/run/media/toadie/data/ISOs/clonezilla-live-20251017-questing-amd64.iso"
 	// command arguments
 	cmdArgs := buildVirtInstallCmd(name, ram, cpus, diskPath, iso, variant, diskSizeGB)
-	virtCmd := exec.Command("virt-install", cmdArgs...) // for system VMs "sudo virt-install"
-	var out bytes.Buffer
-	//virtCmd.Stdout = &out
-	//virtCmd.Stderr = os.Stderr
+	virtCmd := exec.Command("virt-install", cmdArgs...)
+
+	// XML output
+	var outBuf, errBuf bytes.Buffer
+	virtCmd.Stdout = &outBuf
+	virtCmd.Stderr = &errBuf
 
 	if err := virtCmd.Run(); err != nil {
-		return fmt.Errorf("virt-install (XML‑Erzeugung) fehlgeschlagen: %w", err)
+		return fmt.Errorf("virt-install failed: %w – %s", err, errBuf.String())
 	}
-	rawXML := out.Bytes()
+	rawXML := outBuf.Bytes()
 
-	// save xml
+	// (optional) show first lines of the xml
+	fmt.Printf("XML created (%d Bytes).\n", len(rawXML))
+	if len(rawXML) > 0 {
+		fmt.Printf("First lines of the XML:\n%s\n", string(rawXML[:200]))
+	}
+
+	// save XML
 	xmlFile := fmt.Sprintf("%s.xml", name)
 	if err := writeXML(rawXML, xmlFile); err != nil {
-		return fmt.Errorf("konnte XML nicht speichern: %w", err)
+		return fmt.Errorf("could not write XML: %w", err)
 	}
 	absPath, _ := filepath.Abs(xmlFile)
-	fmt.Printf("XML‑Definition gespeichert unter: %s\n", absPath)
+	fmt.Printf("XML definition saved under: %s\n", absPath)
 
-	// define vm
+	// define VM
 	if err := defineVM(xmlFile); err != nil {
-		return fmt.Errorf("virsh define fehlgeschlagen: %w", err)
+		return fmt.Errorf("virsh define failed: %w", err)
 	}
 	fmt.Println("VM successfully registered with libvirt/qemu (not yet started).")
 	return nil
 }
+
 // MAIN
 func main() {
-	// default config
+	// Default config
 	cfg := DomainConfig{
 		Name:    "new-machine",
 		MemMiB:  1024,
@@ -220,11 +257,11 @@ func main() {
 		Network: "default",
 	}
 
-	// interactive input
+	// interactive query
 	promptForm(&cfg)
 
-	// config overview
-	fmt.Println("\n=== Summary ===")
+	// show summary
+	fmt.Println("\n=== SUMMARY ===")
 	renderTable(map[string]string{
 		"Name":      cfg.Name,
 		"RAM (MiB)": strconv.Itoa(cfg.MemMiB),
@@ -233,7 +270,7 @@ func main() {
 		"Network":  cfg.Network,
 	})
 
-	// create VM (virsh/virt‑install)
+	// VM creation
 	if err := createVMFromConfig(cfg); err != nil {
 		fmt.Fprintln(os.Stderr, "Error creating the VM:", err)
 		os.Exit(1)

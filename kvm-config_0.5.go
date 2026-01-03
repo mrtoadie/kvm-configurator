@@ -18,7 +18,6 @@ type DomainConfig struct {
 	VCPU    int
 	Disk    string
 	Network string
-	ISO 		string
 }
 
 // mapping os variants
@@ -73,7 +72,7 @@ func defineVM(xmlPath string) error {
 	return cmd.Run()
 }
 
-// renderTable prints a nice tab‑writer table
+// Render Tab‑Writer
 func renderTable(pairs map[string]string) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	for k, v := range pairs {
@@ -98,7 +97,7 @@ func promptForm(cfg *DomainConfig) {
 		fmt.Fprintf(w, "[5] Network:\t%s\t[default]\n", cfg.Network)
 		w.Flush()
 
-		fmt.Print("\nSelect or press Enter to continue: ")
+		fmt.Print("\nSelect or enter to continue: ")
 		fieldRaw, _ := in.ReadString('\n')
 		field := strings.TrimSpace(strings.ToLower(fieldRaw))
 		if field == "" {
@@ -135,7 +134,7 @@ func promptForm(cfg *DomainConfig) {
 			cfg.Disk = strings.TrimSpace(val)
 
 		case "5":
-			fmt.Print("Network (comma‑separated): ")
+			fmt.Print("Network (comma-separated): ")
 			val, _ := in.ReadString('\n')
 			cfg.Network = strings.TrimSpace(val)
 
@@ -145,7 +144,7 @@ func promptForm(cfg *DomainConfig) {
 	}
 }
 
-// createVMFromConfig builds the XML via virt‑install and registers it with libvirt
+// VM‑creation from DomainConfig
 func createVMFromConfig(cfg DomainConfig) error {
 	r := bufio.NewReader(os.Stdin)
 
@@ -155,14 +154,16 @@ func createVMFromConfig(cfg DomainConfig) error {
 	}
 	diskSizeGB, err := strconv.Atoi(diskSizeStr)
 	if err != nil {
-		return fmt.Errorf("invalid disk size: %w", err)
+		return fmt.Errorf("Invalid disk size: %w", err)
 	}
 
+	// Pfad zur ISO
 	iso, err := ask("Path to the installation ISO: ", r)
 	if err != nil {
 		return err
 	}
 
+	// Distro (Ubuntu / Arch Linux)
 	distro, err := ask("Distro (Ubuntu / Arch Linux): ", r)
 	if err != nil {
 		return err
@@ -177,33 +178,23 @@ func createVMFromConfig(cfg DomainConfig) error {
 	ram := strconv.Itoa(cfg.MemMiB)
 	cpus := strconv.Itoa(cfg.VCPU)
 
-	// default virtual‑disk path
+	// defaul virtual-disk path
 	diskPath := fmt.Sprintf("/run/media/toadie/vm/QEMU/%s.qcow2", name)
-
-	// (optional) you can overwrite the iso path entered above – here we keep the user input
-	//iso = "/run/media/toadie/data/ISOs/ubuntu-24.04.3-desktop-amd64.iso"
-
+	// hard-coded iso path
+	iso = "/run/media/toadie/data/ISOs/ubuntu-24.04.3-desktop-amd64.iso"
+	// command arguments
 	cmdArgs := buildVirtInstallCmd(name, ram, cpus, diskPath, iso, variant, diskSizeGB)
-	virtCmd := exec.Command("virt-install", cmdArgs...)
-
-	// Capture stdout (the XML) and stderr (error messages)
-	var outBuf, errBuf bytes.Buffer
-	virtCmd.Stdout = &outBuf
-	virtCmd.Stderr = &errBuf
+	virtCmd := exec.Command("virt-install", cmdArgs...) // for system VMs "sudo virt-install"
+	var out bytes.Buffer
+	//virtCmd.Stdout = &out
+	//virtCmd.Stderr = os.Stderr
 
 	if err := virtCmd.Run(); err != nil {
-		return fmt.Errorf("virt‑install (XML‑Erzeugung) fehlgeschlagen: %w – %s", err, errBuf.String())
+		return fmt.Errorf("virt-install (XML‑Erzeugung) fehlgeschlagen: %w", err)
 	}
+	rawXML := out.Bytes()
 
-	rawXML := outBuf.Bytes()
-
-	// optional: quick sanity check – print size / snippet
-	fmt.Printf("XML erzeugt (%d Bytes).\n", len(rawXML))
-	if len(rawXML) > 0 {
-		fmt.Printf("Erster Teil des XML:\n%s\n", string(rawXML[:200]))
-	}
-
-	// --- write XML to file ----------------------------------------------------
+	// save xml
 	xmlFile := fmt.Sprintf("%s.xml", name)
 	if err := writeXML(rawXML, xmlFile); err != nil {
 		return fmt.Errorf("konnte XML nicht speichern: %w", err)
@@ -211,44 +202,38 @@ func createVMFromConfig(cfg DomainConfig) error {
 	absPath, _ := filepath.Abs(xmlFile)
 	fmt.Printf("XML‑Definition gespeichert unter: %s\n", absPath)
 
-	// --- register VM with libvirt ---------------------------------------------
+	// define vm
 	if err := defineVM(xmlFile); err != nil {
 		return fmt.Errorf("virsh define fehlgeschlagen: %w", err)
 	}
-	fmt.Println("VM erfolgreich bei libvirt/qemu registriert (noch nicht gestartet).")
+	fmt.Println("VM successfully registered with libvirt/qemu (not yet started).")
 	return nil
 }
-
-// ---------------------------------------------------------------------------
 // MAIN
-// ---------------------------------------------------------------------------
 func main() {
-	// default configuration
+	// default config
 	cfg := DomainConfig{
 		Name:    "new-machine",
 		MemMiB:  1024,
 		VCPU:    2,
 		Disk:    "",
 		Network: "default",
-		ISO:		 "test",
 	}
 
-	// interactive editing
+	// interactive input
 	promptForm(&cfg)
 
-	// show a short summary
+	// config overview
 	fmt.Println("\n=== Summary ===")
 	renderTable(map[string]string{
 		"Name":      cfg.Name,
 		"RAM (MiB)": strconv.Itoa(cfg.MemMiB),
 		"vCPU":      strconv.Itoa(cfg.VCPU),
 		"Disk-Path": cfg.Disk,
-		"Network":   cfg.Network,
-		"ISO":			 cfg.ISO,
+		"Network":  cfg.Network,
 	})
-	fmt.Println("\n===============")
 
-	// create the VM (virt‑install → XML → virsh define)
+	// create VM (virsh/virt‑install)
 	if err := createVMFromConfig(cfg); err != nil {
 		fmt.Fprintln(os.Stderr, "Error creating the VM:", err)
 		os.Exit(1)
