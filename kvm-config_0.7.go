@@ -19,38 +19,50 @@ type DomainConfig struct {
 	Disk    string
 	Network string
 }
+/*
+	operationsystem mapping
+	displayname and name for virt‑install identifier
+*/
+type distro struct {
+	name string
+	id   string
+}
+// osList
+var osList = []distro{
+	{"Arch Linux",         "archlinux"},
+	{"Debian 12",          "debian12"},
+	{"Debian 13",          "debian13"},
+	{"Fedora 43",          "fedora43"},
+	{"openSUSE Leap 16.0", "opensuse16.0"},
+	{"Ubuntu 24.04 LTS",   "ubuntu24.04"},
+	{"Ubuntu 25.10",       "ubuntu25.10"},
+	{"Windows 10",         "win10"},
+}
+// osVariantMap 
+var osVariantMap map[string]string
 
-// mapping os variants
-var osVariant = map[string]string{
-	"Ubuntu 24.04 LTS":   "ubuntu24.04",
-	"Ubuntu 25.10":   		"ubuntu25.10",
-	"Debian 12":          "debian12",
-	"Debian 13":          "debian13",
-	"Fedora 43":          "fedora43",
-	"Arch Linux":         "archlinux",
-	"openSUSE Leap 16.0": "opensuse16.0",
-	"Windows 10":					"win10"
+func init() {
+	osVariantMap = make(map[string]string, len(osList))
+	for _, d := range osList {
+		osVariantMap[d.name] = d.id
+	}
 }
 
-// chooseVariant checks if the distro is known for virt-install identifier
+// chooseVariant checks if the distro is known for virt‑install identifier.
 func chooseVariant(key string) (string, error) {
-	if v, ok := osVariant[key]; ok {
+	if v, ok := osVariantMap[key]; ok {
 		return v, nil
 	}
 	return "", fmt.Errorf("unknown distro %q", key)
 }
 
-// ask asks a question and reads the input from stdin
+// selectOSMenu prints the static menu and reads the user choice.
 func selectOSMenu(r *bufio.Reader) (string, error) {
 	fmt.Println("\n=== Choosing the operating system ===")
-	
-	keys := make([]string, 0, len(osVariant))
-	for k := range osVariant {
-		keys = append(keys, k)
-	}
 
-	for i, name := range keys {
-		fmt.Printf("  %2d) %s\n", i+1, name)
+	// Print the menu in the exact order defined in osList.
+	for i, d := range osList {
+		fmt.Printf("  %2d) %s\n", i+1, d.name)
 	}
 	fmt.Print("\nPlease enter a number (or press ENTER for default Ubuntu 24.04): ")
 
@@ -60,16 +72,16 @@ func selectOSMenu(r *bufio.Reader) (string, error) {
 	}
 	line = strings.TrimSpace(line)
 
-	// ENTER default Ubuntu 24.04
+	// ENTER defaults to Ubuntu 24.04 LTS
 	if line == "" {
 		return "Ubuntu 24.04 LTS", nil
 	}
 
 	idx, err := strconv.Atoi(line)
-	if err != nil || idx < 1 || idx > len(keys) {
+	if err != nil || idx < 1 || idx > len(osList) {
 		return "", fmt.Errorf("Invalid selection")
 	}
-	return keys[idx-1], nil
+	return osList[idx-1].name, nil
 }
 
 // ask asks a question and reads the input from stdin
