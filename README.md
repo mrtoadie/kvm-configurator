@@ -1,6 +1,6 @@
 # kvm-configurator
 # == alpha ==
-![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) ![GitHub License](https://img.shields.io/github/license/mrtoadie/kvm-configurator)
+![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) ![GitHub License](https://img.shields.io/github/license/mrtoadie/kvm-configurator) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/mrtoadie/kvm-configurator/total)
 
 ## About kvm-configurator
 kvm-konfigurator creates a virtual machine and registers it with qemu. In addition, the definition is saved as an XML file.
@@ -90,11 +90,8 @@ kvm-konfigurator creates a virtual machine and registers it with qemu. In additi
 ```
 
 ### Ideas & Roadmap
-- [ ] better code
-- [ ] Nice Menu
-- [ ] TUI Style
-- [ ] Saving XMLs as templates and reediting
-- [ ] More & advanced VM parameters
-- [ ] Complex configs
-- [ ] More templates
-
+- [X] logical, easy-to-understand menu
+- [ ] transform into TUI style
+- [ ] saving XMLs as templates and reediting
+- [ ] more & advanced VM parameters
+- [ ] web version for browser usage
