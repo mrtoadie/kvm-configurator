@@ -3,12 +3,31 @@
 
 - [kvm-configurator](#kvm-configurator)
   - [About kvm-configurator](#about-kvm-configurator)
+    - [Tested under](#tested-under)
     - [Sample XML output](#sample-xml-output)
     - [Ideas \& Roadmap](#ideas--roadmap)
 
 ## About kvm-configurator
-kvm-konfigurator creates a virtual machine and registers it with qemu. In addition, the definition is saved as an XML file.
+**kvm-configurator** is my first ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) project that goes beyond just playing around.
+
+**kvm-configurator** creates a **virtual machine** and registers it with qemu. In addition, the definition is saved as an **XML** file.
+
+The program can help you if you don't want to or can't use tools like virt-manager. Or if you don't feel like using commands like this:
+```bash
+virt-install \
+  --name guest1-rhel7 \
+  --memory 2048 \
+  --vcpus 2 \
+  --disk size=8 \
+  --cdrom /path/to/rhel7.iso \
+  --os-variant rhel7
+```
+### Tested under
+- [Arch Linux](https://archlinux.org/)
+- [GuideOS](https://guideos.de/) (Debian-based)
+  
 ### Sample XML output
+<details>
 ```xml
 <domain type="kvm">
   <name>new-machine</name>
@@ -92,7 +111,7 @@ kvm-konfigurator creates a virtual machine and registers it with qemu. In additi
   </devices>
 </domain>
 ```
-
+</details>
 ### Ideas & Roadmap
 - [X] logical, easy-to-understand menu
 - [ ] transform into TUI style
