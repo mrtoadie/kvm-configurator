@@ -1,13 +1,7 @@
 # kvm-configurator
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) ![GitHub License](https://img.shields.io/github/license/mrtoadie/kvm-configurator) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/mrtoadie/kvm-configurator/total)
 
-- [kvm-configurator](#kvm-configurator)
-  - [About kvm-configurator](#about-kvm-configurator)
-    - [Tested under](#tested-under)
-    - [Sample XML output](#sample-xml-output)
-    - [Ideas \& Roadmap](#ideas--roadmap)
 
-## About kvm-configurator
 **kvm-configurator** is my first ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) project that goes beyond just playing around.
 
 **kvm-configurator** creates a **virtual machine** and registers it with qemu. In addition, the definition is saved as an **XML** file.
@@ -22,6 +16,10 @@ virt-install \
   --cdrom /path/to/rhel7.iso \
   --os-variant rhel7
 ```
+
+![kvm-configurator](assets/kvm-configurator_01.png)
+
+## 
 ### Tested under
 - [Arch Linux](https://archlinux.org/)
 - [GuideOS](https://guideos.de/) (Debian-based)
@@ -111,7 +109,7 @@ virt-install \
 </domain>
 ```
 
-### Ideas & Roadmap
+## Ideas & Roadmap
 - [X] logical, easy-to-understand menu
 - [ ] transform into TUI style
 - [ ] saving XMLs as templates and reediting
