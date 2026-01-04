@@ -27,8 +27,6 @@ virt-install \
 - [GuideOS](https://guideos.de/) (Debian-based)
   
 ### Sample XML output
-<details>
-hjkk
 ```xml
 <domain type="kvm">
   <name>new-machine</name>
@@ -64,7 +62,7 @@ hjkk
     <emulator>/usr/bin/qemu-system-x86_64</emulator>
     <disk type="file" device="disk">
       <driver name="qemu" type="qcow2"/>
-      <source file="/run/media/toadie/vm/QEMU/new-machine.qcow2"/>
+      <source file="/run/media/vm/QEMU/new-machine.qcow2"/>
       <target dev="vda" bus="virtio"/>
     </disk>
     <controller type="usb" model="qemu-xhci" ports="15"/>
@@ -112,7 +110,6 @@ hjkk
   </devices>
 </domain>
 ```
-</details>
 
 ### Ideas & Roadmap
 - [X] logical, easy-to-understand menu
