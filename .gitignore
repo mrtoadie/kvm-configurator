@@ -1,3 +1,5 @@
 testing/
 kvm-config_0.5.go
 *.xml
+kvm-config_0.6.go
+kvm-config_0.7.go

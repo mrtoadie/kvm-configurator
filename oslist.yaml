@@ -1,0 +1,46 @@
+# oslist.yaml – jede Zeile definiert ein OS inkl. Default‑Ressourcen
+- name: Arch Linux
+  id: archlinux
+  cpu: 2          # Default‑Anzahl vCPUs
+  ram: 2048       # Default‑RAM in MiB
+
+- name: Debian 12
+  id: debian12
+  cpu: 2
+  ram: 2048
+
+- name: Debian 13
+  id: debian13
+  cpu: 2
+  ram: 3072
+
+- name: Fedora 43
+  id: fedora43
+  cpu: 2
+  ram: 4096
+
+- name: openSUSE Leap 16.0
+  id: opensuse16.0
+  cpu: 2
+  ram: 4096
+
+- name: Ubuntu 24.04 LTS
+  id: ubuntu24.04
+  cpu: 2
+  ram: 4096
+
+- name: Ubuntu 25.10
+  id: ubuntu25.10
+  cpu: 2
+  ram: 4096
+
+- name: Windows 10
+  id: win10
+  cpu: 4
+  ram: 8192
+
+- name: GuideOS
+  id: debian13
+  cpu: 2
+  ram: 4096
+  disksize: 20
