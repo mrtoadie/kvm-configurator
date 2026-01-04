@@ -19,7 +19,23 @@ virt-install \
 
 ![kvm-configurator](assets/kvm-configurator_01.png)
 
-## 
+## How to use?
+### Compiled version
+Download the two files oslist.yaml and kvm-config_x.x.
+Set kvm-config_x.x as an executable file:
+```bash
+chmod +x kvm-confi_x.x
+```
+and start the program with 
+```bash
+./kvm-config_x.x
+```
+### Alternatively - source file
+Use the file **kvm-config_x.x.go**
+```bash
+go run kvm_config.x.x.go 
+```
+
 ### Tested under
 - [Arch Linux](https://archlinux.org/)
 - [GuideOS](https://guideos.de/) (Debian-based)
