@@ -1,55 +1,68 @@
 # oslist.yaml
 # defines OS defaults
-- name: Arch Linux
-  id: archlinux
-  cpu: 2
-  ram: 2048
+defaults: &default_vals               
+  disk_path: "/srv/vm-images"
   disksize: 20
 
-- name: Debian 12
-  id: debian12
-  cpu: 2
-  ram: 2048
-  disksize: 20
+oslist: 
+  - name: Arch Linux
+    id: archlinux
+    cpu: 2
+    ram: 2048
+    <<: *default_vals
 
-- name: Debian 13
-  id: debian13
-  cpu: 2
-  ram: 3072
-  disksize: 20
+  - name: Debian 12
+    id: debian12
+    cpu: 2
+    ram: 2048
+    disksize: 20
+    <<: *default_vals
 
-- name: Fedora 43
-  id: fedora43
-  cpu: 2
-  ram: 4096
-  disksize: 20
+  - name: Debian 13
+    id: debian13
+    cpu: 2
+    ram: 3072
+    disksize: 20
+    disk_path: "/run/media/toadie/vm/QEMU/"
 
-- name: openSUSE Leap 16.0
-  id: opensuse16.0
-  cpu: 2
-  ram: 4096
-  disksize: 20
+  - name: Fedora 43
+    id: fedora43
+    cpu: 2
+    ram: 4096
+    disksize: 20
+    <<: *default_vals
 
-- name: Ubuntu 24.04 LTS
-  id: ubuntu24.04
-  cpu: 2
-  ram: 4096
-  disksize: 20
+  - name: openSUSE Leap 16.0
+    id: opensuse16.0
+    cpu: 2
+    ram: 4096
+    disksize: 20
+    <<: *default_vals
 
-- name: Ubuntu 25.10
-  id: ubuntu25.10
-  cpu: 2
-  ram: 4096
-  disksize: 20
+  - name: Ubuntu 24.04 LTS
+    id: ubuntu24.04
+    cpu: 2
+    ram: 4096
+    disksize: 20
+    <<: *default_vals
 
-- name: Windows 10
-  id: win10
-  cpu: 4
-  ram: 8192
-  disksize: 60
+  - name: Ubuntu 25.10
+    id: ubuntu25.10
+    cpu: 2
+    ram: 4096
+    disksize: 20
+    <<: *default_vals
 
-- name: GuideOS
-  id: debian13
-  cpu: 2
-  ram: 4096
-  disksize: 20
+  - name: Windows 10
+    id: win10
+    cpu: 4
+    ram: 8192
+    disksize: 60
+    <<: *default_vals
+
+  - name: GuideOS
+    id: debian13
+    cpu: 2
+    ram: 4096
+    disksize: 20
+    <<: *default_vals

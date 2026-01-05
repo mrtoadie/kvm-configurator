@@ -27,6 +27,7 @@ type DomainConfig struct {
 	Disk     string
 	Disksize int
 	Network  string
+	ISO			 string
 }
 
 type distro struct {
@@ -35,11 +36,19 @@ type distro struct {
 	CPU      int    `yaml:"cpu"`
 	RAM      int    `yaml:"ram"`
 	Disksize int    `yaml:"disksize"`
+	DiskPath string `yaml:"disk_path"`
+}
+
+type defaults struct {
+    DiskPath string
+		DiskSize int
 }
 
 /* --------------------
 	Global vars
 -------------------- */
+var globalDefaults defaults
+
 var (
 	osList          []distro
 	variantByName   map[string]string
@@ -58,18 +67,32 @@ func readLine(r *bufio.Reader, prompt string) (string, error) {
 	Loading OS-List from yaml
 -------------------- */
 func loadOSList(p string) error {
-	b, err := ioutil.ReadFile(p)
-	if err != nil {
-		return fmt.Errorf("Could not read config: %w", err)
-	}
-	if err = yaml.Unmarshal(b, &osList); err != nil {
-		return fmt.Errorf("YAML could not be parsed: %w", err)
-	}
-	variantByName = make(map[string]string, len(osList))
-	for _, d := range osList {
-		variantByName[d.Name] = d.ID
-	}
-	return nil
+    b, err := ioutil.ReadFile(p)
+    if err != nil {
+        return fmt.Errorf("Could not read config: %w", err)
+    }
+
+    var root struct {
+        Defaults struct {
+            DiskPath string `yaml:"disk_path"`
+            DiskSize int    `yaml:"disksize"`
+        } `yaml:"defaults"`
+        OSList []distro `yaml:"oslist"`
+    }
+
+    if err = yaml.Unmarshal(b, &root); err != nil {
+        return fmt.Errorf("YAML could not be parsed: %w", err)
+    }
+
+    globalDefaults.DiskPath = root.Defaults.DiskPath
+    globalDefaults.DiskSize = root.Defaults.DiskSize
+    osList = root.OSList
+
+    variantByName = make(map[string]string, len(osList))
+    for _, d := range osList {
+        variantByName[d.Name] = d.ID
+    }
+    return nil
 }
 
 /* --------------------
@@ -156,28 +179,105 @@ func (c *DomainConfig) edit(r *bufio.Reader) {
 	}
 }
 
+// buildDiskArg create string for --disk.
+func buildDiskArg(cfg DomainConfig) (string, bool) {
+	// no disk path, no disk size :D
+	if strings.TrimSpace(cfg.Disk) == "" {
+		return "", false
+	}
+
+	p := strings.TrimSpace(cfg.Disk)
+
+	// if input is only path, append .qcow (<VM‑Name>.qcow2)
+	if !strings.HasSuffix(p, ".qcow2") && !strings.Contains(filepath.Base(p), ".") {
+		p = filepath.Join(p, cfg.Name+".qcow2")
+	} else if !strings.HasSuffix(p, ".qcow2") {
+		p = p + ".qcow2"
+	}
+
+	// defaul disk image file format
+	opts := []string{
+		fmt.Sprintf("path=%s", p),
+		"format=qcow2",
+	}
+
+	// use size i > 0
+	if cfg.Disksize > 0 {
+		opts = append([]string{fmt.Sprintf("size=%d", cfg.Disksize)}, opts...)
+	}
+
+	return strings.Join(opts, ","), true
+}
+
+func effectiveDiskPath(d distro) string {
+    if d.DiskPath != "" {
+        return d.DiskPath
+    }
+    return globalDefaults.DiskPath
+}
+
+// effectiveDiskSize
+func effectiveDiskSize(d distro) int {
+    if d.Disksize != 0 {
+        return d.Disksize
+    }
+    return globalDefaults.DiskSize
+}
+
+// diskSpec
+func diskSpec(cfg DomainConfig) (string, bool) {
+    // no path use ""
+    if strings.TrimSpace(cfg.Disk) != "" {
+        arg, _ := buildDiskArg(cfg) 
+        return arg, true
+    }
+
+    return "none", false
+}
+
 /* --------------------
 	Create VM
 -------------------- */
 func createVM(cfg DomainConfig, variant string) error {
 	r := bufio.NewReader(os.Stdin)
 
+	// ask for iso
 	iso, err := readLine(r, "Path to the installation ISO: ")
 	if err != nil {
 		return err
 	}
 
 	// build the vm with virt‑install
-	args := []string{
+/*	args := []string{
 		"--name", cfg.Name,
 		"--memory", strconv.Itoa(cfg.MemMiB),
 		"--vcpus", strconv.Itoa(cfg.VCPU),
 		"--os-variant", variant,
-		"--disk", fmt.Sprintf("path=/run/media/toadie/vm/QEMU/%s.qcow2,size=%d,format=qcow2", cfg.Name, cfg.Disksize),
-		"--cdrom", iso,
+		//"--disk", fmt.Sprintf("path=/run/media/toadie/vm/QEMU/%s.qcow2,size=%d,format=qcow2", cfg.Name, cfg.Disksize),
+		"--disk", buildDiskArg(cfg),
+		"--cdrom", iso,		
 		"--boot", "hd",
 		"--print-xml",
-	}
+	}*/
+	diskArg, haveRealDisk := diskSpec(cfg)
+
+  args := []string{
+    "--name", cfg.Name,
+    "--memory", strconv.Itoa(cfg.MemMiB),
+    "--vcpus", strconv.Itoa(cfg.VCPU),
+    "--os-variant", variant,
+    "--disk", diskArg,
+    "--cdrom", iso,
+    "--boot", "hd",
+    "--print-xml",
+  }
+  // logging
+  if haveRealDisk {
+  	fmt.Println("Using custom disk:", diskArg)
+  } else {
+  	fmt.Println("No custom disk – passing '--disk none'")
+  }
+
 	cmd := exec.Command("virt-install", args...)
 	var out, errOut bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errOut
@@ -228,8 +328,8 @@ func runNewVMWorkflow() {
 		Name:     d.Name,
 		MemMiB:   d.RAM,
 		VCPU:     d.CPU,
-		Disksize: d.Disksize,
-		Disk:     "",
+		Disksize: effectiveDiskSize(d),
+    Disk:     effectiveDiskPath(d),
 		Network:  "default",
 	}
 
@@ -243,7 +343,7 @@ func runNewVMWorkflow() {
 	fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)
 	fmt.Fprintf(w, "vCPU:\t%d\n", cfg.VCPU)
 	fmt.Fprintf(w, "Disk-Path:\t%s\n", cfg.Disk)
-	fmt.Fprintf(w, "Disksize:\t%s\n", cfg.Disksize)
+	fmt.Fprintf(w, "Disksize:\t%d\n", cfg.Disksize)
 	fmt.Fprintf(w, "Network:\t%s\n", cfg.Network)
 	w.Flush()
 
