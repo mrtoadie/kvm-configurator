@@ -39,8 +39,33 @@ go run kvm_config.x.x.go
 ### Tested under
 - [Arch Linux](https://archlinux.org/)
 - [GuideOS](https://guideos.de/) (Debian-based)
-  
-### Sample XML output
+
+### Configuration
+#### YAML
+You can define default values for disk path and disk size in `oslist.yaml`.
+```yaml
+defaults: &default_vals               
+  disk_path: "/srv/vm-images"
+  disksize: 20
+```
+Using default values looks like this:
+```yaml
+- name: Arch Linux
+    id: archlinux
+    cpu: 2
+    ram: 2048
+    <<: *default_vals
+```
+You can overwrite the default values for your needs like this:
+```yaml
+- name: Debian 13
+    id: debian13
+    cpu: 2
+    ram: 3072
+    disksize: 20
+    disk_path: "/home/<user>/Downloads"
+```
+#### Sample XML output
 ```xml
 <domain type="kvm">
   <name>new-machine</name>
