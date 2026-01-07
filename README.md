@@ -107,19 +107,6 @@ You can overwrite the default values for your needs like this:
     <controller type="usb" model="qemu-xhci" ports="15"/>
     <controller type="pci" model="pcie-root"/>
     <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
-    <controller type="pci" model="pcie-root-port"/>
     <interface type="user">
       <mac address="52:54:00:c2:70:03"/>
       <model type="virtio"/>
@@ -141,7 +128,6 @@ You can overwrite the default values for your needs like this:
       <model type="virtio"/>
     </video>
     <redirdev bus="usb" type="spicevmc"/>
-    <redirdev bus="usb" type="spicevmc"/>
     <memballoon model="virtio"/>
     <rng model="virtio">
       <backend model="random">/dev/urandom</backend>
@@ -149,6 +135,16 @@ You can overwrite the default values for your needs like this:
   </devices>
 </domain>
 ```
+
+## Release notes
+### Version 0.9.1 - Service release
+Some screen outputs are now color-coded.
+### Version 0.9
+Bug fixes related to the storage location for hard disk images
+### Version 0.8.5 - Support for YAML
+Operating systems are now read from a YAML file.
+The YAML can be easily customized by anyone according to their personal preferences.
+
 
 ## Ideas & Roadmap
 - [X] logical, easy-to-understand menu
