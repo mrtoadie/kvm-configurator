@@ -37,9 +37,12 @@ go run kvm_config.x.x.go
 ```
 
 ### Tested under
-:white_check_mark: [Arch Linux](https://archlinux.org/)
-:white_check_mark: [GuideOS](https://guideos.de/) (Debian-based)
-:white_check_mark: [Ubuntu 25.04 & 25.10](https://ubuntu.com/)
+- [x] [Arch Linux](https://archlinux.org/)
+- [ ] Debian
+- [ ] Fedora
+- [x] [GuideOS](https://guideos.de/) (Debian-based)
+- [ ] Solus
+- [x] [Ubuntu 25.04 & 25.10](https://ubuntu.com/)
 
 ### Configuration
 #### YAML
