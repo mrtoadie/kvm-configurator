@@ -136,6 +136,7 @@ func (c *DomainConfig) edit(r *bufio.Reader) {
 		fmt.Fprintf(w, "[4] Disk-Path:\t%s\t[Enter path for virtual hdd]\n", c.Disk)
 		fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\t[default]\n", c.Disksize)
 		fmt.Fprintf(w, "[6] Network:\t%s\t[default]\n", c.Network)
+		fmt.Fprintf(w, "[7] Advanced Parameters")
 		w.Flush()
 
 		f, _ := readLine(r, "\nSelect or enter to continue: ")
@@ -172,6 +173,10 @@ func (c *DomainConfig) edit(r *bufio.Reader) {
 		case "6":
 			if v, _ := readLine(r, ">> Network (comma-separated): "); true {
 				c.Network = v
+			}
+		case "7":
+			if v, _ := readLine(r, ">> : "); true {
+				fmt.Printf("sdf", v)
 			}
 		default:
 			fmt.Println("\x1b[31mInvalid input!\x1b[0m")

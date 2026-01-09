@@ -66,3 +66,10 @@ oslist:
     ram: 4096
     disksize: 20
     <<: *default_vals
+
+  - name: Solus
+    id: solus
+    cpu: 2
+    ram: 4096
+    disksize: 20
+    <<: *default_vals
