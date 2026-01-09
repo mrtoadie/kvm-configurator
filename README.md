@@ -41,7 +41,7 @@ go run kvm_config.x.x.go
 - [ ] Debian
 - [ ] Fedora
 - [x] [GuideOS](https://guideos.de/) (Debian-based)
-- [ ] Solus
+- [x] [Solus](https://getsol.us/)
 - [x] [Ubuntu 25.04 & 25.10](https://ubuntu.com/)
 
 ### Configuration
