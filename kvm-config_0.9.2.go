@@ -21,13 +21,16 @@ import (
 	Data structure
 -------------------- */
 type DomainConfig struct {
-	Name     string
-	MemMiB   int
-	VCPU     int
-	Disk     string
-	Disksize int
-	Network  string
-	ISO			 string
+	Name     	string
+	MemMiB   	int
+	VCPU     	int
+	Disk     	string
+	Disksize 	int
+	Network  	string
+	ISO			 	string
+	nVirt 		string // Nested‑Virtualisation
+	BootOrder string
+	VirtIO 		string
 }
 
 type distro struct {
@@ -99,20 +102,29 @@ func loadOSList(p string) error {
 	Print the OS-List
 -------------------- */
 func chooseDistro(r *bufio.Reader) (distro, error) {
-	fmt.Println("\n=== Select an operating system ===")
+	fmt.Println("\n\x1b[34m=== Select an operating system ===\x1b[0m")
+
 	sorted := append([]distro(nil), osList...)
 	sort.Slice(sorted, func(i, j int) bool {
 		return strings.ToLower(sorted[i].Name) < strings.ToLower(sorted[j].Name)
 	})
+
+	// minWidth=0, tabWidth=8, padding=2, padchar=' ', flags=0
+	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
+
+	fmt.Fprintln(w, "No.\tName\tCPU\tRAM (MiB)\tDisk (GB)")
 	for i, d := range sorted {
-		fmt.Printf(" %2d) %s  (CPU:%d  RAM:%d MiB  Disk:%d GB)\n",
+		fmt.Fprintf(w, "%2d\t%s\t%d\t%d\t%d\n",
 			i+1, d.Name, d.CPU, d.RAM, d.Disksize)
 	}
+	w.Flush()
+
 	line, err := readLine(r, "\nPlease enter a number (or press ENTER for default Arch Linux): ")
 	if err != nil {
 		return distro{}, err
 	}
-	idx := 1
+
+	idx := 1 // Default‑Index (Arch Linux)
 	if line != "" {
 		if i, e := strconv.Atoi(line); e == nil && i >= 1 && i <= len(sorted) {
 			idx = i
@@ -136,6 +148,7 @@ func (c *DomainConfig) edit(r *bufio.Reader) {
 		fmt.Fprintf(w, "[4] Disk-Path:\t%s\t[Enter path for virtual hdd]\n", c.Disk)
 		fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\t[default]\n", c.Disksize)
 		fmt.Fprintf(w, "[6] Network:\t%s\t[default]\n", c.Network)
+		fmt.Fprintf(w, "[7] Advanced Parameters [optional]")
 		w.Flush()
 
 		f, _ := readLine(r, "\nSelect or enter to continue: ")
@@ -172,6 +185,45 @@ func (c *DomainConfig) edit(r *bufio.Reader) {
 		case "6":
 			if v, _ := readLine(r, ">> Network (comma-separated): "); true {
 				c.Network = v
+			}
+		case "7":
+			c.editAdvanced(r)
+		default:
+			fmt.Println("\x1b[31mInvalid input!\x1b[0m")
+		}
+	}
+}
+
+/* --------------------
+	Form – Advanced Parameters
+-------------------- */
+func (c *DomainConfig) editAdvanced(r *bufio.Reader) {
+	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
+
+	for {
+		fmt.Fprintln(w, "\n=== Advanced Parameters ===\t")
+		fmt.Fprintln(w, "[a] Nested-Virtualisation\t[default]")
+		fmt.Fprintln(w, "[b] Boot-Order\t[default] 'not implemented yet'")
+		fmt.Fprintln(w, "[d] Back to main menu")
+		w.Flush()
+
+		choice, _ := readLine(r, "\nSelect an option (or press Enter to go back): ")
+		if choice == "" || strings.EqualFold(choice, "d") {
+			// Rücksprung zum Haupt‑Menu
+			return
+		}
+
+		switch strings.ToLower(choice) {
+		case "a":
+			if v, _ := readLine(r, ">> Nested-Virtualisation (e.g. vmx): "); v != "" {
+				// Beispiel‑Speicherung – passe das Feld deiner Struktur an
+				c.nVirt = v
+				fmt.Println("Nested-Virtualisation is set.")
+			}
+		case "b":
+			if v, _ := readLine(r, ">> Boot-Order (e.g. cdrom, disk, network): "); v != "" {
+				c.BootOrder = v
+				fmt.Println("Boot-Order is set.")
 			}
 		default:
 			fmt.Println("\x1b[31mInvalid input!\x1b[0m")
@@ -250,18 +302,27 @@ func createVM(cfg DomainConfig, variant string) error {
 	// build the vm with virt‑install
 	diskArg, haveRealDisk := diskSpec(cfg)
 
+	// ---------- CPU‑Argument Nested ----------
+    cpuBase := "host-passthrough"
+		//"--cpu", "host-passthrough,+vmx", //Intel
+		//"--cpu", "host-passthrough,+svm", //AMD
+    cpuArg := cpuBase
+    if strings.TrimSpace(cfg.nVirt) != "" {
+        cpuArg = fmt.Sprintf("%s,+%s", cpuBase, cfg.nVirt)
+    }
+
   args := []string{
     "--name", cfg.Name,
     "--memory", strconv.Itoa(cfg.MemMiB),
     "--vcpus", strconv.Itoa(cfg.VCPU),
-		"--cpu", "host-passthrough,+vmx", //Intel
-		//"--cpu", "host-passthrough,+svm", //AMD
+		"--cpu", cpuArg,
     "--os-variant", variant,
     "--disk", diskArg,
     "--cdrom", iso,
     "--boot", "hd",
     "--print-xml",
   }
+	
   // logging
   if haveRealDisk {
   	fmt.Println("Using custom disk:", diskArg)
