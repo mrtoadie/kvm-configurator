@@ -141,6 +141,11 @@ You can overwrite the default values for your needs like this:
 ```
 
 ## Release notes
+### Version 0.9.3
+- Minor improvements
+- Check whether `virt-install` is available / installed
+### Version 0.9.2
+[Changelog / Release notes](https://github.com/mrtoadie/kvm-configurator/releases/tag/v0.9.2)
 ### Version 0.9.1 - Service release
 Some screen outputs are now color-coded.
 ### Version 0.9
