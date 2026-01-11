@@ -165,6 +165,10 @@ You can overwrite the default values for your needs like this:
 - [x] [Ubuntu 25.04 & 25.10](https://ubuntu.com/)
 
 ## Release notes
+### Version 1.0
+- new select ISO menu
+- Project divided into individual modules
+- Some code documented
 ### Version 0.9.3
 - Minor improvements
 - Check whether `virt-install` is available / installed
