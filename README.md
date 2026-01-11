@@ -19,12 +19,18 @@ virt-install \
 
 ![kvm-configurator](assets/kvm-configurator_01.png)
 
-## How to use?
+## Features
+- **Easy**: Assisted creation of virtual machines
+- **Automatoin**: Created VMs are automatically registered (not started) and are immediately ready for use
+- **Customizable**: Default values can be customized individually via a YAML file
+- **Resuse & backup**: Create VM configurations are also saved as XML files
+
+## Running the Application
 ### Compiled version
 Download the two files oslist.yaml and kvm-config_x.x.
 Set kvm-config_x.x as an executable file:
 ```bash
-chmod +x kvm-confi_x.x
+chmod +x kvm-config_x.x
 ```
 and start the program with 
 ```bash
