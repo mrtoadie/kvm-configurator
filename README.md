@@ -25,6 +25,7 @@ virt-install \
 - **Resuse & backup**: Create VM configurations are also saved as XML files
 
 ## Project Structure
+
 ```
 kvm-configurator/
 │
@@ -46,6 +47,7 @@ kvm-configurator/
 │
 └─ main.go                    # Entry point, orchestrates the entire workflow
 ```
+
 ## Running the Application
 ### Compiled version
 Download the two files oslist.yaml and kvm-config_x.x.
