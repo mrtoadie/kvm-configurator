@@ -2,8 +2,6 @@
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) ![GitHub License](https://img.shields.io/github/license/mrtoadie/kvm-configurator) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/mrtoadie/kvm-configurator/total)
 
 
-**kvm-configurator** is my first ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) project that goes beyond just playing around.
-
 **kvm-configurator** creates a **virtual machine** and registers it with qemu. In addition, the definition is saved as an **XML** file.
 
 The program can help you if you don't want to or can't use tools like virt-manager. Or if you don't feel like using commands like this:
@@ -16,6 +14,7 @@ virt-install \
   --cdrom /path/to/rhel7.iso \
   --os-variant rhel7
 ```
+**kvm-configurator** is my first ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) project that goes beyond just playing around.
 
 ![kvm-configurator](assets/kvm-configurator_01.png)
 
@@ -36,19 +35,6 @@ and start the program with
 ```bash
 ./kvm-config_x.x
 ```
-### Alternatively - source file
-Use the file **kvm-config_x.x.go**
-```bash
-go run kvm_config.x.x.go 
-```
-
-### Tested under
-- [x] [Arch Linux](https://archlinux.org/)
-- [ ] Debian
-- [ ] Fedora
-- [x] [GuideOS](https://guideos.de/) (Debian-based)
-- [x] [Solus](https://getsol.us/)
-- [x] [Ubuntu 25.04 & 25.10](https://ubuntu.com/)
 
 ### Configuration
 #### YAML
@@ -73,7 +59,7 @@ You can overwrite the default values for your needs like this:
     cpu: 2
     ram: 3072
     disksize: 20
-    disk_path: "/home/<user>/Downloads"
+    disk_path: "$HOME/Downloads"
 ```
 #### Sample XML output
 ```xml
@@ -145,6 +131,14 @@ You can overwrite the default values for your needs like this:
   </devices>
 </domain>
 ```
+
+### Tested under
+- [x] [Arch Linux](https://archlinux.org/)
+- [ ] Debian
+- [ ] Fedora
+- [x] [GuideOS](https://guideos.de/) (Debian-based)
+- [x] [Solus](https://getsol.us/)
+- [x] [Ubuntu 25.04 & 25.10](https://ubuntu.com/)
 
 ## Release notes
 ### Version 0.9.3
