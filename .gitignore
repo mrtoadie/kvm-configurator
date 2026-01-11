@@ -2,3 +2,5 @@
 /testing
 xml.go
 *.xml
+/configurator_back
+/internal
