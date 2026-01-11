@@ -24,6 +24,28 @@ virt-install \
 - **Customizable**: Default values can be customized individually via a YAML file
 - **Resuse & backup**: Create VM configurations are also saved as XML files
 
+## Project Structure
+```
+kvm-configurator/
+│
+├─ oslist.yaml                # Central YAML configuration (OS list + filepaths)
+│
+├─ internal/
+│   ├─ config/                # Loading and validating YAML data
+│   │   └─ config.go
+│   ├─ model/                 # Data models & helper logic
+│   │   └─ model.go
+│   ├─ fileutils/             # File utilities (ListFiles, PromptSelection)
+│   │   └─ fileutils.go
+│   ├─ engine/                # Core logic: Calling virt-install & XML handling
+│   │   └─ engine.go
+│   ├─ ui/                    # User interaction (menus, inputs, summary)
+│   │   └─ ui.go
+│   └─ prereq/                # Checks whether necessary programs are installed
+│       └─ prereq.go
+│
+└─ main.go                    # Entry point, orchestrates the entire workflow
+```
 ## Running the Application
 ### Compiled version
 Download the two files oslist.yaml and kvm-config_x.x.
