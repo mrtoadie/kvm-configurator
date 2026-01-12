@@ -16,7 +16,8 @@ virt-install \
 ```
 **kvm-configurator** is my first ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) project that goes beyond just playing around.
 
-![kvm-configurator](assets/kvm-configurator_01.png)
+![kvm-configurator-demo](assets/kvm-configurator_demo.gif)
+
 
 ## Features
 - **Easy**: Assisted creation of virtual machines
