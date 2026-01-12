@@ -1,17 +1,30 @@
 # oslist.yaml
 # nvirt: for Intel CPUs use vmx / for AMD CPUs use smx
+# NOTE: Don't change the id value! 
+#       'virt-install --osinfo list' for more infos
 
 filepaths:
   input_dir: "/run/media/toadie/data/ISOs"
-  max_lines: 10     
-  
+  max_lines: 10
+  xml_dir: "/home/toadie/Downloads"
+
+advanced_features:
+  start_init: false
+
 # defines OS defaults
 defaults: &default_vals               
   disk_path: "/var/lib/libvirt/images"
   disksize: 20
   nvirt: "vmx"
 
-oslist: 
+oslist:
+  - name: _test
+    id: archlinux
+    cpu: 1
+    ram: 512
+    disk_path: "/run/media/toadie/vm/QEMU"
+    disksize: 2
+
   - name: Arch Linux
     id: archlinux
     cpu: 2
