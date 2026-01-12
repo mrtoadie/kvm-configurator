@@ -7,7 +7,7 @@ filepaths:
   
 # defines OS defaults
 defaults: &default_vals               
-  disk_path: "/srv/vm-images"
+  disk_path: "/var/lib/libvirt/images"
   disksize: 20
   nvirt: "vmx"
 
@@ -22,43 +22,36 @@ oslist:
     id: debian12
     cpu: 2
     ram: 2048
-    disksize: 20
     <<: *default_vals
 
   - name: Debian 13
     id: debian13
     cpu: 2
     ram: 3072
-    disksize: 20
-    disk_path: "/run/media/toadie/vm/QEMU/"
-    nvirt: "vmx"
+    <<: *default_vals
 
   - name: Fedora 43
     id: fedora43
     cpu: 2
     ram: 4096
-    disksize: 20
     <<: *default_vals
 
   - name: openSUSE Leap 16.0
     id: opensuse16.0
     cpu: 2
     ram: 4096
-    disksize: 20
     <<: *default_vals
 
   - name: Ubuntu 24.04 LTS
     id: ubuntu24.04
     cpu: 2
     ram: 4096
-    disksize: 20
     <<: *default_vals
 
   - name: Ubuntu 25.10
     id: ubuntu25.10
     cpu: 2
     ram: 4096
-    disksize: 20
     <<: *default_vals
 
   - name: Windows 10
@@ -67,16 +60,50 @@ oslist:
     ram: 8192
     disksize: 60
     <<: *default_vals
+  
+  - name: Windows 11
+    id: win11
+    cpu: 4
+    ram: 8192
+    disksize: 100
+    <<: *default_vals
 
   - name: GuideOS
     id: debian13
     cpu: 2
     ram: 4096
-    disksize: 20
     <<: *default_vals
 
   - name: Solus
     id: solus
+    cpu: 2
+    ram: 4096
+    disksize: 20
+    <<: *default_vals
+
+  - name: NixOS 25.05
+    id: nixos-25.05
+    cpu: 2
+    ram: 4096
+    disksize: 40
+    <<: *default_vals
+  
+  - name: GenericLinux2024
+    id: linux2024
+    cpu: 2
+    ram: 2048
+    disksize: 10
+    <<: *default_vals
+
+  - name: PopOS 20.10
+    id: popos20.10
+    cpu: 2
+    ram: 4096
+    disksize: 20
+    <<: *default_vals
+
+  - name: Void Linux
+    id: voidlinux
     cpu: 2
     ram: 4096
     disksize: 20
