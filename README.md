@@ -68,8 +68,8 @@ and start the program with
 - [x] [Solus](https://getsol.us/)
 - [x] [Ubuntu 25.04 & 25.10](https://ubuntu.com/)
 
-## Release notes
-
+## Release Notes
+[Release notes](https://github.com/mrtoadie/kvm-configurator/wiki/Release-Notes)
 
 
 ## Ideas & Roadmap
