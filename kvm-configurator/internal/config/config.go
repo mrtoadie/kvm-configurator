@@ -2,7 +2,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
 	"gopkg.in/yaml.v3"
 )
@@ -26,6 +25,13 @@ type OSRoot struct {
 	OSList []Distro `yaml:"oslist"`
 }
 
+type AdvancedFeaturesRoot struct {
+	AdvancedFeatures struct {
+		StartInit bool `yaml:"start_init"`
+	} `yaml:"advanced_features"`
+	AdvFeatures []AdvancedFeaturesRoot `yaml:"oslist"`
+}
+
 /* --------------------
 	LoadOSList
 -------------------- */
@@ -33,7 +39,7 @@ func LoadOSList(path string) (list []Distro, defaults struct {
 	DiskPath string
 	DiskSize int
 }, err error) {
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, defaults, err
 	}
@@ -52,6 +58,7 @@ func LoadOSList(path string) (list []Distro, defaults struct {
 type FilePaths struct {
 	Filepaths struct {
 		InputDir string `yaml:"input_dir"`
+		xmlDir 	 string `yaml:"xml_dir"`
 		MaxLines int    `yaml:"max_lines"`
 	} `yaml:"filepaths"`
 }
@@ -60,7 +67,7 @@ type FilePaths struct {
 	LoadFilePaths – read only block „filepaths“
 -------------------- */
 func LoadFilePaths(path string) (*FilePaths, error) {
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}

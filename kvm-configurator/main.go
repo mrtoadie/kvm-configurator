@@ -45,6 +45,7 @@ func main() {
 	for {
 		fmt.Println("\x1b[34m\n=== MAIN MENU ===\x1b[0m")
 		fmt.Println("[1] New VM")
+		fmt.Println("[2] Check")
 		fmt.Println("[0] Exit")
 		fmt.Print("Selection: ")
 
@@ -62,6 +63,8 @@ func main() {
 			if err := runNewVMWorkflow(r, osList, defaults, variantByName, workDir, fp.Filepaths.MaxLines); err != nil {
 				fmt.Fprintf(os.Stderr, "\x1b[31mError: %v\x1b[0m\n", err)
 			}
+		//case 2:
+
 		default:
 			fmt.Println("\x1b[31mInvalid selection!\x1b[0m")
 		}

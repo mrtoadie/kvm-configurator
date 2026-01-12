@@ -15,7 +15,7 @@ import (
 -------------------- */
 type DomainConfig struct {
 	Name, Disk, Network, ISO, NestedVirt, BootOrder string
-	MemMiB, VCPU, DiskSize                         int
+	MemMiB, VCPU, DiskSize int
 }
 
 /* --------------------

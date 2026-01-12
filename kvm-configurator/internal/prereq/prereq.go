@@ -41,7 +41,7 @@ func EnsureAll(commands ...string) error {
 }
 
 /* --------------------
-	Helper to terminate the program in case of a fatal error
+	Fatal Error? No problem >> terminate!
 -------------------- */
 func FatalIfMissing(err error) {
 	if err == nil {
