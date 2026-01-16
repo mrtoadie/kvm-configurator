@@ -3,6 +3,8 @@ package config
 
 import (
 	"os"
+	"strings"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -58,7 +60,7 @@ func LoadOSList(path string) (list []Distro, defaults struct {
 type FilePaths struct {
 	Filepaths struct {
 		InputDir string `yaml:"input_dir"`
-		xmlDir 	 string `yaml:"xml_dir"`
+		XmlDir   string `yaml:"xml_dir"` 
 		MaxLines int    `yaml:"max_lines"`
 	} `yaml:"filepaths"`
 }
@@ -78,6 +80,10 @@ func LoadFilePaths(path string) (*FilePaths, error) {
 	// Defaults NO FUNCTION YET!!
 	if fp.Filepaths.MaxLines == 0 {
 		fp.Filepaths.MaxLines = 10
+	}
+
+	if strings.TrimSpace(fp.Filepaths.XmlDir) == "" {
+		fp.Filepaths.XmlDir = "/home/toadie/Downloads/xml"
 	}
 	return &fp, nil
 }
