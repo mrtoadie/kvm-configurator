@@ -98,3 +98,4 @@ func ResolveWorkDir(fp *FilePaths) (string, error) {
 	// Fallback: current work dir
 	return os.Getwd()
 }
+// EOF

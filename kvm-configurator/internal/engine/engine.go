@@ -24,7 +24,7 @@ func startSimpleProgress(msg string, stopChan <-chan struct{}) {
 		for {
 			select {
 			case <-stopChan:
-				fmt.Print("\r")               // Zeile zurücksetzen
+				fmt.Print("\r")
 				return
 			default:
 				fmt.Printf("\r%s %c ", msg, chars[i%len(chars)])
@@ -120,10 +120,10 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	fmt.Printf("\x1b[32mXML definition saved under: %s\n\x1b[0m", abs)
 */
 
-	// ---------- Neuer Teil: Pfad aus der Config -----------------------
-	xmlDir := strings.TrimSpace(fp.Filepaths.XmlDir) // sollte nie leer sein
+	// xml path from config
+	xmlDir := strings.TrimSpace(fp.Filepaths.XmlDir) 
 	if xmlDir == "" {
-		// Sicherheits‑Fallback: aktuelles Arbeitsverzeichnis
+		// fallback to current dir
 		xmlDir = "."
 	}
 	xmlFileName := cfg.Name + ".xml"
@@ -139,11 +139,11 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	*/
 
 	// Save XML
-if err := os.WriteFile(xmlFullPath, cleanXML, 0644); err != nil {
-    return fmt.Errorf("\x1b[31mcould not write XML: %w\x1b[0m", err)
-}
-abs, _ := filepath.Abs(xmlFullPath)
-fmt.Printf("\n\x1b[32mXML definition saved under: %s\n\x1b[0m", abs)
+	if err := os.WriteFile(xmlFullPath, cleanXML, 0644); err != nil {
+			return fmt.Errorf("\x1b[31mcould not write XML: %w\x1b[0m", err)
+	}
+	abs, _ := filepath.Abs(xmlFullPath)
+	fmt.Printf("\n\x1b[32mXML definition saved under: %s\n\x1b[0m", abs)
 
 	// Define the new VM >> libvirt
 	if err := exec.Command("virsh", "define", xmlFullPath).Run(); err != nil {
@@ -151,5 +151,5 @@ fmt.Printf("\n\x1b[32mXML definition saved under: %s\n\x1b[0m", abs)
 	}
 	fmt.Println("\n\x1b[32mVM successfully registered with libvirt/qemu (not yet started).\x1b[0m")
 	return nil
-	
 }
+// EOF
