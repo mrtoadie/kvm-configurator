@@ -42,7 +42,7 @@ func PromptSelection(files []string) (int, error) {
 	for i, f := range files {
 		fmt.Printf("[%d] %s\n", i+1, filepath.Base(f))
 	}
-	fmt.Print("\nPlease enter number (or 0 to cancel)): ")
+	fmt.Print("\nPlease enter number (or 0 to cancel): ")
 
 	reader := bufio.NewReader(os.Stdin)
 	line, err := reader.ReadString('\n')
