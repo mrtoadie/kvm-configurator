@@ -60,3 +60,4 @@ func PromptSelection(files []string) (int, error) {
 	}
 	return choice, nil
 }
+// EOF

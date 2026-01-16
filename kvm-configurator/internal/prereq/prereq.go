@@ -57,3 +57,4 @@ func FatalIfMissing(err error) {
 	}
 	os.Exit(1)
 }
+// EOF

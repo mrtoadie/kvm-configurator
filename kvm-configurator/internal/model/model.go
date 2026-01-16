@@ -64,3 +64,4 @@ func BuildDiskArg(cfg DomainConfig) (string, bool) {
 	}
 	return strings.Join(opts, ","), true
 }
+// EOF

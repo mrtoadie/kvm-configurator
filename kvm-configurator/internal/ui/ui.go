@@ -201,3 +201,4 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Print("\nPress ENTER to create VM … ")
 	_, _ = r.ReadString('\n')
 }
+// EOF
