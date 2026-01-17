@@ -16,6 +16,24 @@ import (
 	"configurator/internal/ui"
 )
 
+func startSimpleProgress(msg string, stopChan <-chan struct{}) {
+	go func() {
+		chars := []rune{'⣾','⣽','⣻','⢿','⡿','⣟','⣯','⣷'}
+		i := 0
+		for {
+			select {
+			case <-stopChan:
+				fmt.Print("\r")
+				return
+			default:
+				fmt.Printf("\r%s %c ", msg, chars[i%len(chars)])
+				time.Sleep(100 * time.Millisecond)
+				i++
+			}
+	}
+}()
+}
+
 /* --------------------
 	CreateVM receives a fully‑filled DomainConfig, the os‑variant string
 	and the absolute path to the ISO file.
@@ -113,6 +131,16 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	abs, _ := filepath.Abs(xmlFullPath)
 	fmt.Printf("\n\x1b[32mXML definition saved under: %s\n\x1b[0m", abs)
 
+	// xml path from config
+	xmlDir := strings.TrimSpace(fp.Filepaths.XmlDir) 
+	if xmlDir == "" {
+		// fallback to current dir
+		xmlDir = "."
+	}
+	xmlFileName := cfg.Name + ".xml"
+	xmlFullPath := filepath.Join(xmlDir, xmlFileName)
+	// -------------------------------------------------------------------
+/*
 	// Define the new VM >> libvirt
 	if err := exec.Command("virsh", "define", xmlFullPath).Run(); err != nil {
 		return fmt.Errorf("\x1b[31mvirsh define failed: %w\x1b[0m", err)
