@@ -174,11 +174,18 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 				cfg.NestedVirt = v
 				fmt.Println("Nested-Virtualisation is set to\x1b[32m", v)
 			}
-		case "b":
-			if v, _ := readLine(r, ">> Boot-Order (e.g. cdrom, disk, network): "); v != "" {
-				cfg.BootOrder = v
-				fmt.Println("Boot-Order is set.")
-			}
+		case "b": // bug - disk is no parameter
+			prompt := ">> Boot-Order (comma-separated, e.g. cdrom,disk,network): "
+      if v, _ := readLine(r, prompt); v != "" {
+        // clean spaces and all lower case
+        cleaned := strings.ReplaceAll(strings.ToLower(v), " ", "")
+        cfg.BootOrder = cleaned
+        fmt.Printf("Boot-Order set to \x1b[32m%s\x1b[0m\n", cleaned)
+      } else {
+        // no input = use default
+        cfg.BootOrder = "cdrom,disk,network"
+        fmt.Println("Boot-Order left unchanged – using default.")
+      }
 		default:
 			fmt.Println("\x1b[31mInvalid input!\x1b[0m")
 		}
@@ -200,6 +207,7 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Fprintf(w, "Network:\t%s\n", cfg.Network)
 	fmt.Fprintf(w, "Nested-Virtualisation:\t%s\n", cfg.NestedVirt)
 	fmt.Fprintf(w, "ISO-File:\t%s\n", isoPath)
+	fmt.Fprintf(w, "Boot-Order:\t%s\n", cfg.BootOrder)
 	w.Flush()
 
 	fmt.Print("\nPress ENTER to create VM … ")
