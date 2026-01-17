@@ -42,6 +42,8 @@ kvm-configurator/
 │   ├─ engine/                # Core logic: Calling virt-install & XML handling
 │   │   └─ engine.go
 │   ├─ ui/                    # User interaction (menus, inputs, summary)
+│   │   ├─ colours.go
+│   │   ├─ progress.go
 │   │   └─ ui.go
 │   └─ prereq/                # Checks whether necessary programs are installed
 │       └─ prereq.go
