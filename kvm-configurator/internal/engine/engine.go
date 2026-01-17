@@ -10,16 +10,15 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	// internal
-	"configurator/internal/model"
 	"configurator/internal/config"
+	"configurator/internal/model"
 )
 
 func startSimpleProgress(msg string, stopChan <-chan struct{}) {
 	go func() {
 		chars := []rune{'⣾','⣽','⣻','⢿','⡿','⣟','⣯','⣷'}
-		//chars := []string{"⣾","⣽","⣻","⢿","⡿","⣟","⣯","⣷"}
-		//chars := []rune{'▁','▂','▃','▄','▅','▆','▇','█'}
 		i := 0
 		for {
 			select {
@@ -55,6 +54,13 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 		cpuArg = fmt.Sprintf("%s,+%s", cpuBase, cfg.NestedVirt)
 	}
 
+	// boot-argument (boot order)
+	bootArg := ""
+  if strings.TrimSpace(cfg.BootOrder) != "" {
+    // virt‑install --boot cdrom,network
+    bootArg = fmt.Sprintf("--boot %s", cfg.BootOrder)
+  }
+
 	// Calling virt‑install
 	args := []string{
 		"--name", cfg.Name,
@@ -72,6 +78,11 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	} else {
 		fmt.Println("\x1b[34mNo custom disk – passing '--disk none'\x1b[0m")
 	}
+
+	// if custom string -use it
+  if bootArg != "" {
+    args = append(args, strings.Split(bootArg, " ")...)
+  }
 
 	////////////////
 	stop := make(chan struct{})
