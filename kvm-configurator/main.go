@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
@@ -84,11 +85,14 @@ func main() {
 func runNewVMWorkflow(
 	r *bufio.Reader,
 	osList []config.Distro,
-	defs struct{ DiskPath string; DiskSize int },
+	defs struct {
+		DiskPath string
+		DiskSize int
+	},
 	variantByName map[string]string,
 	isoWorkDir string,
 	maxLines int,
-	fp *config.FilePaths, //load xml_dir 
+	fp *config.FilePaths, //load xml_dir
 ) error {
 
 	// choosing distribution
@@ -127,4 +131,5 @@ func runNewVMWorkflow(
 	}
 	return nil
 }
+
 // EOF
