@@ -44,7 +44,7 @@ func main() {
 	// Mainmenu
 	r := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Println("\x1b[34m\n=== MAIN MENU ===\x1b[0m")
+		fmt.Println(ui.Colourise("\n=== MAIN MENU ===", ui.Blue))
 		fmt.Println("[1] New VM")
 		fmt.Println("[2] Check")
 		fmt.Println("[0] Exit")
@@ -52,7 +52,7 @@ func main() {
 
 		var sel int
 		if _, err := fmt.Scanln(&sel); err != nil {
-			fmt.Println("\x1b[31mPlease enter a valid number.\x1b[0m")
+			fmt.Println(ui.Colourise("Please enter a valid number.", ui.Red))
 			continue
 		}
 		switch sel {
@@ -74,7 +74,7 @@ func main() {
 			}
 		//case 2:
 		default:
-			fmt.Println("\x1b[31mInvalid selection!\x1b[0m")
+			fmt.Println(ui.Colourise("Invalid selection!", ui.Red))
 		}
 	}
 }
@@ -102,19 +102,25 @@ func runNewVMWorkflow(
 	}
 	variant := variantByName[distro.Name]
 
+// Disk‑Path‑Default aus der gewählten Distro holen
+defaultDiskPath := distro.DiskPath
+    if defaultDiskPath == "" {
+        defaultDiskPath = defs.DiskPath
+    }
+
 	// create basic config from default vaules
 	cfg := model.DomainConfig{
 		Name:       distro.Name,
 		MemMiB:     distro.RAM,
 		VCPU:       distro.CPU,
 		DiskSize:   model.EffectiveDiskSize(distro, defs),
-		Disk:       model.EffectiveDiskPath(distro, defs),
+		//Disk:       model.EffectiveDiskPath(distro, defs),
 		Network:    "default",
 		NestedVirt: distro.NestedVirt,
 	}
 
 	// Optional Edit Menu for last edits
-	ui.PromptEditDomainConfig(r, &cfg)
+	ui.PromptEditDomainConfig(r, &cfg, defaultDiskPath)
 
 	// Select ISO (uses the directory from the YAML)
 	isoPath, err := ui.PromptSelectISO(r, isoWorkDir, maxLines)
@@ -131,5 +137,4 @@ func runNewVMWorkflow(
 	}
 	return nil
 }
-
 // EOF

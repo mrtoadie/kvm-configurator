@@ -29,7 +29,7 @@ func readLine(r *bufio.Reader, prompt string) (string, error) {
 	Loading distro list from yaml
 -------------------- */
 func PromptSelectDistro(r *bufio.Reader, list []config.Distro) (config.Distro, error) {
-	fmt.Println("\n\x1b[34m=== Select an operating system ===\x1b[0m")
+	fmt.Println(Colourise("\n=== Select an operating system ===", Blue))
 	sorted := append([]config.Distro(nil), list...)
 	sort.Slice(sorted, func(i, j int) bool {
 		return strings.ToLower(sorted[i].Name) < strings.ToLower(sorted[j].Name)
@@ -52,14 +52,13 @@ func PromptSelectDistro(r *bufio.Reader, list []config.Distro) (config.Distro, e
 		if i, e := strconv.Atoi(line); e == nil && i >= 1 && i <= len(sorted) {
 			idx = i
 		} else {
-			return config.Distro{}, fmt.Errorf("\x1b[31mInvalid selection\x1b[0m")
+			return config.Distro{}, fmt.Errorf(Colourise("Invalid selection", Red))
 		}
 	}
 	return sorted[idx-1], nil
 }
 
 /* --------------------
-	[Modul: internal/ui/ui.go] Select ISO
 	PromptSelectISO – selects an ISO file from the specified directory
 	The return value is the 'absolute path' to the file (for virt‑install)
 -------------------- */
@@ -83,7 +82,7 @@ func PromptSelectISO(r *bufio.Reader, workDir string, maxLines int) (string, err
 		return "", err
 	}
 	if choice == 0 {
-		return "", fmt.Errorf("selection aborted")
+		return "", fmt.Errorf(Colourise("selection aborted", Yellow))
 	}
 	selected := files[choice-1]
 
@@ -93,47 +92,64 @@ func PromptSelectISO(r *bufio.Reader, workDir string, maxLines int) (string, err
 }
 
 /* --------------------
+	expand disk path
+-------------------- */
+func expandPath(p string) string {
+    if strings.HasPrefix(p, "~"+string(os.PathSeparator)) {
+        home, _ := os.UserHomeDir()
+        return filepath.Join(home, p[2:])
+    }
+    return p
+}
+
+/* --------------------
 	Form – allows changes to the fields
 -------------------- */
-func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig) {
+func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 	for {
-		fmt.Fprintln(w, "\n\x1b[34m=== VM-Config ===\t\x1b[0m")
+		fmt.Fprintln(w, Colourise("\n=== VM-Config ===\t", Blue))
 		fmt.Fprintf(w, "[1] Name:\t%s\t[default]\n", cfg.Name)
 		fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t[default]\n", cfg.MemMiB)
 		fmt.Fprintf(w, "[3] vCPU:\t%d\t[default]\n", cfg.VCPU)
-		fmt.Fprintf(w, "[4] Disk-Path:\t%s\t[Enter path for virtual hdd]\n", cfg.Disk)
+		fmt.Fprintf(w, "[4] Disk-Path:\t%s\t[default = no disk path]\n", cfg.Disk)
 		fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\t[default]\n", cfg.DiskSize)
 		fmt.Fprintf(w, "[6] Network:\t%s\t[default]\n", cfg.Network)
 		fmt.Fprintf(w, "[7] Advanced Parameters [optional]")
 		w.Flush()
 
-		f, _ := readLine(r, "\nSelect or press Enter to continue: ")
+		f, _ := readLine(r, Colourise("\nSelect or press Enter to continue: ", Yellow))
 		if f == "" {
 			break
 		}
 		switch f {
-		case "1":
+		case "1": // name
 			if v, _ := readLine(r, ">> New Name: "); v != "" {
 				cfg.Name = v
 			}
-		case "2":
+		case "2": // ram
 			if v, _ := readLine(r, ">> RAM (MiB): "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					cfg.MemMiB = i
 				}
 			}
-		case "3":
+		case "3": // vcpu
 			if v, _ := readLine(r, ">> vCPU: "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					cfg.VCPU = i
 				}
 			}
-		case "4":
-			if v, _ := readLine(r, ">> Disk path (empty = no disk): "); true {
-				cfg.Disk = v
-			}
-		case "5":
+		case "4":	// disk path
+    	prompt := fmt.Sprintf(">> Disk path (default: %s): ", defaultDiskPath)
+      if v, _ := readLine(r, prompt); v != "" {
+        // user input
+				cfg.Disk = expandPath(v)
+      } else {
+        // no intpu = default path
+        cfg.Disk = expandPath(defaultDiskPath)
+      }
+      fmt.Printf("\x1b[32mDisk will be stored at: %s\x1b[0m\n", cfg.Disk)
+		case "5": // disksize
 			if v, _ := readLine(r, ">> Disksize (GB): "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					cfg.DiskSize = i
@@ -146,7 +162,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig) {
 		case "7":
 			editAdvanced(r, cfg)
 		default:
-			fmt.Println("\x1b[31mInvalid input!\x1b[0m")
+			fmt.Println(Colourise("Invalid input!", Red))
 		}
 	}
 }
@@ -158,13 +174,13 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 
 	for {
-		fmt.Fprintln(w, "\n\x1b[34m=== Advanced Parameters ===\t\x1b[0m")
+		fmt.Fprintln(w, Colourise("\n=== Advanced Parameters ===\t", Blue))
 		fmt.Fprintln(w, "[a] Nested-Virtualisation\t[default]")
 		fmt.Fprintln(w, "[b] Boot-Order\t[default] 'not implemented yet'")
 		fmt.Fprintln(w, "[0] Back to main menu")
 		w.Flush()
 
-		choice, _ := readLine(r, "\nSelect an option (or press Enter to go back): ")
+		choice, _ := readLine(r, Colourise("\nSelect an option (or press Enter to go back): ", Yellow))
 		if choice == "" || strings.EqualFold(choice, "0") {
 			return
 		}
@@ -187,7 +203,7 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
         fmt.Println("Boot-Order left unchanged – using default.")
       }
 		default:
-			fmt.Println("\x1b[31mInvalid input!\x1b[0m")
+			fmt.Println(Colourise("Invalid input!", Red))
 		}
 	}
 }
@@ -198,7 +214,7 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 
-	fmt.Fprintln(w, "\n\x1b[34m=== VM-SUMMARY ===\x1b[0m")
+	fmt.Fprintln(w, Colourise("\n=== VM-SUMMARY ===", Blue))
 	fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
 	fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)
 	fmt.Fprintf(w, "vCPU:\t%d\n", cfg.VCPU)
@@ -210,7 +226,7 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Fprintf(w, "Boot-Order:\t%s\n", cfg.BootOrder)
 	w.Flush()
 
-	fmt.Print("\nPress ENTER to create VM … ")
+	fmt.Print(Colourise("\nPress ENTER to create VM … ", Yellow))
 	_, _ = r.ReadString('\n')
 }
 // EOF
