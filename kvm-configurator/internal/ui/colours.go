@@ -1,4 +1,5 @@
 // ui/colours.go
+// last modification: January 17 2026
 package ui
 
 const (

@@ -1,4 +1,5 @@
 // fileutils/fileutils.go
+// last modification: January 17 2026
 package fileutils
 
 import (
@@ -8,6 +9,9 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	// internal
+	//"configurator/internal/ui"
 )
 
 /* --------------------
@@ -36,7 +40,7 @@ func ListFiles(dir string) ([]string, error) {
 -------------------- */
 func PromptSelection(files []string) (int, error) {
 	if len(files) == 0 {
-		return -1, fmt.Errorf("\x1b[31mno files found\x1b[0m")
+		return -1, fmt.Errorf("no files found")
 	}
 	fmt.Println("\n\x1b[34m=== Select ISO ===\x1b[0m")
 	for i, f := range files {

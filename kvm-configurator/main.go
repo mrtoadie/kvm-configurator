@@ -1,4 +1,5 @@
-// Version 1.0
+// Version 1.0.1
+// last modification: January 18 2026
 package main
 
 import (
@@ -48,11 +49,11 @@ func main() {
 		fmt.Println("[1] New VM")
 		fmt.Println("[2] Check")
 		fmt.Println("[0] Exit")
-		fmt.Print("Selection: ")
+		fmt.Print(ui.Colourise("Selection: ", ui.Yellow))
 
 		var sel int
 		if _, err := fmt.Scanln(&sel); err != nil {
-			fmt.Println(ui.Colourise("Please enter a valid number.", ui.Red))
+			fmt.Print(ui.Colourise("Please enter a valid number.", ui.Red))
 			continue
 		}
 		switch sel {
@@ -102,7 +103,7 @@ func runNewVMWorkflow(
 	}
 	variant := variantByName[distro.Name]
 
-// Disk‑Path‑Default aus der gewählten Distro holen
+// Disk‑Path‑Default from selectet distro
 defaultDiskPath := distro.DiskPath
     if defaultDiskPath == "" {
         defaultDiskPath = defs.DiskPath
@@ -114,7 +115,6 @@ defaultDiskPath := distro.DiskPath
 		MemMiB:     distro.RAM,
 		VCPU:       distro.CPU,
 		DiskSize:   model.EffectiveDiskSize(distro, defs),
-		//Disk:       model.EffectiveDiskPath(distro, defs),
 		Network:    "default",
 		NestedVirt: distro.NestedVirt,
 	}

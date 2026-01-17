@@ -1,4 +1,5 @@
 // engine/engine.go
+// last modification: January 17 2026
 package engine
 
 import (
@@ -30,7 +31,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	diskArg, haveRealDisk := model.BuildDiskArg(cfg)
 
 	// CPU‑Argument (Nested Virtualisation)
-	cpuBase := "host-passthrough"
+	cpuBase := "host-passthrough" // always included
 	cpuArg := cpuBase
 	if strings.TrimSpace(cfg.NestedVirt) != "" {
 		cpuArg = fmt.Sprintf("%s,+%s", cpuBase, cfg.NestedVirt)
@@ -43,7 +44,39 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
     bootArg = fmt.Sprintf("--boot %s", cfg.BootOrder)
   }
 
-	// Calling virt‑install
+// -------------------------------------------------
+// ❻ Boot‑Order aus cfg übernehmen, wenn angegeben
+// -------------------------------------------------
+//bootArg := "hd" // Standardfallback
+/*
+if strings.TrimSpace(cfg.BootOrder) != "" {
+    // Nur erlaubte Keywords zulassen (einfacher Filter)
+    allowed := map[string]bool{
+        "cdrom": true, "hd": true, "network": true,
+    }
+    parts := strings.Split(cfg.BootOrder, ",")
+    var clean []string
+    for _, p := range parts {
+        p = strings.TrimSpace(p)
+        if allowed[p] {
+            clean = append(clean, p)
+        }
+    }
+    if len(clean) > 0 {
+        bootArg = strings.Join(clean, ",")
+    }
+}*/
+
+	if haveRealDisk {
+		fmt.Println(ui.Colourise(
+    fmt.Sprintf("Using custom disk: %s", diskArg),
+    ui.Yellow,
+		))
+	} else {
+		fmt.Println(ui.Colourise("\x1b[34mNo custom disk – passing '--disk none'\x1b[0m", ui.Yellow))
+	}
+
+	// Arguments for virt‑install
 	args := []string{
 		"--name", cfg.Name,
 		"--memory", strconv.Itoa(cfg.MemMiB),
@@ -52,24 +85,12 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 		"--os-variant", variant,
 		"--disk", diskArg,
 		"--cdrom", isoPath,
-		"--boot", "hd",
+		//"--boot", "hd",
+		"--boot", bootArg,
 		"--print-xml",
 	}
-	if haveRealDisk {
-		//fmt.Println("Using custom disk:", diskArg)
-		fmt.Println(ui.Colourise(
-    fmt.Sprintf("Using custom disk: %s", diskArg),
-    ui.Yellow,
-))
-	} else {
-		fmt.Println("\x1b[34mNo custom disk – passing '--disk none'\x1b[0m")
-	}
-
-	// if custom string -use it
-  if bootArg != "" {
-    args = append(args, strings.Split(bootArg, " ")...)
-  }
-
+	// Debug output
+	fmt.Print(args)
 	// SimpelProgress
 	stop := make(chan struct{})
 	ui.SimpleProgress("\x1b[34mRunning virt-install:", stop)
@@ -91,7 +112,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	// Find the 'first' </domain> tag – discard everything after it
 	firstEndIdx := strings.Index(xmlStr, "</domain>")
 	if firstEndIdx == -1 {
-		return fmt.Errorf("\x1b[31mFailed to locate closing </domain> tag in virt‑install output\x1b[0m")
+		return fmt.Errorf(ui.Colourise("Failed to locate closing </domain> tag in virt-install output", ui.Red))
 	}
 	// +len("</domain>") includes the tag itself
 	cleanXMLStr := xmlStr[:firstEndIdx+len("</domain>")]
@@ -117,7 +138,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	if err := exec.Command("virsh", "define", xmlFullPath).Run(); err != nil {
 		return fmt.Errorf("\x1b[31mvirsh define failed: %w\x1b[0m", err)
 	}
-	fmt.Println("\n\x1b[32mVM successfully registered with libvirt/qemu (not yet started).\x1b[0m")
+	fmt.Println(ui.Colourise("\nVM successfully registered with libvirt/qemu (not yet started).", ui.Green))
 	return nil
 }
 // EOF

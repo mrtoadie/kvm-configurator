@@ -1,4 +1,5 @@
 // ui/progress.go
+// last modification: January 17 2026
 package ui
 
 import (

@@ -1,4 +1,5 @@
 // ui/ui.go
+// last modification: January 17 2026
 package ui
 
 import (
@@ -43,7 +44,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.Distro) (config.Distro, e
 	}
 	w.Flush()
 
-	line, err := readLine(r, "\nPlease enter a number (or press ENTER for default Arch Linux): ")
+	line, err := readLine(r, Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", Yellow))
 	if err != nil {
 		return config.Distro{}, err
 	}
@@ -106,7 +107,7 @@ func expandPath(p string) string {
 	Form – allows changes to the fields
 -------------------- */
 func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
+	w := tabwriter.NewWriter(os.Stdout, 0, 10, 2, ' ', 0)
 	for {
 		fmt.Fprintln(w, Colourise("\n=== VM-Config ===\t", Blue))
 		fmt.Fprintf(w, "[1] Name:\t%s\t[default]\n", cfg.Name)
@@ -115,7 +116,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		fmt.Fprintf(w, "[4] Disk-Path:\t%s\t[default = no disk path]\n", cfg.Disk)
 		fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\t[default]\n", cfg.DiskSize)
 		fmt.Fprintf(w, "[6] Network:\t%s\t[default]\n", cfg.Network)
-		fmt.Fprintf(w, "[7] Advanced Parameters [optional]")
+		fmt.Fprintf(w, "[7] Advanced Parameters\n")
 		w.Flush()
 
 		f, _ := readLine(r, Colourise("\nSelect or press Enter to continue: ", Yellow))
@@ -177,6 +178,7 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 		fmt.Fprintln(w, Colourise("\n=== Advanced Parameters ===\t", Blue))
 		fmt.Fprintln(w, "[a] Nested-Virtualisation\t[default]")
 		fmt.Fprintln(w, "[b] Boot-Order\t[default] 'not implemented yet'")
+		fmt.Fprintln(w, "-------------------------------------")
 		fmt.Fprintln(w, "[0] Back to main menu")
 		w.Flush()
 
@@ -186,12 +188,12 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 		}
 		switch strings.ToLower(choice) {
 		case "a":
-			if v, _ := readLine(r, ">> Nested-Virtualisation (vmx for Intel or smx for AMD): "); v != "" {
+			if v, _ := readLine(r, Colourise(">> Nested-Virtualisation (vmx for Intel or smx for AMD): ", Blue)); v != "" {
 				cfg.NestedVirt = v
 				fmt.Println("Nested-Virtualisation is set to\x1b[32m", v)
 			}
 		case "b": // bug - disk is no parameter
-			prompt := ">> Boot-Order (comma-separated, e.g. cdrom,disk,network): "
+			prompt := Colourise(">> Boot-Order (comma-separated, e.g. cdrom,hd,network): ", Blue)
       if v, _ := readLine(r, prompt); v != "" {
         // clean spaces and all lower case
         cleaned := strings.ReplaceAll(strings.ToLower(v), " ", "")
@@ -199,8 +201,8 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
         fmt.Printf("Boot-Order set to \x1b[32m%s\x1b[0m\n", cleaned)
       } else {
         // no input = use default
-        cfg.BootOrder = "cdrom,disk,network"
-        fmt.Println("Boot-Order left unchanged – using default.")
+        cfg.BootOrder = "hd"
+        fmt.Println(Colourise("Boot-Order left unchanged – using default.", Yellow))
       }
 		default:
 			fmt.Println(Colourise("Invalid input!", Red))
