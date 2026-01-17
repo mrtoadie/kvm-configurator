@@ -9,31 +9,12 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/model"
 	"configurator/internal/ui"
 )
-
-func SimpleProgress(msg string, stopChan <-chan struct{}) {
-	go func() {
-		chars := []rune{'⣾','⣽','⣻','⢿','⡿','⣟','⣯','⣷'}
-		i := 0
-		for {
-			select {
-			case <-stopChan:
-				fmt.Print("\r")
-				return
-			default:
-				fmt.Printf("\r%s %c ", msg, chars[i%len(chars)])
-				time.Sleep(100 * time.Millisecond)
-				i++
-			}
-	}
-}()
-}
 
 /* --------------------
 	CreateVM receives a fully‑filled DomainConfig, the os‑variant string
@@ -91,7 +72,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 
 	// SimpelProgress
 	stop := make(chan struct{})
-	SimpleProgress("\x1b[34mRunning virt-install:", stop)
+	ui.SimpleProgress("\x1b[34mRunning virt-install:", stop)
 	
 	// run virt-install
 	cmd := exec.Command("virt-install", args...)
