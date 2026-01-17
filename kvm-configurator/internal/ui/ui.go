@@ -72,6 +72,10 @@ func PromptSelectISO(r *bufio.Reader, workDir string, maxLines int) (string, err
 	if len(files) == 0 {
 		return "", fmt.Errorf("no files found in %s", workDir)
 	}
+	// sort iso list by name
+	sort.Slice(files, func(i, j int) bool {
+  	return strings.ToLower(files[i]) < strings.ToLower(files[j])
+  })
 
 	// Show menu for selection
 	choice, err := fileutils.PromptSelection(files)
