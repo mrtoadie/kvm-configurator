@@ -113,21 +113,11 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	abs, _ := filepath.Abs(xmlFullPath)
 	fmt.Printf("\n\x1b[32mXML definition saved under: %s\n\x1b[0m", abs)
 
-	// xml path from config
-	xmlDir := strings.TrimSpace(fp.Filepaths.XmlDir) 
-	if xmlDir == "" {
-		// fallback to current dir
-		xmlDir = "."
-	}
-	xmlFileName := cfg.Name + ".xml"
-	xmlFullPath := filepath.Join(xmlDir, xmlFileName)
-	// -------------------------------------------------------------------
-/*
 	// Define the new VM >> libvirt
 	if err := exec.Command("virsh", "define", xmlFullPath).Run(); err != nil {
 		return fmt.Errorf("\x1b[31mvirsh define failed: %w\x1b[0m", err)
 	}
-	fmt.Println(ui.Colourise("\nVM successfully registered with libvirt/qemu (not yet started).", ui.Green))
+	fmt.Println("\n\x1b[32mVM successfully registered with libvirt/qemu (not yet started).\x1b[0m")
 	return nil
 }
 // EOF
