@@ -1,11 +1,12 @@
 // prereq/prereq.go
-// last modification: January 17 2026
+// last modification: January 18 2026
 package prereq
 
 import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
 /* --------------------
@@ -57,5 +58,23 @@ func FatalIfMissing(err error) {
 		fmt.Fprintf(os.Stderr, "\x1b[31mUnexpected error: %v\x1b[0m\n", err)
 	}
 	os.Exit(1)
+}
+
+/*
+	not good, need improvment
+*/
+// function to check if config file exists
+func Exists() (bool, error) {
+	var fileName = ".config/arkrc"
+  home, err := os.UserHomeDir()
+  if err != nil {
+    return false, err
+  }
+	path := filepath.Join(home, fileName)
+  info, err := os.Stat(path)
+  if err == nil {
+    return !info.IsDir(), nil
+  }
+  return false, err
 }
 // EOF

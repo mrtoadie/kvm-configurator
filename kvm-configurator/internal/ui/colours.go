@@ -1,9 +1,9 @@
 // ui/colours.go
-// last modification: January 17 2026
+// last modification: January 18 2026
 package ui
 
 const (
-    reset  = "\033[0m"
+    Reset  = "\033[0m"
     Red    = "\033[31m"
     Green  = "\033[32m"
     Yellow = "\033[33m"
@@ -13,6 +13,6 @@ const (
 )
 
 func Colourise(text, colour string) string {
-    return colour + text + reset
+    return colour + text + Reset
 }
 // EOF

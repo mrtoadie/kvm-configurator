@@ -22,7 +22,18 @@ func main() {
 		prereq.FatalIfMissing(err)
 	}
 
-	// [Modul: config] loads File‑Config (input_dir, max_lines)
+	// [Modul: prereqs] check if cinfig file exists
+	ok, err := prereq.Exists()
+  if err != nil {
+    log.Fatalf("Fehler beim Prüfen: %v", err)
+  }
+  if ok {
+		// program starts		
+  } else {
+    fmt.Println("Datei existiert nicht")
+  }
+	
+	// [Modul: config] loads File‑Config (input_dir)
 	fp, err := config.LoadFilePaths("oslist.yaml")
 	if err != nil {
 		log.Fatalf("\x1b[31mError loading file-config: %v\x1b[0m", err)
@@ -61,15 +72,14 @@ func main() {
 			fmt.Println("Bye!")
 			return
 		case 1:
-			// workDir & maxLines from File‑Config
+			// workDir from File‑Config
 			if err := runNewVMWorkflow(
 				r,
 				osList,
 				defaults,
 				variantByName,
 				workDir,
-				fp.Filepaths.MaxLines,
-				fp, // complete config (idk if good or not)
+				fp,
 			); err != nil {
 				fmt.Fprintf(os.Stderr, "\x1b[31mError: %v\x1b[0m\n", err)
 			}
@@ -92,7 +102,6 @@ func runNewVMWorkflow(
 	},
 	variantByName map[string]string,
 	isoWorkDir string,
-	maxLines int,
 	fp *config.FilePaths, //load xml_dir
 ) error {
 
@@ -115,15 +124,20 @@ defaultDiskPath := distro.DiskPath
 		MemMiB:     distro.RAM,
 		VCPU:       distro.CPU,
 		DiskSize:   model.EffectiveDiskSize(distro, defs),
-		Network:    "default",
+		//Network:    "default",
+		Network: 		distro.Network,
 		NestedVirt: distro.NestedVirt,
+		Graphics: 	distro.Graphics,
+		Sound:			distro.Sound,
+		FileSystem: distro.FileSystem,
+		BootOrder: 	distro.BootOrder,
 	}
 
 	// Optional Edit Menu for last edits
 	ui.PromptEditDomainConfig(r, &cfg, defaultDiskPath)
 
 	// Select ISO (uses the directory from the YAML)
-	isoPath, err := ui.PromptSelectISO(r, isoWorkDir, maxLines)
+	isoPath, err := ui.PromptSelectISO(r, isoWorkDir)
 	if err != nil {
 		return fmt.Errorf("\x1b[31mISO selection failed: %w\x1b[0m", err)
 	}

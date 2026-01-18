@@ -1,10 +1,10 @@
 // config/config.go
-// last modification: January 17 2026
+// last modification: January 18 2026
 package config
 
 import (
+	"fmt"
 	"os"
-	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -16,13 +16,19 @@ type Distro struct {
 	CPU        int    `yaml:"cpu"`
 	RAM        int    `yaml:"ram"`
 	DiskSize   int    `yaml:"disksize"`
-	DiskPath   string `yaml:"disk_path"`
+	DiskPath   string `yaml:"diskpath"`
 	NestedVirt string `yaml:"nvirt"`
+	Network    string `yaml:"network"`   // bridge | nat | none
+  Graphics   string `yaml:"graphics"`  // spice | vnc | none
+	Sound			 string `yaml:"sound"`
+	FileSystem string `yaml:"filesystem"`
+  //BootOrder  []int  `yaml:"boot_order,omitempty"`// [1,2] (disk, cdrom)
+	BootOrder		string `yaml:"bootorder"`
 }
 
 type OSRoot struct {
 	Defaults struct {
-		DiskPath string `yaml:"disk_path"`
+		DiskPath string `yaml:"diskpath"`
 		DiskSize int    `yaml:"disksize"`
 	} `yaml:"defaults"`
 	OSList []Distro `yaml:"oslist"`
@@ -62,7 +68,6 @@ type FilePaths struct {
 	Filepaths struct {
 		InputDir string `yaml:"input_dir"`
 		XmlDir   string `yaml:"xml_dir"` 
-		MaxLines int    `yaml:"max_lines"`
 	} `yaml:"filepaths"`
 }
 
@@ -78,14 +83,6 @@ func LoadFilePaths(path string) (*FilePaths, error) {
 	if err = yaml.Unmarshal(data, &fp); err != nil {
 		return nil, err
 	}
-	// Defaults NO FUNCTION YET!!
-	if fp.Filepaths.MaxLines == 0 {
-		fp.Filepaths.MaxLines = 10
-	}
-
-	if strings.TrimSpace(fp.Filepaths.XmlDir) == "" {
-		fp.Filepaths.XmlDir = "/home/toadie/Downloads/xml"
-	}
 	return &fp, nil
 }
 
@@ -93,10 +90,13 @@ func LoadFilePaths(path string) (*FilePaths, error) {
 	ResolveWorkDir – returns the directory to be scanned
 -------------------- */
 func ResolveWorkDir(fp *FilePaths) (string, error) {
-	if fp.Filepaths.InputDir != "" {
-		return fp.Filepaths.InputDir, nil
-	}
-	// Fallback: current work dir
-	return os.Getwd()
+    if fp.Filepaths.InputDir != "" {
+        return fp.Filepaths.InputDir, nil
+    }
+    cwd, err := os.Getwd()
+    if err != nil {
+        return "", fmt.Errorf("cannot determine working directory: %w", err)
+    }
+    return cwd, nil
 }
 // EOF

@@ -5,24 +5,37 @@
 
 filepaths:
   input_dir: "/run/media/toadie/data/ISOs"
-  max_lines: 10
-  xml_dir: "/home/toadie/Downloads"
+  xml_dir: "/home/toadie/Downloads/xml"
 
 advanced_features:
   start_init: false
 
 # defines OS defaults
-defaults: &default_vals               
-  disk_path: "/var/lib/libvirt/images"
+defaults: &default_vals
+  diskpath: "/var/lib/libvirt/images"
   disksize: 20
-  nvirt: "vmx"
+  nvirt:    "vmx"
+  network:  "default" # default or none
+  graphics: "spice" # spice or vnc
+  sound: "none"
 
 oslist:
+  - name: _test2
+    id: ubuntu24.04
+    filesystem: "/home,/mnt"
+    cpu: 2
+    ram: 4096
+    diskpath: "/run/media/toadie/vm/QEMU"
+    network: "none"
+    graphics: "vnc"
+    nvirt: "vmx"
+    bootorder: "hd"
+
   - name: _test
     id: archlinux
     cpu: 1
     ram: 512
-    disk_path: "/run/media/toadie/vm/QEMU"
+    diskpath: "/run/media/toadie/vm/QEMU"
     disksize: 2
 
   - name: Arch Linux

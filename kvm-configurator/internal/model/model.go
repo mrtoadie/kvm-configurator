@@ -1,5 +1,5 @@
 // model/model.go
-// last modification: January 17 2026
+// last modification: January 18 2026
 package model
 
 import (
@@ -15,7 +15,7 @@ import (
 	[Modul: config] Load DomainConfig
 -------------------- */
 type DomainConfig struct {
-	Name, Disk, Network, ISO, NestedVirt, BootOrder string
+	Name, Disk, Network, ISO, NestedVirt, BootOrder, Graphics, Sound, FileSystem string
 	MemMiB, VCPU, DiskSize int
 }
 

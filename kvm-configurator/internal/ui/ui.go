@@ -1,5 +1,5 @@
 // ui/ui.go
-// last modification: January 17 2026
+// last modification: January 18 2026
 package ui
 
 import (
@@ -63,7 +63,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.Distro) (config.Distro, e
 	PromptSelectISO – selects an ISO file from the specified directory
 	The return value is the 'absolute path' to the file (for virt‑install)
 -------------------- */
-func PromptSelectISO(r *bufio.Reader, workDir string, maxLines int) (string, error) {
+func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 	// workDir is directory from filepaths.input_dir
 	files, err := fileutils.ListFiles(workDir)
 	if err != nil {
@@ -111,7 +111,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 	for {
 		fmt.Fprintln(w, Colourise("\n=== VM-Config ===\t", Blue))
 		fmt.Fprintf(w, "[1] Name:\t%s\t[default]\n", cfg.Name)
-		fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t[default]\n", cfg.MemMiB)
+		fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t\n", cfg.MemMiB)
 		fmt.Fprintf(w, "[3] vCPU:\t%d\t[default]\n", cfg.VCPU)
 		fmt.Fprintf(w, "[4] Disk-Path:\t%s\t[default = no disk path]\n", cfg.Disk)
 		fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\t[default]\n", cfg.DiskSize)
@@ -157,7 +157,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 				}
 			}
 		case "6":
-			if v, _ := readLine(r, ">> Network (comma-separated): "); true {
+			if v, _ := readLine(r, ">> Network (none or default): "); true {
 				cfg.Network = v
 			}
 		case "7":
@@ -176,8 +176,12 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 
 	for {
 		fmt.Fprintln(w, Colourise("\n=== Advanced Parameters ===\t", Blue))
-		fmt.Fprintln(w, "[a] Nested-Virtualisation\t[default]")
-		fmt.Fprintln(w, "[b] Boot-Order\t[default] 'not implemented yet'")
+		fmt.Fprintln(w, "Parameter\t Default\t Set")
+		fmt.Fprintln(w, "[a] Nested-Virtualisation\t", cfg.NestedVirt)
+		fmt.Fprintln(w, "[b] Boot-Order\t", cfg.BootOrder)
+		fmt.Fprintln(w, "[c] Graphics\t", cfg.Graphics)
+		fmt.Fprintln(w, "[d] Sound\t", cfg.Sound)
+		fmt.Fprintln(w, "[e] Filesystem\t", cfg.FileSystem)
 		fmt.Fprintln(w, "-------------------------------------")
 		fmt.Fprintln(w, "[0] Back to main menu")
 		w.Flush()
@@ -192,18 +196,26 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 				cfg.NestedVirt = v
 				fmt.Println("Nested-Virtualisation is set to\x1b[32m", v)
 			}
-		case "b": // bug - disk is no parameter
-			prompt := Colourise(">> Boot-Order (comma-separated, e.g. cdrom,hd,network): ", Blue)
-      if v, _ := readLine(r, prompt); v != "" {
-        // clean spaces and all lower case
-        cleaned := strings.ReplaceAll(strings.ToLower(v), " ", "")
-        cfg.BootOrder = cleaned
-        fmt.Printf("Boot-Order set to \x1b[32m%s\x1b[0m\n", cleaned)
-      } else {
-        // no input = use default
-        cfg.BootOrder = "hd"
-        fmt.Println(Colourise("Boot-Order left unchanged – using default.", Yellow))
-      }
+		case "b": // bug - nothing happend
+			if v, _ := readLine(r, ">> Boot order: "); v != "" {
+				cfg.BootOrder = v
+				fmt.Println("Boot order is set to", v)
+			}
+		case "c":
+			if v, _ := readLine(r, Colourise(">> Graphics (spice (default) or vnc): ", Blue)); v != "" {
+				cfg.Graphics = v
+				fmt.Println(Colourise("Graphics is set to", Blue), v)
+			}
+		case "d":
+			if v, _ := readLine(r, Colourise(">> Sound (none, ac97, ich6 or ich9 (default)): ", Blue)); v != "" {
+				cfg.Sound = v
+				fmt.Println(Colourise("Sound is set to", Blue), v)
+			}
+		case "e":
+			if v, _ := readLine(r, Colourise(">> Filesystem / Mount (/my/source/dir,/dir/in/guest): ", Blue)); v != "" {
+				cfg.FileSystem = v
+				fmt.Println(Colourise("Filesystem / Mount is set to", Blue), v)
+			}
 		default:
 			fmt.Println(Colourise("Invalid input!", Red))
 		}
@@ -226,6 +238,9 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Fprintf(w, "Nested-Virtualisation:\t%s\n", cfg.NestedVirt)
 	fmt.Fprintf(w, "ISO-File:\t%s\n", isoPath)
 	fmt.Fprintf(w, "Boot-Order:\t%s\n", cfg.BootOrder)
+	fmt.Fprintf(w, "Graphic:\t%s\n", cfg.Graphics)
+	fmt.Fprintf(w, "Sound:\t%s\n", cfg.Sound)
+	fmt.Fprintf(w, "Filesystem:\t%s\n", cfg.FileSystem)
 	w.Flush()
 
 	fmt.Print(Colourise("\nPress ENTER to create VM … ", Yellow))

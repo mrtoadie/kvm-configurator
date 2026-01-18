@@ -1,5 +1,5 @@
 // engine/engine.go
-// last modification: January 17 2026
+// last modification: January 18 2026
 package engine
 
 import (
@@ -37,36 +37,6 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 		cpuArg = fmt.Sprintf("%s,+%s", cpuBase, cfg.NestedVirt)
 	}
 
-	// boot-argument (boot order)
-	bootArg := ""
-  if strings.TrimSpace(cfg.BootOrder) != "" {
-    // virt‑install --boot cdrom,network
-    bootArg = fmt.Sprintf("--boot %s", cfg.BootOrder)
-  }
-
-// -------------------------------------------------
-// ❻ Boot‑Order aus cfg übernehmen, wenn angegeben
-// -------------------------------------------------
-//bootArg := "hd" // Standardfallback
-/*
-if strings.TrimSpace(cfg.BootOrder) != "" {
-    // Nur erlaubte Keywords zulassen (einfacher Filter)
-    allowed := map[string]bool{
-        "cdrom": true, "hd": true, "network": true,
-    }
-    parts := strings.Split(cfg.BootOrder, ",")
-    var clean []string
-    for _, p := range parts {
-        p = strings.TrimSpace(p)
-        if allowed[p] {
-            clean = append(clean, p)
-        }
-    }
-    if len(clean) > 0 {
-        bootArg = strings.Join(clean, ",")
-    }
-}*/
-
 	if haveRealDisk {
 		fmt.Println(ui.Colourise(
     fmt.Sprintf("Using custom disk: %s", diskArg),
@@ -85,10 +55,14 @@ if strings.TrimSpace(cfg.BootOrder) != "" {
 		"--os-variant", variant,
 		"--disk", diskArg,
 		"--cdrom", isoPath,
-		//"--boot", "hd",
-		"--boot", bootArg,
+		"--boot", "hd,cdrom",
+		//"--boot", cfg.BootOrder,
+		"--graphics", cfg.Graphics,
+		"--sound", cfg.Sound,
+		"--filesystem", cfg.FileSystem,
 		"--print-xml",
 	}
+
 	// Debug output
 	fmt.Print(args)
 	// SimpelProgress
