@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
-
 	// internal
 	"configurator/internal/config"
 )

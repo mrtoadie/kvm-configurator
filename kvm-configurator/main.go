@@ -1,4 +1,8 @@
-// Version 1.0.1
+// Version 1.0.3
+// Autor: 	MrToadie
+// GitHub: 	https://github.com/mrtoadie/
+// Repo: 		https://github.com/mrtoadie/kvm-configurator
+// Lisence: MIT
 // last modification: January 18 2026
 package main
 
@@ -7,7 +11,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
@@ -22,7 +25,7 @@ func main() {
 		prereq.FatalIfMissing(err)
 	}
 
-	// [Modul: prereqs] check if cinfig file exists
+	// [Modul: prereqs] check if config file exists
 	ok, err := prereq.Exists()
   if err != nil {
     log.Fatalf("Fehler beim Prüfen: %v", err)

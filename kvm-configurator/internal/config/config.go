@@ -5,7 +5,7 @@ package config
 import (
 	"fmt"
 	"os"
-
+	// external
 	"gopkg.in/yaml.v3"
 )
 

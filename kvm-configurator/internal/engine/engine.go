@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/model"

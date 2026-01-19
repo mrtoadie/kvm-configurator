@@ -1,5 +1,5 @@
 // fileutils/fileutils.go
-// last modification: January 17 2026
+// last modification: January 18 2026
 package fileutils
 
 import (
@@ -9,9 +9,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	// internal
-	//"configurator/internal/ui"
 )
 
 /* --------------------
