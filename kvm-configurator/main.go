@@ -62,6 +62,7 @@ func main() {
 		fmt.Println(ui.Colourise("\n=== MAIN MENU ===", ui.Blue))
 		fmt.Println("[1] New VM")
 		fmt.Println("[2] Check")
+		fmt.Println("[3] DiskImage Tools")
 		fmt.Println("[0] Exit")
 		fmt.Print(ui.Colourise("Selection: ", ui.Yellow))
 
@@ -87,6 +88,8 @@ func main() {
 				fmt.Fprintf(os.Stderr, "\x1b[31mError: %v\x1b[0m\n", err)
 			}
 		//case 2:
+		case 3:
+			// diskimage tools
 		default:
 			fmt.Println(ui.Colourise("Invalid selection!", ui.Red))
 		}
