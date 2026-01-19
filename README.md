@@ -65,18 +65,14 @@ and start the program with
 
 ### Tested under
 :white_check_mark: [Arch Linux](https://archlinux.org/)
+
 :white_check_mark: [NixOS](https://nixos.org/)
+
 :white_check_mark: [GuideOS](https://guideos.de/) (Debian-based)
+
 :white_check_mark: [Solus](https://getsol.us/)
+
 :white_check_mark: [Ubuntu 25.04 & 25.10](https://ubuntu.com/)
 
 ## Release Notes
 [Release notes](https://github.com/mrtoadie/kvm-configurator/wiki/Release-Notes)
-
-
-## Ideas & Roadmap
-- [X] logical, easy-to-understand menu
-- [ ] transform into TUI style
-- [ ] saving XMLs as templates and reediting
-- [ ] more & advanced VM parameters
-- [ ] web version for browser usage
