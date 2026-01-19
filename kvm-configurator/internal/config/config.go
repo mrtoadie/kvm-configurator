@@ -11,17 +11,18 @@ import (
 
 // ---------- OS‑Liste ----------
 type Distro struct {
-	Name       string `yaml:"name"`
-	ID         string `yaml:"id"`
-	CPU        int    `yaml:"cpu"`
-	RAM        int    `yaml:"ram"`
-	DiskSize   int    `yaml:"disksize"`
-	DiskPath   string `yaml:"diskpath"`
-	NestedVirt string `yaml:"nvirt"`
-	Network    string `yaml:"network"`   // bridge | nat | none
-  Graphics   string `yaml:"graphics"`  // spice | vnc | none
-	Sound			 string `yaml:"sound"`
-	FileSystem string `yaml:"filesystem"`
+	Name       	string `yaml:"name"`
+	ID         	string `yaml:"id"`
+	CPU        	int    `yaml:"cpu"`
+	RAM        	int    `yaml:"ram"`
+	DiskSize   	int    `yaml:"disksize"`
+	DiskPath   	string `yaml:"diskpath"`
+	ISOPath   	string `yaml:"isopath"`
+	NestedVirt 	string `yaml:"nvirt"`
+	Network    	string `yaml:"network"`   // bridge | nat | none
+  Graphics   	string `yaml:"graphics"`  // spice | vnc | none
+	Sound			 	string `yaml:"sound"`
+	FileSystem 	string `yaml:"filesystem"`
   //BootOrder  []int  `yaml:"boot_order,omitempty"`// [1,2] (disk, cdrom)
 	BootOrder		string `yaml:"bootorder"`
 }

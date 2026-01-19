@@ -117,6 +117,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\t[default]\n", cfg.DiskSize)
 		fmt.Fprintf(w, "[6] Network:\t%s\t[default]\n", cfg.Network)
 		fmt.Fprintf(w, "[7] Advanced Parameters\n")
+		fmt.Fprintf(w, "[8] ISO\n")
 		w.Flush()
 
 		f, _ := readLine(r, Colourise("\nSelect or press Enter to continue: ", Yellow))
