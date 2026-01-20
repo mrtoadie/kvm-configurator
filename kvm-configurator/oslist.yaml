@@ -37,6 +37,7 @@ oslist:
     ram: 512
     diskpath: "/run/media/toadie/vm/QEMU"
     disksize: 2
+    input_dir: "/run/media/toadie/data/ISOs/archlinux-2025.12.01-x86_64.iso"
 
   - name: Arch Linux
     id: archlinux

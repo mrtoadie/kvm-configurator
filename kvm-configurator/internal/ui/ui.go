@@ -106,7 +106,7 @@ func expandPath(p string) string {
 /* --------------------
 	Form – allows changes to the fields
 -------------------- */
-func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string) {
+func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string, isoWorkDir string) {
 	w := tabwriter.NewWriter(os.Stdout, 0, 10, 2, ' ', 0)
 	for {
 		fmt.Fprintln(w, Colourise("\n=== VM-Config ===\t", Blue))
@@ -117,7 +117,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\t[default]\n", cfg.DiskSize)
 		fmt.Fprintf(w, "[6] Network:\t%s\t[default]\n", cfg.Network)
 		fmt.Fprintf(w, "[7] Advanced Parameters\n")
-		fmt.Fprintf(w, "[8] ISO\n")
+		fmt.Fprintf(w, "[8] ISO:\t%s\n", cfg.ISOPath)
 		w.Flush()
 
 		f, _ := readLine(r, Colourise("\nSelect or press Enter to continue: ", Yellow))
@@ -163,6 +163,14 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			}
 		case "7":
 			editAdvanced(r, cfg)
+		case "8": // iso
+			isoPath, err := PromptSelectISO(r, isoWorkDir)
+			if err != nil {
+					fmt.Printf("\x1b[ISO selection failed: %v\x1b[0m\n", err)
+					continue // back to menu
+			}
+			cfg.ISOPath = isoPath
+			fmt.Printf("\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
 		default:
 			fmt.Println(Colourise("Invalid input!", Red))
 		}
@@ -237,7 +245,7 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Fprintf(w, "Disk-Size (GB):\t%d\n", cfg.DiskSize)
 	fmt.Fprintf(w, "Network:\t%s\n", cfg.Network)
 	fmt.Fprintf(w, "Nested-Virtualisation:\t%s\n", cfg.NestedVirt)
-	fmt.Fprintf(w, "ISO-File:\t%s\n", isoPath)
+	fmt.Fprintf(w, "ISO-File:\t%s\n", cfg.ISOPath)
 	fmt.Fprintf(w, "Boot-Order:\t%s\n", cfg.BootOrder)
 	fmt.Fprintf(w, "Graphic:\t%s\n", cfg.Graphics)
 	fmt.Fprintf(w, "Sound:\t%s\n", cfg.Sound)

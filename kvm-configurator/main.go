@@ -118,11 +118,11 @@ func runNewVMWorkflow(
 	}
 	variant := variantByName[distro.Name]
 
-// Disk‑Path‑Default from selectet distro
-defaultDiskPath := distro.DiskPath
-    if defaultDiskPath == "" {
-        defaultDiskPath = defs.DiskPath
-    }
+	// Disk‑Path‑Default from selectet distro
+	defaultDiskPath := distro.DiskPath
+  if defaultDiskPath == "" {
+    defaultDiskPath = defs.DiskPath
+  }
 
 	// create basic config from default vaules
 	cfg := model.DomainConfig{
@@ -130,6 +130,7 @@ defaultDiskPath := distro.DiskPath
 		MemMiB:     distro.RAM,
 		VCPU:       distro.CPU,
 		DiskSize:   model.EffectiveDiskSize(distro, defs),
+		ISOPath:		distro.ISOPath,
 		//Network:    "default",
 		Network: 		distro.Network,
 		NestedVirt: distro.NestedVirt,
@@ -140,19 +141,20 @@ defaultDiskPath := distro.DiskPath
 	}
 
 	// Optional Edit Menu for last edits
-	ui.PromptEditDomainConfig(r, &cfg, defaultDiskPath)
+	ui.PromptEditDomainConfig(r, &cfg, defaultDiskPath, isoWorkDir)
 
-	// Select ISO (uses the directory from the YAML)
+	/* OLD PROMT
+		Select ISO (uses the directory from the YAML)
 	isoPath, err := ui.PromptSelectISO(r, isoWorkDir)
 	if err != nil {
 		return fmt.Errorf("\x1b[31mISO selection failed: %w\x1b[0m", err)
-	}
+	}*/
 
 	// Summary
-	ui.ShowSummary(r, &cfg, isoPath)
+	ui.ShowSummary(r, &cfg, cfg.ISOPath)
 
 	// Create VM
-	if err := engine.CreateVM(cfg, variant, isoPath, fp); err != nil {
+	if err := engine.CreateVM(cfg, variant, cfg.ISOPath, fp); err != nil {
 		return fmt.Errorf("\x1b[31mVM creation failed: %w\x1b[0m", err)
 	}
 	return nil

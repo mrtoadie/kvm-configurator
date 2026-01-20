@@ -53,7 +53,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 		"--cpu", cpuArg,
 		"--os-variant", variant,
 		"--disk", diskArg,
-		"--cdrom", isoPath,
+		"--cdrom", cfg.ISOPath,
 		"--boot", "hd,cdrom",
 		//"--boot", cfg.BootOrder,
 		"--graphics", cfg.Graphics,

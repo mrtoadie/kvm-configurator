@@ -14,7 +14,7 @@ import (
 	[Modul: config] Load DomainConfig
 -------------------- */
 type DomainConfig struct {
-	Name, Disk, Network, ISO, NestedVirt, BootOrder, Graphics, Sound, FileSystem string
+	Name, Disk, Network, ISOPath, NestedVirt, BootOrder, Graphics, Sound, FileSystem string
 	MemMiB, VCPU, DiskSize int
 }
 

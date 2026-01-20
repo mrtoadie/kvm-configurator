@@ -17,7 +17,7 @@ type Distro struct {
 	RAM        	int    `yaml:"ram"`
 	DiskSize   	int    `yaml:"disksize"`
 	DiskPath   	string `yaml:"diskpath"`
-	ISOPath   	string `yaml:"isopath"`
+	ISOPath   	string `yaml:"input_dir"`
 	NestedVirt 	string `yaml:"nvirt"`
 	Network    	string `yaml:"network"`   // bridge | nat | none
   Graphics   	string `yaml:"graphics"`  // spice | vnc | none
