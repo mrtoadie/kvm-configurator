@@ -63,7 +63,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	}
 
 	// Debug output
-	fmt.Print(args)
+	//fmt.Print(args)
 	// SimpelProgress
 	stop := make(chan struct{})
 	ui.SimpleProgress("\x1b[34mRunning virt-install:", stop)
