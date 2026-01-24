@@ -41,12 +41,15 @@ kvm-configurator/
 │   │   └─ fileutils.go
 │   ├─ engine/                # Core logic: Calling virt-install & XML handling
 │   │   └─ engine.go
-│   ├─ ui/                    # User interaction (menus, inputs, summary)
-│   │   ├─ colours.go
+│   ├─ ui/                    # User interaction (menus, inputs, summary, colours)
+│   │   ├─ colours.go         
 │   │   ├─ progress.go
 │   │   └─ ui.go
 │   └─ prereq/                # Checks whether necessary programs are installed
 │       └─ prereq.go
+├─ kvmtools/                  # kvm-tools
+│   ├─ menu.go                # ui for kvm-tools
+│   └─ exec.go                # cammand calls
 │
 └─ main.go                    # Entry point, orchestrates the entire workflow
 ```
