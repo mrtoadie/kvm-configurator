@@ -45,11 +45,16 @@ kvm-configurator/
 │   │   ├─ colours.go         
 │   │   ├─ progress.go
 │   │   └─ ui.go
+│   ├─ utils/                    
+│   │   ├─ status.go         
+│   │   └─ tabwriter.go
 │   └─ prereq/                # Checks whether necessary programs are installed
 │       └─ prereq.go
 ├─ kvmtools/                  # kvm-tools
-│   ├─ menu.go                # ui for kvm-tools
-│   └─ exec.go                # cammand calls
+│   ├─ action.go
+│   ├─ menu.go                
+│   ├─ vminfo.go
+│   └─ vmmenu.go                
 │
 └─ main.go                    # Entry point, orchestrates the entire workflow
 ```
