@@ -1,5 +1,5 @@
 // kvmtools/menu.go
-// last modification: January 24 2026
+// last modification: January 25 2026
 package kvmtools
 
 import (
@@ -8,61 +8,64 @@ import (
 	"os"
 	"strings"
 	"text/tabwriter"
-
-	// interne UI‑Hilfen (Farbgebung)
+	// internal
 	"configurator/internal/ui"
 )
 
-// Start zeigt das Menü, liest die Auswahl und delegiert an exec.Run.
-// Der Aufrufer (z. B. main.go) muss nur einen *bufio.Reader* übergeben.
+/* --------------------
+	only one entry - the rest is in vmmenu.go
+-------------------- */
+type commandInfo struct {
+	Description string
+}
+
+var menuMap = map[string]commandInfo{
+	"1": {"Show VMs"},
+	"q": {"Back to Mainmenu"},
+}
+
+/* --------------------
+	lightweight dispatcher
+-------------------- */
 func Start(r *bufio.Reader) {
 	for {
 		printMenu()
-		fmt.Print(ui.Colourise("\nBitte wählen (oder q zum Zurück): ", ui.Yellow))
+		choice := readChoice(r)
 
-		choiceRaw, err := r.ReadString('\n')
-		if err != nil {
-			fmt.Fprintln(os.Stderr, ui.Colourise("Eingabefehler – bitte erneut versuchen.", ui.Red))
-			continue
-		}
-		choice := strings.TrimSpace(choiceRaw)
-
-		// Rückkehr zum Hauptmenü
-		if choice == "q" || choice == "quit" {
+		if choice == "q" {
+			fmt.Println(ui.Colourise("\nBack to Mainmenu", ui.Yellow))
 			return
 		}
 
-		// error output
-		if err := Run(choice); err != nil {
-			fmt.Fprintln(os.Stderr, ui.Colourise("❌ "+err.Error(), ui.Red))
-		} else {
-			fmt.Println(ui.Colourise("✅ Befehl erfolgreich ausgeführt.", ui.Green))
+		switch choice {
+		case "1":
+			VMMenu(bufio.NewReader(os.Stdin))
+		default:
+			fmt.Fprintln(os.Stderr,
+				ui.Colourise("Invalid selection", ui.Red))
 		}
 	}
 }
 
-// printMenu erzeugt die tabellarische Ausgabe.
+/* --------------------
+	print kvm-tools menu
+-------------------- */
 func printMenu() {
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
 
-	menuItems := []struct {
-		Key   string
-		Desc  string
-	}{
-		{"1", "Alle VMs auflisten (virsh list --all)"},
-		{"2", "Laufende VMs auflisten (virsh list)"},
-		{"3", "VM neu starten"},
-		{"4", "VM herunterfahren"},
-		{"5", "VM zerstören"},
-		{"6", "Host-System-Infos (nodeinfo)"},
-		{"7", "start"},
-		{"q", "Zurück zum Hauptmenü"},
-	}
-
-	fmt.Fprintln(w, ui.Colourise("\n=== KVM‑TOOLS ===", ui.Blue))
-	fmt.Fprintln(w, "Auswahl\tBeschreibung")
-	for _, it := range menuItems {
-		fmt.Fprintf(w, "%s\t%s\n", it.Key, it.Desc)
+	fmt.Fprintln(w, ui.Colourise("\n=== KVM-TOOLS ===", ui.Blue))
+	for key, info := range menuMap {
+		fmt.Fprintf(w, "%s\t%s\n", key, info.Description)
 	}
 	w.Flush()
 }
+
+/* --------------------
+	Read input and remove whitespace.
+-------------------- */
+func readChoice(r *bufio.Reader) string {
+	fmt.Print(ui.Colourise("\nSelect: ", ui.Yellow))
+	raw, _ := r.ReadString('\n')
+	return strings.TrimSpace(raw)
+}
+// EOF

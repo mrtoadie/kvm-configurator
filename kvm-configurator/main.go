@@ -1,9 +1,9 @@
-// Version 1.0.3
+// Version 1.0.6
 // Autor: 	MrToadie
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // Lisence: MIT
-// last modification: January 18 2026
+// last modification: January 25 2026
 package main
 
 import (
@@ -17,6 +17,7 @@ import (
 	"configurator/internal/model"
 	"configurator/internal/prereq"
 	"configurator/internal/ui"
+	"configurator/kvmtools"
 )
 
 func main() {
@@ -46,7 +47,7 @@ func main() {
 		log.Fatalf("\x1b[31mCannot resolve work directory: %v\x1b[0m", err)
 	}
 
-	// [Modul: config] loading globale Defaults
+	// [Modul: config] loading global Defaults
 	osList, defaults, err := config.LoadOSList("oslist.yaml")
 	if err != nil {
 		log.Fatalf("\x1b[31mError loading OS list: %v\x1b[0m", err)
@@ -62,13 +63,14 @@ func main() {
 		fmt.Println(ui.Colourise("\n=== MAIN MENU ===", ui.Blue))
 		fmt.Println("[1] New VM")
 		fmt.Println("[2] Check")
-		fmt.Println("[3] DiskImage Tools")
+		//fmt.Println("[3] DiskImage Tools")
+		fmt.Println("[3] KVM-Tools")
 		fmt.Println("[0] Exit")
 		fmt.Print(ui.Colourise("Selection: ", ui.Yellow))
 
 		var sel int
 		if _, err := fmt.Scanln(&sel); err != nil {
-			fmt.Print(ui.Colourise("Please enter a valid number.", ui.Red))
+			fmt.Print(ui.Colourise("\nPlease enter a valid number.", ui.Red))
 			continue
 		}
 		switch sel {
@@ -88,10 +90,12 @@ func main() {
 				fmt.Fprintf(os.Stderr, "\x1b[31mError: %v\x1b[0m\n", err)
 			}
 		//case 2:
-		case 3:
+		//case 3:
 			// diskimage tools
+		case 3:
+			kvmtools.Start(r)
 		default:
-			fmt.Println(ui.Colourise("Invalid selection!", ui.Red))
+			fmt.Println(ui.Colourise("\nInvalid selection!", ui.Red))
 		}
 	}
 }

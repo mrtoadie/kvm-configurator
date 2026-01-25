@@ -68,13 +68,13 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	stop := make(chan struct{})
 	ui.SimpleProgress("\x1b[34mRunning virt-install:", stop)
 	
-	// run virt-install
-	cmd := exec.Command("virt-install", args...)
-	var out, errOut bytes.Buffer
-	cmd.Stdout, cmd.Stderr = &out, &errOut
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("\x1b[31mvirt-install failed: %w – %s\x1b[0m", err, errOut.String())
-	}
+		// run virt-install
+		cmd := exec.Command("virt-install", args...)
+		var out, errOut bytes.Buffer
+		cmd.Stdout, cmd.Stderr = &out, &errOut
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("\x1b[31mvirt-install failed: %w – %s\x1b[0m", err, errOut.String())
+		}
 	// stopp progessbar
 	close(stop)
 	
