@@ -9,60 +9,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-/* NEU?
-// FullConfig bündelt alles, was wir aus oslist.yaml brauchen.
-type FullConfig struct {
-	FilePaths   *FilePaths // input_dir & xml_dir
-	OSList      []Distro   // die eigentlichen Distribution‑Einträge
-	Defaults    struct {
-		DiskPath string `yaml:"diskpath"`
-		DiskSize int    `yaml:"disksize"`
-	}
-}
-
-// LoadEverything liest oslist.yaml **einmal** und zerlegt das Ergebnis.
-func LoadEverything(path string) (*FullConfig, error) {
-	b, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("read config %q: %w", path, err)
-	}
-
-	// Wir nutzen die bereits definierten Strukturen, aber
-	// packen sie in ein temporäres Root‑Objekt.
-	var root struct {
-		Filepaths struct {
-			InputDir string `yaml:"input_dir"`
-			XmlDir   string `yaml:"xml_dir"`
-		} `yaml:"filepaths"`
-
-		Defaults struct {
-			DiskPath string `yaml:"diskpath"`
-			DiskSize int    `yaml:"disksize"`
-		} `yaml:"defaults"`
-
-		OSList []Distro `yaml:"oslist"`
-	}
-
-	if err = yaml.Unmarshal(b, &root); err != nil {
-		return nil, fmt.Errorf("unmarshal config %q: %w", path, err)
-	}
-
-	fc := &FullConfig{
-		FilePaths: &FilePaths{
-			Filepaths: struct {
-				InputDir string `yaml:"input_dir"`
-				XmlDir   string `yaml:"xml_dir"`
-			}{InputDir: root.Filepaths.InputDir, XmlDir: root.Filepaths.XmlDir},
-		},
-		OSList:   root.OSList,
-		Defaults: root.Defaults,
-	}
-	return fc, nil
-}
-
-*/
-
-
 // ---------- OS‑Liste ----------
 type Distro struct {
 	Name       	string `yaml:"name"`
