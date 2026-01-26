@@ -1,5 +1,5 @@
 // model/model.go
-// last modification: January 18 2026
+// last modification: January 15 2026
 package model
 
 import (
@@ -46,24 +46,36 @@ func EffectiveDiskSize(d config.Distro, global struct {
 /* --------------------
 	buildDiskArg create string for --disk
 -------------------- */
-func BuildDiskArg(cfg DomainConfig) (string, bool) {
+func BuildDiskArg(cfg DomainConfig) (arg string, ok bool) {
+	// no input > no disk-arg
 	if strings.TrimSpace(cfg.Disk) == "" {
 		return "", false
 	}
-	p := strings.TrimSpace(cfg.Disk)
 
-	if !strings.HasSuffix(p, ".qcow2") && !strings.Contains(filepath.Base(p), ".") {
-		p = filepath.Join(p, cfg.Name+".qcow2")
-	} else if !strings.HasSuffix(p, ".qcow2") {
-		p = p + ".qcow2"
+	// normalise base path
+	base := strings.TrimSpace(cfg.Disk)
+
+	// check if needs to attach '.qcow2'
+	if strings.Contains(filepath.Base(base), ".") {
+		if !strings.HasSuffix(base, ".qcow2") {
+			base += ".qcow2"
+		}
+	} else {
+		// Only directory specified > Append file <VM name>.qcow2
+		base = filepath.Join(base, cfg.Name+".qcow2")
 	}
+
+	// put them together
 	opts := []string{
-		fmt.Sprintf("path=%s", p),
+		fmt.Sprintf("path=%s", base),
 		"format=qcow2",
 	}
+	// add disk size if > 0
 	if cfg.DiskSize > 0 {
 		opts = append([]string{fmt.Sprintf("size=%d", cfg.DiskSize)}, opts...)
 	}
+
 	return strings.Join(opts, ","), true
 }
 // EOF
+
