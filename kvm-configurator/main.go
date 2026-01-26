@@ -48,6 +48,7 @@ func main() {
 	if errors.Is(err, os.ErrNotExist) {
 		ui.Fatal(ui.ErrWorkDirInvalid, "Error")
 	}
+	
 	// [Modul: config] loading global Defaults
 	osList, defaults, err := config.LoadOSList("oslist.yaml")
 

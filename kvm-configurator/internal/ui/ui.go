@@ -172,7 +172,8 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			cfg.ISOPath = isoPath
 			fmt.Printf("\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
 		default:
-			fmt.Println(Colourise("Invalid input!", Red))
+			//fmt.Println(Colourise("Invalid input!", Red))
+			WarnSoft(ErrSelection, "")
 		}
 	}
 }
