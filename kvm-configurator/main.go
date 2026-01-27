@@ -16,19 +16,18 @@ import (
 	"configurator/internal/config"
 	"configurator/internal/engine"
 	"configurator/internal/model"
-	"configurator/internal/prereq"
 	"configurator/internal/ui"
 	"configurator/kvmtools"
 )
 
 func main() {
 	// [Modul: prereqs] validates if (virt‑install, virsh) is installed
-	if err := prereq.EnsureAll("virt-install", "virsh"); err != nil {
-		prereq.FatalIfMissing(err)
+	if err := config.EnsureAll("virt-install", "virsh"); err != nil {
+		config.FatalIfMissing(err)
 	}
 
 	// [Modul: prereqs] check if config file exists
-	ok, err := prereq.Exists()
+	ok, err := config.Exists()
   if err != nil {
     log.Fatalf("Error during verification: %v", err)
   }
