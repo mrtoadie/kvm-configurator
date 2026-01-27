@@ -1,6 +1,6 @@
-// prereq/prereq.go
+// config/prereq.go
 // last modification: January 25 2026
-package prereq
+package config
 
 import (
 	"fmt"

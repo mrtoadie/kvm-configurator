@@ -227,7 +227,8 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 				fmt.Println(Colourise("Filesystem / Mount is set to", Blue), v)
 			}
 		default:
-			fmt.Println(Colourise("Invalid input!", Red))
+			//fmt.Println(Colourise("Invalid input!", Red))
+			WarnSoft(ErrSelection, "")
 		}
 	}
 }
