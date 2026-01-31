@@ -11,6 +11,6 @@ import (
 	NewTabWriter returns a ready‑to‑use tabwriter.Writer for stdout
 -------------------- */
 func NewTabWriter() *tabwriter.Writer {
-	return tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
+	return tabwriter.NewWriter(os.Stdout, 0, 10, 2, ' ', 0)
 }
 // EOF

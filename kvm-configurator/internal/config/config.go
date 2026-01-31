@@ -1,5 +1,5 @@
 // config/config.go
-// last modification: January 18 2026
+// last modification: January 31 2026
 package config
 
 import (
@@ -9,7 +9,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// ---------- OS‑Liste ----------
+/* --------------------
+	define OS parameter from YAML
+-------------------- */
 type Distro struct {
 	Name       	string `yaml:"name"`
 	ID         	string `yaml:"id"`

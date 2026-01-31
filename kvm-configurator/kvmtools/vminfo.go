@@ -1,3 +1,5 @@
+// kvmtools/vminfo.go
+// last modification: January 31 2026
 package kvmtools
 
 /* --------------------
@@ -8,3 +10,4 @@ type VMInfo struct {
 	Name string
 	Stat string // canonical: "running" or "shut off"
 }
+// EOF

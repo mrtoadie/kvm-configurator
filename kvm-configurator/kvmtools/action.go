@@ -1,3 +1,5 @@
+// kvmtools/action.go
+// last modification: January 31 2026
 package kvmtools
 
 type Action string
@@ -8,3 +10,4 @@ const (
 	ActShutdown Action = "shutdown"
 	ActDestroy  Action = "destroy"
 )
+// EOF
