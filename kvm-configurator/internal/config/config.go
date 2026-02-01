@@ -1,32 +1,33 @@
-// config/config.go
-// last modification: January 18 2026
+// internal/config/config.go
+// last modification: February 01 2026
 package config
 
 import (
 	"fmt"
 	"os"
+	"reflect"
 	// external
 	"gopkg.in/yaml.v3"
 )
 
-// ---------- OS‑Liste ----------
+// Distro represents a single operating‑system definition coming from the YAML file.
 type Distro struct {
-	Name       	string `yaml:"name"`
-	ID         	string `yaml:"id"`
-	CPU        	int    `yaml:"cpu"`
-	RAM        	int    `yaml:"ram"`
-	DiskSize   	int    `yaml:"disksize"`
-	DiskPath   	string `yaml:"diskpath"`
-	ISOPath   	string `yaml:"input_dir"`
-	NestedVirt 	string `yaml:"nvirt"`
-	Network    	string `yaml:"network"`   // bridge | nat | none
-  Graphics   	string `yaml:"graphics"`  // spice | vnc | none
-	Sound			 	string `yaml:"sound"`
-	FileSystem 	string `yaml:"filesystem"`
-  //BootOrder  []int  `yaml:"boot_order,omitempty"`// [1,2] (disk, cdrom)
-	BootOrder		string `yaml:"bootorder"`
+	Name        string `yaml:"name"`
+	ID          string `yaml:"id"`
+	CPU         int    `yaml:"cpu"`
+	RAM         int    `yaml:"ram"`
+	DiskSize    int    `yaml:"disksize"`
+	DiskPath    string `yaml:"diskpath"`
+	ISOPath     string `yaml:"input_dir"`
+	NestedVirt  string `yaml:"nvirt"`
+	Network     string `yaml:"network"`   // bridge | nat | none
+	Graphics    string `yaml:"graphics"`  // spice | vnc | none
+	Sound       string `yaml:"sound"`
+	FileSystem  string `yaml:"filesystem"`
+	BootOrder   string `yaml:"bootorder"` // stored as a string for backward compatibility
 }
 
+// OSRoot mirrors the top‑level structure of the OS list YAML file.
 type OSRoot struct {
 	Defaults struct {
 		DiskPath string `yaml:"diskpath"`
@@ -35,6 +36,7 @@ type OSRoot struct {
 	OSList []Distro `yaml:"oslist"`
 }
 
+// AdvancedFeaturesRoot mirrors the advanced‑features YAML file (currently unused elsewhere).
 type AdvancedFeaturesRoot struct {
 	AdvancedFeatures struct {
 		StartInit bool `yaml:"start_init"`
@@ -42,39 +44,87 @@ type AdvancedFeaturesRoot struct {
 	AdvFeatures []AdvancedFeaturesRoot `yaml:"oslist"`
 }
 
-/* --------------------
-	LoadOSList
--------------------- */
+/* ---------------------------------------------------------
+   Helper: expand all string fields in a struct using os.ExpandEnv
+   (recursively handles nested structs, slices and maps)
+--------------------------------------------------------- */
+func expandStrings(v interface{}) {
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Ptr || val.IsNil() {
+		return // nothing to do
+	}
+	val = val.Elem()
+	expandValue(val)
+}
+
+func expandValue(val reflect.Value) {
+	switch val.Kind() {
+	case reflect.Struct:
+		for i := 0; i < val.NumField(); i++ {
+			f := val.Field(i)
+			if f.CanSet() {
+				expandValue(f)
+			}
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			expandValue(val.Index(i))
+		}
+	case reflect.Map:
+		iter := val.MapRange()
+		for iter.Next() {
+			k := iter.Key()
+			v := iter.Value()
+			if v.Kind() == reflect.String {
+				newStr := os.ExpandEnv(v.String())
+				val.SetMapIndex(k, reflect.ValueOf(newStr))
+			} else {
+				expandValue(v)
+			}
+			// Keys are usually static strings, we leave them untouched.
+			_ = k
+		}
+	case reflect.String:
+		val.SetString(os.ExpandEnv(val.String()))
+	}
+}
+
+/* ---------------------------------------------------------
+   LoadOSList – reads the OS list YAML file and expands env vars
+--------------------------------------------------------- */
 func LoadOSList(path string) (list []Distro, defaults struct {
 	DiskPath string
 	DiskSize int
 }, err error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return nil, defaults, err
+		return nil, defaults, fmt.Errorf("read OS‑list file %q: %w", path, err)
 	}
 	var root OSRoot
 	if err = yaml.Unmarshal(b, &root); err != nil {
 		return nil, defaults, err
 	}
+	// Expand any environment placeholders that may appear in the distro definitions.
+	expandStrings(&root)
+
 	defaults.DiskPath = root.Defaults.DiskPath
 	defaults.DiskSize = root.Defaults.DiskSize
 	return root.OSList, defaults, nil
 }
 
-/* --------------------
-	Path config
--------------------- */
+/* ---------------------------------------------------------
+   FilePaths – only the “filepaths” block from the config file
+--------------------------------------------------------- */
 type FilePaths struct {
 	Filepaths struct {
 		InputDir string `yaml:"input_dir"`
-		XmlDir   string `yaml:"xml_dir"` 
+		XmlDir   string `yaml:"xml_dir"`
 	} `yaml:"filepaths"`
 }
 
-/* --------------------
-	LoadFilePaths – read only block „filepaths“
--------------------- */
+/* ---------------------------------------------------------
+   LoadFilePaths – reads the filepaths block and expands env vars
+--------------------------------------------------------- */
 func LoadFilePaths(path string) (*FilePaths, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -84,20 +134,24 @@ func LoadFilePaths(path string) (*FilePaths, error) {
 	if err = yaml.Unmarshal(data, &fp); err != nil {
 		return nil, err
 	}
+	// Expand ${HOME}, ${USER}, … in the two path strings.
+	expandStrings(&fp)
 	return &fp, nil
 }
 
-/* --------------------
-	ResolveWorkDir – returns the directory to be scanned
--------------------- */
+/* ---------------------------------------------------------
+   ResolveWorkDir – returns the directory that should be scanned
+   (prefers the configured InputDir, falls back to the current working directory)
+--------------------------------------------------------- */
 func ResolveWorkDir(fp *FilePaths) (string, error) {
-    if fp.Filepaths.InputDir != "" {
-        return fp.Filepaths.InputDir, nil
-    }
-    cwd, err := os.Getwd()
-    if err != nil {
-        return "", fmt.Errorf("cannot determine working directory: %w", err)
-    }
-    return cwd, nil
+	if fp.Filepaths.InputDir != "" {
+		return fp.Filepaths.InputDir, nil
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("cannot determine working directory: %w", err)
+	}
+	return cwd, nil
 }
+
 // EOF

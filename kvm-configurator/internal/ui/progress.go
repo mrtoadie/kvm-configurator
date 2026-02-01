@@ -1,5 +1,5 @@
 // ui/progress.go
-// last modification: January 17 2026
+// last modification: February 01 2026
 package ui
 
 import (
@@ -15,6 +15,7 @@ func SimpleProgress(msg string, stopChan <-chan struct{}) {
 			select {
 			case <-stopChan:
 				fmt.Print("\r")
+				fmt.Printf("%s ... done!\n", msg)
 				return
 			default:
 				fmt.Printf("\r%s %c ", msg, chars[i%len(chars)])

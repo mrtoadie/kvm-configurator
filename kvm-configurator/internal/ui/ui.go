@@ -6,15 +6,16 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
-	"path/filepath" 
 	"strconv"
 	"strings"
-	"text/tabwriter"
+
 	// internal
-	"configurator/internal/fileutils"
 	"configurator/internal/config"
+	"configurator/internal/fileutils"
 	"configurator/internal/model"
+	"configurator/internal/utils"
 )
 
 /* --------------------
@@ -36,7 +37,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.Distro) (config.Distro, e
 		return strings.ToLower(sorted[i].Name) < strings.ToLower(sorted[j].Name)
 	})
 
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
+	w := utils.NewTabWriter()
 	fmt.Fprintln(w, "No.\tName\tCPU\tRAM (MiB)\tDisk (GB)")
 	for i, d := range sorted {
 		fmt.Fprintf(w, "%2d\t%s\t%d\t%d\t%d\n",
@@ -107,7 +108,7 @@ func expandPath(p string) string {
 	Form – allows changes to the fields
 -------------------- */
 func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string, isoWorkDir string) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 10, 2, ' ', 0)
+	w := utils.NewTabWriter()
 	for {
 		fmt.Fprintln(w, Colourise("\n=== VM-Config ===\t", Blue))
 		fmt.Fprintf(w, "[1] Name:\t%s\t[default]\n", cfg.Name)
@@ -172,7 +173,8 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			cfg.ISOPath = isoPath
 			fmt.Printf("\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
 		default:
-			fmt.Println(Colourise("Invalid input!", Red))
+			//fmt.Println(Colourise("Invalid input!", Red))
+			WarnSoft(ErrSelection, "")
 		}
 	}
 }
@@ -181,8 +183,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 	Form – Advanced Parameters
 -------------------- */
 func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
-
+	w := utils.NewTabWriter()
 	for {
 		fmt.Fprintln(w, Colourise("\n=== Advanced Parameters ===\t", Blue))
 		fmt.Fprintln(w, "Parameter\t Default\t Set")
@@ -226,7 +227,8 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 				fmt.Println(Colourise("Filesystem / Mount is set to", Blue), v)
 			}
 		default:
-			fmt.Println(Colourise("Invalid input!", Red))
+			//fmt.Println(Colourise("Invalid input!", Red))
+			WarnSoft(ErrSelection, "")
 		}
 	}
 }
@@ -235,8 +237,7 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 	Summary table
 -------------------- */
 func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
-
+	w := utils.NewTabWriter()
 	fmt.Fprintln(w, Colourise("\n=== VM-SUMMARY ===", Blue))
 	fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
 	fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)

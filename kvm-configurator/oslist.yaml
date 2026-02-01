@@ -3,9 +3,10 @@
 # NOTE: Don't change the id value! 
 #       'virt-install --osinfo list' for more infos
 
+# default paths for your ISOs and storage location for the xml files
 filepaths:
   input_dir: "/run/media/toadie/data/ISOs"
-  xml_dir: "/home/toadie/Downloads/xml"
+  xml_dir: "${HOME}/Downloads/xml"
 
 advanced_features:
   start_init: false
@@ -19,7 +20,22 @@ defaults: &default_vals
   graphics: "spice" # spice or vnc
   sound: "none"
 
+# define Linux guest defaults (not use yet)
+common_linux: &common_linux
+  <<: *default_vals
+  graphics: "spice"
+
+# define Windows guest defaults
+windows_base: &windows_base
+  <<: *default_vals
+  cpu: 4
+  ram: 8192
+  disksize: 100
+  graphics: "spice"
+
+# List of predefined operating systems
 oslist:
+# TESTING
   - name: _test2
     id: ubuntu24.04
     filesystem: "/home,/mnt"
@@ -38,7 +54,7 @@ oslist:
     diskpath: "/run/media/toadie/vm/QEMU"
     disksize: 2
     input_dir: "/run/media/toadie/data/ISOs/archlinux-2025.12.01-x86_64.iso"
-
+# Linux
   - name: Arch Linux
     id: archlinux
     cpu: 2
@@ -81,20 +97,6 @@ oslist:
     ram: 4096
     <<: *default_vals
 
-  - name: Windows 10
-    id: win10
-    cpu: 4
-    ram: 8192
-    disksize: 60
-    <<: *default_vals
-  
-  - name: Windows 11
-    id: win11
-    cpu: 4
-    ram: 8192
-    disksize: 100
-    <<: *default_vals
-
   - name: GuideOS
     id: debian13
     cpu: 2
@@ -135,3 +137,11 @@ oslist:
     ram: 4096
     disksize: 20
     <<: *default_vals
+# Windows
+  - name: Windows 10
+    id: win10
+    <<: *windows_base
+  
+  - name: Windows 11
+    id: win11
+    <<: *windows_base

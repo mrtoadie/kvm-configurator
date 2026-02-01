@@ -3,7 +3,7 @@
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // Lisence: MIT
-// last modification: January 25 2026
+// last modification: January 31 2026
 package main
 
 import (
@@ -11,47 +11,49 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"errors"
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
 	"configurator/internal/model"
-	"configurator/internal/prereq"
 	"configurator/internal/ui"
 	"configurator/kvmtools"
 )
 
+/* --------------------
+	MAIN
+-------------------- */
 func main() {
 	// [Modul: prereqs] validates if (virt‑install, virsh) is installed
-	if err := prereq.EnsureAll("virt-install", "virsh"); err != nil {
-		prereq.FatalIfMissing(err)
+	if err := config.EnsureAll("virt-install", "virsh"); err != nil {
+		config.FatalIfMissing(err)
 	}
 
 	// [Modul: prereqs] check if config file exists
-	ok, err := prereq.Exists()
+	ok, err := config.Exists()
   if err != nil {
-    log.Fatalf("Fehler beim Prüfen: %v", err)
+    log.Fatalf("Error during verification: %v", err)
   }
   if ok {
 		// program starts		
   } else {
-    fmt.Println("Datei existiert nicht")
+    fmt.Println("File does not exist")
   }
 	
 	// [Modul: config] loads File‑Config (input_dir)
 	fp, err := config.LoadFilePaths("oslist.yaml")
-	if err != nil {
-		log.Fatalf("\x1b[31mError loading file-config: %v\x1b[0m", err)
-	}
-	workDir, err := config.ResolveWorkDir(fp)
-	if err != nil {
-		log.Fatalf("\x1b[31mCannot resolve work directory: %v\x1b[0m", err)
+	if errors.Is(err, os.ErrNotExist) {
+		ui.Fatal(ui.ErrConfigMissing, "Error")
 	}
 
+	workDir, err := config.ResolveWorkDir(fp)
+	if errors.Is(err, os.ErrNotExist) {
+		ui.Fatal(ui.ErrWorkDirInvalid, "Error")
+	}
+	
 	// [Modul: config] loading global Defaults
 	osList, defaults, err := config.LoadOSList("oslist.yaml")
-	if err != nil {
-		log.Fatalf("\x1b[31mError loading OS list: %v\x1b[0m", err)
-	}
+
 	variantByName := make(map[string]string, len(osList))
 	for _, d := range osList {
 		variantByName[d.Name] = d.ID
@@ -62,9 +64,7 @@ func main() {
 	for {
 		fmt.Println(ui.Colourise("\n=== MAIN MENU ===", ui.Blue))
 		fmt.Println("[1] New VM")
-		fmt.Println("[2] Check")
-		//fmt.Println("[3] DiskImage Tools")
-		fmt.Println("[3] KVM-Tools")
+		fmt.Println("[2] KVM-Tools")
 		fmt.Println("[0] Exit")
 		fmt.Print(ui.Colourise("Selection: ", ui.Yellow))
 
@@ -89,10 +89,7 @@ func main() {
 			); err != nil {
 				fmt.Fprintf(os.Stderr, "\x1b[31mError: %v\x1b[0m\n", err)
 			}
-		//case 2:
-		//case 3:
-			// diskimage tools
-		case 3:
+		case 2:
 			kvmtools.Start(r)
 		default:
 			fmt.Println(ui.Colourise("\nInvalid selection!", ui.Red))
@@ -100,9 +97,9 @@ func main() {
 	}
 }
 
-// ---------------------------------------------------------------------
-// Workflow "New VM"
-// ---------------------------------------------------------------------
+/* --------------------
+	Workflow "New VM"
+-------------------- */
 func runNewVMWorkflow(
 	r *bufio.Reader,
 	osList []config.Distro,
@@ -135,7 +132,6 @@ func runNewVMWorkflow(
 		VCPU:       distro.CPU,
 		DiskSize:   model.EffectiveDiskSize(distro, defs),
 		ISOPath:		distro.ISOPath,
-		//Network:    "default",
 		Network: 		distro.Network,
 		NestedVirt: distro.NestedVirt,
 		Graphics: 	distro.Graphics,
@@ -147,19 +143,14 @@ func runNewVMWorkflow(
 	// Optional Edit Menu for last edits
 	ui.PromptEditDomainConfig(r, &cfg, defaultDiskPath, isoWorkDir)
 
-	/* OLD PROMT
-		Select ISO (uses the directory from the YAML)
-	isoPath, err := ui.PromptSelectISO(r, isoWorkDir)
-	if err != nil {
-		return fmt.Errorf("\x1b[31mISO selection failed: %w\x1b[0m", err)
-	}*/
-
 	// Summary
 	ui.ShowSummary(r, &cfg, cfg.ISOPath)
 
 	// Create VM
 	if err := engine.CreateVM(cfg, variant, cfg.ISOPath, fp); err != nil {
 		return fmt.Errorf("\x1b[31mVM creation failed: %w\x1b[0m", err)
+		// WIP
+		//return ui.Fatal(ui.ErrVMCreationFail, "%w")
 	}
 	return nil
 }
