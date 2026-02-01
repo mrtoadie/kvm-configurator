@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"text/tabwriter"
 	// internal
 	"configurator/internal/ui"
+	"configurator/internal/utils"
 )
 
 /* --------------------
@@ -51,8 +51,7 @@ func Start(r *bufio.Reader) {
 	print kvm-tools menu
 -------------------- */
 func printMenu() {
-	w := tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0)
-
+	w := utils.NewTabWriter()
 	fmt.Fprintln(w, ui.Colourise("\n=== KVM-TOOLS ===", ui.Blue))
 	for key, info := range menuMap {
 		fmt.Fprintf(w, "%s\t%s\n", key, info.Description)

@@ -34,8 +34,7 @@ kvm-configurator/
 │
 ├─ internal/
 │   ├─ config/                # Loading and validating YAML data
-│   │   ├─ config.go
-│   │   └─ prereq.go          # Checks whether necessary programs are installed
+│   │   └─ config.go
 │   ├─ model/                 # Data models & helper logic
 │   │   └─ model.go
 │   ├─ fileutils/             # File utilities (ListFiles, PromptSelection)
@@ -46,9 +45,11 @@ kvm-configurator/
 │   │   ├─ colours.go         
 │   │   ├─ progress.go
 │   │   └─ ui.go
-│   └─ utils/                    
-│       ├─ status.go         
-│       └─ tabwriter.go
+│   ├─ utils/                    
+│   │   ├─ status.go         
+│   │   └─ tabwriter.go
+│   └─ prereq/                # Checks whether necessary programs are installed
+│       └─ prereq.go
 ├─ kvmtools/                  # kvm-tools
 │   ├─ action.go
 │   ├─ menu.go                

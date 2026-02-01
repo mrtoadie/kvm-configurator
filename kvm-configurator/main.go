@@ -3,7 +3,7 @@
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // Lisence: MIT
-// last modification: January 26 2026
+// last modification: January 31 2026
 package main
 
 import (
@@ -20,6 +20,9 @@ import (
 	"configurator/kvmtools"
 )
 
+/* --------------------
+	MAIN
+-------------------- */
 func main() {
 	// [Modul: prereqs] validates if (virt‑install, virsh) is installed
 	if err := config.EnsureAll("virt-install", "virsh"); err != nil {
@@ -94,9 +97,9 @@ func main() {
 	}
 }
 
-// ---------------------------------------------------------------------
-// Workflow "New VM"
-// ---------------------------------------------------------------------
+/* --------------------
+	Workflow "New VM"
+-------------------- */
 func runNewVMWorkflow(
 	r *bufio.Reader,
 	osList []config.Distro,
