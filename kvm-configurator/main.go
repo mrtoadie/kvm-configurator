@@ -132,7 +132,6 @@ func runNewVMWorkflow(
 		VCPU:       distro.CPU,
 		DiskSize:   model.EffectiveDiskSize(distro, defs),
 		ISOPath:		distro.ISOPath,
-		//Network:    "default",
 		Network: 		distro.Network,
 		NestedVirt: distro.NestedVirt,
 		Graphics: 	distro.Graphics,
@@ -150,6 +149,8 @@ func runNewVMWorkflow(
 	// Create VM
 	if err := engine.CreateVM(cfg, variant, cfg.ISOPath, fp); err != nil {
 		return fmt.Errorf("\x1b[31mVM creation failed: %w\x1b[0m", err)
+		// WIP
+		//return ui.Fatal(ui.ErrVMCreationFail, "%w")
 	}
 	return nil
 }
