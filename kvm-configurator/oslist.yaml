@@ -3,9 +3,10 @@
 # NOTE: Don't change the id value! 
 #       'virt-install --osinfo list' for more infos
 
+# default paths for your ISOs and storage location for the xml files
 filepaths:
   input_dir: "/run/media/toadie/data/ISOs"
-  xml_dir: "/home/toadie/Downloads/xml"
+  xml_dir: "${HOME}/Downloads/xml"
 
 advanced_features:
   start_init: false
