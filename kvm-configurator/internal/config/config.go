@@ -11,20 +11,21 @@ import (
 )
 
 // Distro represents a single operating‑system definition coming from the YAML file.
-type Distro struct {
-	Name        string `yaml:"name"`
-	ID          string `yaml:"id"`
-	CPU         int    `yaml:"cpu"`
-	RAM         int    `yaml:"ram"`
-	DiskSize    int    `yaml:"disksize"`
-	DiskPath    string `yaml:"diskpath"`
-	ISOPath     string `yaml:"input_dir"`
-	NestedVirt  string `yaml:"nvirt"`
-	Network     string `yaml:"network"`   // bridge | nat | none
-	Graphics    string `yaml:"graphics"`  // spice | vnc | none
-	Sound       string `yaml:"sound"`
-	FileSystem  string `yaml:"filesystem"`
-	BootOrder   string `yaml:"bootorder"` // stored as a string for backward compatibility
+type VMConfig struct {
+	Name        string 		`yaml:"name"`				// display name "Arch Linux"
+	ID          string 		`yaml:"id"`					// identifier, e.g. "archlinux"
+	CPU         int    		`yaml:"cpu"`				// number of vCPUs
+	RAM         int    		`yaml:"ram"`				// RAM in MiB
+	DiskSize    int    		`yaml:"disksize"`		// disk size in GiB
+	DiskPath    string 		`yaml:"diskpath"`		// path disk image
+	ISOPath     string 		`yaml:"input_dir"`	// path iso image
+	NestedVirt  string 		`yaml:"nvirt"`			// vmx (intel), smx (amd)
+	Network     string 		`yaml:"network"`   	// bridge | nat | none
+	Graphics    string 		`yaml:"graphics"`  	// graphic driver / mode: spice | vnc | none
+	Sound       string 		`yaml:"sound"`			// ac97, ich6, ich9 (default)
+	FileSystem  string 		`yaml:"filesystem"`	//
+	BootOrder   string 		`yaml:"bootorder"` 	// stored as a string for backward compatibility
+	Firmware		string 		`yaml:"firmware"` 	// BIOS, EFI not working yet
 }
 
 // OSRoot mirrors the top‑level structure of the OS list YAML file.
@@ -33,7 +34,7 @@ type OSRoot struct {
 		DiskPath string `yaml:"diskpath"`
 		DiskSize int    `yaml:"disksize"`
 	} `yaml:"defaults"`
-	OSList []Distro `yaml:"oslist"`
+	OSList []VMConfig `yaml:"oslist"`
 }
 
 // AdvancedFeaturesRoot mirrors the advanced‑features YAML file (currently unused elsewhere).
@@ -92,7 +93,7 @@ func expandValue(val reflect.Value) {
 /* ---------------------------------------------------------
    LoadOSList – reads the OS list YAML file and expands env vars
 --------------------------------------------------------- */
-func LoadOSList(path string) (list []Distro, defaults struct {
+func LoadOSList(path string) (list []VMConfig, defaults struct {
 	DiskPath string
 	DiskSize int
 }, err error) {

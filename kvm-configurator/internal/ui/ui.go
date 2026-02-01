@@ -1,5 +1,5 @@
 // ui/ui.go
-// last modification: January 24 2026
+// last modification: February 01 2026
 package ui
 
 import (
@@ -21,7 +21,7 @@ import (
 /* --------------------
 	waiting for input
 -------------------- */
-func readLine(r *bufio.Reader, prompt string) (string, error) {
+func ReadLine(r *bufio.Reader, prompt string) (string, error) {
 	fmt.Print(prompt)
 	s, err := r.ReadString('\n')
 	return strings.TrimSpace(s), err
@@ -30,9 +30,9 @@ func readLine(r *bufio.Reader, prompt string) (string, error) {
 /* --------------------
 	Loading distro list from yaml
 -------------------- */
-func PromptSelectDistro(r *bufio.Reader, list []config.Distro) (config.Distro, error) {
+func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfig, error) {
 	fmt.Println(Colourise("\n=== Select an operating system ===", Blue))
-	sorted := append([]config.Distro(nil), list...)
+	sorted := append([]config.VMConfig(nil), list...)
 	sort.Slice(sorted, func(i, j int) bool {
 		return strings.ToLower(sorted[i].Name) < strings.ToLower(sorted[j].Name)
 	})
@@ -45,16 +45,16 @@ func PromptSelectDistro(r *bufio.Reader, list []config.Distro) (config.Distro, e
 	}
 	w.Flush()
 
-	line, err := readLine(r, Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", Yellow))
+	line, err := ReadLine(r, Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", Yellow))
 	if err != nil {
-		return config.Distro{}, err
+		return config.VMConfig{}, err
 	}
 	idx := 1 // default = Arch
 	if line != "" {
 		if i, e := strconv.Atoi(line); e == nil && i >= 1 && i <= len(sorted) {
 			idx = i
 		} else {
-			return config.Distro{}, fmt.Errorf(Colourise("Invalid selection", Red))
+			return config.VMConfig{}, fmt.Errorf(Colourise("Invalid selection", Red))
 		}
 	}
 	return sorted[idx-1], nil
@@ -96,13 +96,13 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 /* --------------------
 	expand disk path
 -------------------- */
-func expandPath(p string) string {
+/*func expandPath(p string) string {
     if strings.HasPrefix(p, "~"+string(os.PathSeparator)) {
         home, _ := os.UserHomeDir()
         return filepath.Join(home, p[2:])
     }
     return p
-}
+}*/
 
 /* --------------------
 	Form – allows changes to the fields
@@ -114,52 +114,55 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		fmt.Fprintf(w, "[1] Name:\t%s\t[default]\n", cfg.Name)
 		fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t\n", cfg.MemMiB)
 		fmt.Fprintf(w, "[3] vCPU:\t%d\t[default]\n", cfg.VCPU)
-		fmt.Fprintf(w, "[4] Disk-Path:\t%s\t[default = no disk path]\n", cfg.Disk)
+		fmt.Fprintf(w, "[4] Disk-Path:\t%s\t[default = no disk path]\n", cfg.DiskPath)
 		fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\t[default]\n", cfg.DiskSize)
 		fmt.Fprintf(w, "[6] Network:\t%s\t[default]\n", cfg.Network)
 		fmt.Fprintf(w, "[7] Advanced Parameters\n")
 		fmt.Fprintf(w, "[8] ISO:\t%s\n", cfg.ISOPath)
 		w.Flush()
 
-		f, _ := readLine(r, Colourise("\nSelect or press Enter to continue: ", Yellow))
+		f, _ := ReadLine(r, Colourise("\nSelect or press Enter to continue: ", Yellow))
 		if f == "" {
 			break
 		}
 		switch f {
 		case "1": // name
-			if v, _ := readLine(r, ">> New Name: "); v != "" {
+			if v, _ := ReadLine(r, ">> New Name: "); v != "" {
 				cfg.Name = v
 			}
 		case "2": // ram
-			if v, _ := readLine(r, ">> RAM (MiB): "); v != "" {
+			if v, _ := ReadLine(r, ">> RAM (MiB): "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					cfg.MemMiB = i
 				}
 			}
 		case "3": // vcpu
-			if v, _ := readLine(r, ">> vCPU: "); v != "" {
+			if v, _ := ReadLine(r, ">> vCPU: "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					cfg.VCPU = i
 				}
 			}
-		case "4":	// disk path
-    	prompt := fmt.Sprintf(">> Disk path (default: %s): ", defaultDiskPath)
-      if v, _ := readLine(r, prompt); v != "" {
-        // user input
-				cfg.Disk = expandPath(v)
-      } else {
-        // no intpu = default path
-        cfg.Disk = expandPath(defaultDiskPath)
-      }
-      fmt.Printf("\x1b[32mDisk will be stored at: %s\x1b[0m\n", cfg.Disk)
+		// ui/ui.go – nur die betroffene Funktion ändern
+
+	// …
+	case "4": // disk path
+		prompt := fmt.Sprintf(">> Disk path (default: %s): ", defaultDiskPath)
+		if v, _ := ReadLine(r, prompt); v != "" {
+			cfg.DiskPath = os.ExpandEnv(v) // ersetzt expandPath
+		} else {
+			cfg.DiskPath = os.ExpandEnv(defaultDiskPath)
+		}
+		fmt.Printf("\x1b[32mDisk will be stored at: %s\x1b[0m\n", cfg.DiskPath)
+	// …
+
 		case "5": // disksize
-			if v, _ := readLine(r, ">> Disksize (GB): "); v != "" {
+			if v, _ := ReadLine(r, ">> Disksize (GB): "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					cfg.DiskSize = i
 				}
 			}
 		case "6":
-			if v, _ := readLine(r, ">> Network (none or default): "); true {
+			if v, _ := ReadLine(r, ">> Network (none or default): "); true {
 				cfg.Network = v
 			}
 		case "7":
@@ -174,7 +177,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			fmt.Printf("\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
 		default:
 			//fmt.Println(Colourise("Invalid input!", Red))
-			WarnSoft(ErrSelection, "")
+			//WarnSoft(ErrSelection, "")
 		}
 	}
 }
@@ -196,39 +199,39 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 		fmt.Fprintln(w, "[0] Back to main menu")
 		w.Flush()
 
-		choice, _ := readLine(r, Colourise("\nSelect an option (or press Enter to go back): ", Yellow))
+		choice, _ := ReadLine(r, Colourise("\nSelect an option (or press Enter to go back): ", Yellow))
 		if choice == "" || strings.EqualFold(choice, "0") {
 			return
 		}
 		switch strings.ToLower(choice) {
 		case "a":
-			if v, _ := readLine(r, Colourise(">> Nested-Virtualisation (vmx for Intel or smx for AMD): ", Blue)); v != "" {
+			if v, _ := ReadLine(r, Colourise(">> Nested-Virtualisation (vmx for Intel or smx for AMD): ", Blue)); v != "" {
 				cfg.NestedVirt = v
 				fmt.Println("Nested-Virtualisation is set to\x1b[32m", v)
 			}
 		case "b": // bug - nothing happend
-			if v, _ := readLine(r, ">> Boot order: "); v != "" {
+			if v, _ := ReadLine(r, ">> Boot order: "); v != "" {
 				cfg.BootOrder = v
 				fmt.Println("Boot order is set to", v)
 			}
 		case "c":
-			if v, _ := readLine(r, Colourise(">> Graphics (spice (default) or vnc): ", Blue)); v != "" {
+			if v, _ := ReadLine(r, Colourise(">> Graphics (spice (default) or vnc): ", Blue)); v != "" {
 				cfg.Graphics = v
 				fmt.Println(Colourise("Graphics is set to", Blue), v)
 			}
 		case "d":
-			if v, _ := readLine(r, Colourise(">> Sound (none, ac97, ich6 or ich9 (default)): ", Blue)); v != "" {
+			if v, _ := ReadLine(r, Colourise(">> Sound (none, ac97, ich6 or ich9 (default)): ", Blue)); v != "" {
 				cfg.Sound = v
 				fmt.Println(Colourise("Sound is set to", Blue), v)
 			}
 		case "e":
-			if v, _ := readLine(r, Colourise(">> Filesystem / Mount (/my/source/dir,/dir/in/guest): ", Blue)); v != "" {
+			if v, _ := ReadLine(r, Colourise(">> Filesystem / Mount (/my/source/dir,/dir/in/guest): ", Blue)); v != "" {
 				cfg.FileSystem = v
 				fmt.Println(Colourise("Filesystem / Mount is set to", Blue), v)
 			}
 		default:
 			//fmt.Println(Colourise("Invalid input!", Red))
-			WarnSoft(ErrSelection, "")
+			//WarnSoft(ErrSelection, "")
 		}
 	}
 }
@@ -242,7 +245,7 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
 	fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)
 	fmt.Fprintf(w, "vCPU:\t%d\n", cfg.VCPU)
-	fmt.Fprintf(w, "Disk-Path:\t%s\n", cfg.Disk)
+	fmt.Fprintf(w, "Disk-Path:\t%s\n", cfg.DiskPath)
 	fmt.Fprintf(w, "Disk-Size (GB):\t%d\n", cfg.DiskSize)
 	fmt.Fprintf(w, "Network:\t%s\n", cfg.Network)
 	fmt.Fprintf(w, "Nested-Virtualisation:\t%s\n", cfg.NestedVirt)

@@ -1,5 +1,5 @@
 // model/model.go
-// last modification: January 15 2026
+// last modification: February 01 2026
 package model
 
 import (
@@ -14,7 +14,7 @@ import (
 	[Modul: config] Load DomainConfig
 -------------------- */
 type DomainConfig struct {
-	Name, Disk, Network, ISOPath string
+	Name, DiskPath, Network, ISOPath string
 	NestedVirt, BootOrder string
 	Graphics, Sound, FileSystem string
 	MemMiB, VCPU, DiskSize int
@@ -23,7 +23,7 @@ type DomainConfig struct {
 /* --------------------
 	[Modul: config] Load Distro‑Defaults
 -------------------- */
-func EffectiveDiskPath(d config.Distro, global struct {
+func EffectiveDiskPath(d config.VMConfig, global struct {
 	DiskPath string
 	DiskSize int
 }) string {
@@ -33,7 +33,7 @@ func EffectiveDiskPath(d config.Distro, global struct {
 	return global.DiskPath
 }
 
-func EffectiveDiskSize(d config.Distro, global struct {
+func EffectiveDiskSize(d config.VMConfig, global struct {
 	DiskPath string
 	DiskSize int
 }) int {
@@ -48,12 +48,12 @@ func EffectiveDiskSize(d config.Distro, global struct {
 -------------------- */
 func BuildDiskArg(cfg DomainConfig) (arg string, ok bool) {
 	// no input > no disk-arg
-	if strings.TrimSpace(cfg.Disk) == "" {
+	if strings.TrimSpace(cfg.DiskPath) == "" {
 		return "", false
 	}
 
 	// normalise base path
-	base := strings.TrimSpace(cfg.Disk)
+	base := strings.TrimSpace(cfg.DiskPath)
 
 	// check if needs to attach '.qcow2'
 	if strings.Contains(filepath.Base(base), ".") {

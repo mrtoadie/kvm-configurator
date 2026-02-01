@@ -17,6 +17,7 @@ import (
 	"configurator/internal/engine"
 	"configurator/internal/model"
 	"configurator/internal/ui"
+	//"configurator/internal/cli"
 	"configurator/kvmtools"
 )
 
@@ -43,12 +44,14 @@ func main() {
 	// [Modul: config] loads File‑Config (input_dir)
 	fp, err := config.LoadFilePaths("oslist.yaml")
 	if errors.Is(err, os.ErrNotExist) {
-		ui.Fatal(ui.ErrConfigMissing, "Error")
+		//ui.Fatal("sdf", Error)
+		fmt.Println("Error")
 	}
 
 	workDir, err := config.ResolveWorkDir(fp)
 	if errors.Is(err, os.ErrNotExist) {
-		ui.Fatal(ui.ErrWorkDirInvalid, "Error")
+		//ui.Fatal(ui.ErrWorkDirInvalid, "Error")
+		fmt.Println("Error")
 	}
 	
 	// [Modul: config] loading global Defaults
@@ -59,7 +62,6 @@ func main() {
 		variantByName[d.Name] = d.ID
 	}
 
-	// Mainmenu
 	r := bufio.NewReader(os.Stdin)
 	for {
 		fmt.Println(ui.Colourise("\n=== MAIN MENU ===", ui.Blue))
@@ -78,7 +80,6 @@ func main() {
 			fmt.Println("Bye!")
 			return
 		case 1:
-			// workDir from File‑Config
 			if err := runNewVMWorkflow(
 				r,
 				osList,
@@ -87,7 +88,7 @@ func main() {
 				workDir,
 				fp,
 			); err != nil {
-				fmt.Fprintf(os.Stderr, "\x1b[31mError: %v\x1b[0m\n", err)
+				fmt.Fprintf(os.Stderr, "%sError: %v%s\n", ui.Red, err, ui.Reset)
 			}
 		case 2:
 			kvmtools.Start(r)
@@ -102,7 +103,7 @@ func main() {
 -------------------- */
 func runNewVMWorkflow(
 	r *bufio.Reader,
-	osList []config.Distro,
+	osList []config.VMConfig,
 	defs struct {
 		DiskPath string
 		DiskSize int

@@ -19,6 +19,7 @@ defaults: &default_vals
   network:  "default" # default or none
   graphics: "spice" # spice or vnc
   sound: "none"
+  firmware: "bios"
 
 # define Linux guest defaults (not use yet)
 common_linux: &common_linux
@@ -32,6 +33,7 @@ windows_base: &windows_base
   ram: 8192
   disksize: 100
   graphics: "spice"
+  fimrware: "efi"
 
 # List of predefined operating systems
 oslist:

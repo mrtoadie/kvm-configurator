@@ -1,5 +1,4 @@
 // ui/progress.go
-// last modification: February 01 2026
 package ui
 
 import (
@@ -7,13 +6,20 @@ import (
 	"time"
 )
 
-func SimpleProgress(msg string, stopChan <-chan struct{}) {
+// Progress kapselt einen Spinner‑Goroutine.
+type Progress struct {
+	stop chan struct{}
+}
+
+// NewProgress startet einen Spinner mit der übergebenen Meldung.
+func NewProgress(msg string) *Progress {
+	p := &Progress{stop: make(chan struct{})}
 	go func() {
-		chars := []rune{'⣾','⣽','⣻','⢿','⡿','⣟','⣯','⣷'}
+		chars := []rune{'⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'}
 		i := 0
 		for {
 			select {
-			case <-stopChan:
+			case <-p.stop:
 				fmt.Print("\r")
 				fmt.Printf("%s ... done!\n", msg)
 				return
@@ -24,5 +30,10 @@ func SimpleProgress(msg string, stopChan <-chan struct{}) {
 			}
 		}
 	}()
+	return p
 }
-// EOF
+
+// Stop beendet den Spinner.
+func (p *Progress) Stop() {
+	close(p.stop)
+}
