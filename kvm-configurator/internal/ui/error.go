@@ -23,6 +23,7 @@ var (
 	ErrDiskCreationFail = errors.New("Disk argument could not be constructed") // not used yet
 	ErrVirtInstallFail  = errors.New("virt-install failed") // not used yet
 	ErrVirshDefineFail  = errors.New("virsh define failed") // not used yet
+	ErrVMCreationFail		= errors.New("VM creation failed")
 
 	//
 	ErrSelection	= errors.New("Invalid Selection!")
