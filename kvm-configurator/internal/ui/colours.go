@@ -1,6 +1,11 @@
 // ui/colours.go
-// last modification: January 18 2026
+// last modification: February 03 2026
 package ui
+
+import (
+  "fmt"
+  "os"
+)
 
 const (
     Reset  = "\033[0m"
@@ -35,3 +40,40 @@ func ColouriseBold(text, colour string) string {
     return colour + Bold + text + Reset
 }
 // EOF
+
+// SimpleError
+func SimpleError(prefix, ctx string, err error, colour string) {
+	if err == nil {
+		return
+	}
+	// Example: “❗️ Config missing – while loading: <original error>”
+	msg := fmt.Sprintf("%s – %s: %v", prefix, ctx, err)
+	fmt.Fprintln(os.Stderr, Colourise(msg, colour))
+}
+
+// Convenience wrapper for the usual red error
+func RedError(prefix, ctx string, err error) {
+	SimpleError(prefix, ctx, err, Red)
+}
+
+// Success – displays a green success message.
+// prefix = short title (e.g., “✅ VM created”)
+// ctx = additional information (e.g., “my-vm-01”)
+// extra = optional additional text (can be empty)
+func Success(prefix, ctx, extra string) {
+	msg := fmt.Sprintf("%s – %s", prefix, ctx)
+	if extra != "" {
+		msg = fmt.Sprintf("%s – %s", msg, extra)
+	}
+	fmt.Fprintln(os.Stdout, Colourise(msg, Green))
+}
+
+// Successf – wie fmt.Sprintf, nur farbig ausgegeben.
+func Successf(format string, a ...interface{}) {
+	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf(format, a...), Green))
+}
+
+// Info – neutrale, cyan‑farbene Meldungen (z. B. „Weiter geht’s…“)
+func Info(prefix, ctx string) {
+	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf("%s – %s", prefix, ctx), Blue))
+}

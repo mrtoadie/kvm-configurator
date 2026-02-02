@@ -1,0 +1,99 @@
+// internal/ui/error.go
+// last modification: January 26 2026
+package ui
+
+import (
+	"fmt"
+	"os"
+	"errors"
+)
+
+/*
+var (
+	// General configuration issues
+	ErrConfigMissing   = errors.New("Configuration file not found")
+	ErrConfigInvalid   = errors.New("Configuration file invalid or corrupt") // not used yet
+	ErrWorkDirInvalid  = errors.New("Cannot resolve work directory")
+
+	// Prerequisite issues
+	ErrVirtInstallMissing = errors.New("„virt-install“ not in $PATH") // not used yet
+	ErrVirshMissing       = errors.New("“virsh” not in $PATH") // not used yet
+
+	// VM creation issues
+	ErrISONotFound      = errors.New("ISO file not accessible") // not used yet
+	ErrDiskCreationFail = errors.New("Disk argument could not be constructed") // not used yet
+	ErrVirtInstallFail  = errors.New("virt-install failed") // not used yet
+	ErrVirshDefineFail  = errors.New("virsh define failed") // not used yet
+	ErrVMCreationFail		= errors.New("VM creation failed")
+
+	//
+	ErrSelection	= errors.New("Invalid Selection!")
+)
+*/
+
+var (
+	// General configuration issues
+	ErrConfigMissing = errors.New("❗️ Configuration file not found – did you forget to summon the wizard?")
+	ErrConfigInvalid = errors.New("⚠️ Configuration file corrupted – looks like a gremlin ate the YAML.")
+	ErrWorkDirInvalid = errors.New("📁 Cannot resolve work directory – are you stuck in a maze?")
+
+	// Prerequisite issues
+	ErrVirtInstallMissing = errors.New("🚀 “virt‑install” not in $PATH – your system is missing its rocket fuel.")
+	ErrVirshMissing       = errors.New("🔧 “virsh” not in $PATH – you need a toolbox, not a treasure chest.")
+
+	// VM creation issues
+	ErrISONotFound      = errors.New("💿 ISO file not accessible – maybe it’s playing hide‑and‑seek.")
+	ErrDiskCreationFail = errors.New("🗄️ Disk argument could not be constructed – the disk is shy today.")
+	ErrVirtInstallFail  = errors.New("⚙️ virt‑install failed – the gears are jammed.")
+	ErrVirshDefineFail  = errors.New("📜 virsh define failed – the script refused to sign the contract.")
+	ErrVMCreationFail   = errors.New("👾 VM creation failed – the virtual gremlins struck again.")
+
+	// Misc
+	ErrSelection = errors.New("❓ Invalid selection – choose wisely, young Padawan.")
+)
+
+/* --------------------
+	Helper function: Format and output errors with context
+	Report outputs a nicely colored error.
+	* ctx* – short context text (e.g., “VM creation”)
+	* err* – the actual error (can be one of the predefined ones)
+-------------------- */
+// Report gibt einen Kontext‑String zusammen mit dem eigentlichen Fehler aus
+// und färbt die komplette Zeile rot (Error‑Alias).
+func Report(ctx string, err error) {
+    if err == nil {
+        return
+    }
+    // Wir bauen den Text erst und übergeben ihn dann an den farbigen Wrapper.
+    // Errorf sorgt automatisch für das Prefix‑/Suffix‑Escape‑Sequenz.
+    msg := Errorf("%s: %v", ctx, err)
+    fmt.Fprintln(os.Stderr, msg)
+}
+
+/* --------------------
+	Uniform error message + exit
+	example: ui.Fatal(err, "Error loading file-config")
+-------------------- */
+func Fatal(err error, ctx string) {
+	if err != nil {
+		Report(ctx, err)
+		os.Exit(1)
+	}
+}
+
+func WarnSoft(err error, ctx string) {
+    if err != nil {
+        // Gelbe Warnung → Prompt‑Alias (kann bei Bedarf ein eigener Alias werden)
+        msg := Promptf("%s %v", ctx, err)
+        fmt.Fprintln(os.Stderr, msg)
+    }
+}
+
+//TEST
+func ReportVirshDefine(err error) {
+    if err != nil {
+        // Rot, aber mit extra Präfix
+        msg := Errorf("virsh define failed: %v", err)
+        fmt.Fprintln(os.Stderr, msg)
+    }
+}

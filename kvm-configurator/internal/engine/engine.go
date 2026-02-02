@@ -73,10 +73,10 @@ cmd := exec.Command("virt-install", args...)
 var out, errOut bytes.Buffer
 cmd.Stdout, cmd.Stderr = &out, &errOut
 if err := cmd.Run(); err != nil {
-    return fmt.Errorf("\x1b[31mvirt-install failed: %w – %s\x1b[0m", err, errOut.String())
+		ui.RedError("virt-install failed: %w – %s",">", err)
+		return err
 }
 	
-
 	close(stop)
 	
 	// Ensure that only one domain block is present.
@@ -106,13 +106,19 @@ if err := cmd.Run(); err != nil {
 			return fmt.Errorf("\x1b[31mcould not write XML: %w\x1b[0m", err)
 	}
 	abs, _ := filepath.Abs(xmlFullPath)
-	fmt.Printf("\n\x1b[32mXML definition saved under: %s\n\x1b[0m", abs)
+	//fmt.Printf("\n\x1b[32mXML definition saved under: %s\n\x1b[0m", abs)
+	//fmt.Println(ui.Successf("XML definition saved under: %s", abs))
+	ui.Successf("XML definition saved under: %s", abs)
 
 	// Define the new VM >> libvirt
 	if err := exec.Command("virsh", "define", xmlFullPath).Run(); err != nil {
-		return fmt.Errorf("\x1b[31mvirsh define failed: %w\x1b[0m", err)
+		//return fmt.Errorf("\x1b[31mvirsh define failed: %w\x1b[0m", err)
+		ui.RedError("virsh define failed: %w", ">", err)
+		return  err
+
 	}
-	fmt.Println(ui.Colourise("\nVM successfully registered with libvirt/qemu (not yet started).", ui.Green))
+	//fmt.Println(ui.Colourise("\nVM successfully registered with libvirt/qemu (not yet started).", ui.Green))
+	ui.Successf("VM successfully registered with libvirt/qemu (not yet started).")
 	return nil
 }
 // EOF

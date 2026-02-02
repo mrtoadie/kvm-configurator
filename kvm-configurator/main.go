@@ -26,9 +26,16 @@ import (
 -------------------- */
 func main() {
 	// [Modul: prereqs] validates if (virt‑install, virsh) is installed
+	/*
 	if err := config.EnsureAll("virt-install", "virsh"); err != nil {
 		config.FatalIfMissing(err)
-	}
+	}/*/
+
+if err := config.EnsureAll("virt-install", "virsh"); err != nil {
+    ui.RedError("🚀 virt‑install fehlt", "Prüfe $PATH", err)
+    os.Exit(1)
+}
+ui.Success("✅ Prereqs OK", "virt‑install & virsh gefunden", "")
 
 	// [Modul: prereqs] check if config file exists
 	ok, err := config.Exists()
@@ -41,21 +48,45 @@ func main() {
     fmt.Println("File does not exist")
   }
 	
+
+	
 	// [Modul: config] loads File‑Config (input_dir)
-	fp, err := config.LoadFilePaths("oslist.yaml")
+	/*fp, err := config.LoadFilePaths("oslist.yaml")
 	if errors.Is(err, os.ErrNotExist) {
-		//ui.Fatal("sdf", Error)
-		fmt.Println("Error")
-	}
+		
+		//fmt.Println("Error")
+		//fmt.Fprintln(os.Stderr, ui.ErrConfigMissing)
+		//fmt.Println(ui.Errorf("Error: %v", err))
+		// NEW! 02.02
+		ui.Fatal(ui.ConfigMissing(">", err))
+	}*/
+	fp, err := config.LoadFilePaths("oslist.yaml")
+if errors.Is(err, os.ErrNotExist) {
+    ui.RedError("❗️ Konfiguration fehlt", "oslist.yaml konnte nicht gelesen werden", err)
+    os.Exit(1)
+}
+
+/*
+fp, err := config.LoadFilePaths("oslist.yaml")
+if err != nil {
+    ui.RedError("❗️ Config fehlt", "oslist.yaml nicht lesbar", err)
+    os.Exit(1)
+}
+ui.Success("✅ Config geladen", fp.ConfigFile, "")
+*/
 
 	workDir, err := config.ResolveWorkDir(fp)
 	if errors.Is(err, os.ErrNotExist) {
-		//ui.Fatal(ui.ErrWorkDirInvalid, "Error")
-		fmt.Println("Error")
+		ui.RedError("🚀 virt‑install fehlt", "Prüfe $PATH", err)
+    os.Exit(1)
 	}
 	
 	// [Modul: config] loading global Defaults
 	osList, defaults, err := config.LoadOSList("oslist.yaml")
+	if errors.Is(err, os.ErrNotExist) {
+		ui.RedError("❗️ Konfiguration fehlt", "oslist.yaml konnte nicht gelesen werden", err)
+    os.Exit(1)
+	}
 
 	variantByName := make(map[string]string, len(osList))
 	for _, d := range osList {
