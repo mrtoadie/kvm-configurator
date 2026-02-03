@@ -3,13 +3,12 @@
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // Lisence: MIT
-// last modification: January 31 2026
+// last modification: Feb 03 2026
 package main
 
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"errors"
 	// internal
@@ -17,7 +16,6 @@ import (
 	"configurator/internal/engine"
 	"configurator/internal/model"
 	"configurator/internal/ui"
-	//"configurator/internal/cli"
 	"configurator/kvmtools"
 )
 
@@ -26,65 +24,42 @@ import (
 -------------------- */
 func main() {
 	// [Modul: prereqs] validates if (virt‑install, virsh) is installed
-	/*
 	if err := config.EnsureAll("virt-install", "virsh"); err != nil {
-		config.FatalIfMissing(err)
-	}/*/
+			ui.RedError("virt-install not found", "verfiy $PATH", err)
+			os.Exit(1)
+	}
+	// for debug only
+	//ui.Success("✅ Prereqs OK", "virt-install & virsh FOUND!", "")
 
-if err := config.EnsureAll("virt-install", "virsh"); err != nil {
-    ui.RedError("🚀 virt‑install fehlt", "Prüfe $PATH", err)
-    os.Exit(1)
-}
-ui.Success("✅ Prereqs OK", "virt‑install & virsh gefunden", "")
-
-	// [Modul: prereqs] check if config file exists
+	// [Modul: prereqs] check if config file exists or invalid
 	ok, err := config.Exists()
   if err != nil {
-    log.Fatalf("Error during verification: %v", err)
+    ui.RedError("Configuration file invalid or corrupt", "", err)
+		os.Exit(1)
   }
   if ok {
 		// program starts		
   } else {
-    fmt.Println("File does not exist")
+		ui.RedError("File does not exist", "verfiy $PATH", err)
   }
 	
-
-	
 	// [Modul: config] loads File‑Config (input_dir)
-	/*fp, err := config.LoadFilePaths("oslist.yaml")
-	if errors.Is(err, os.ErrNotExist) {
-		
-		//fmt.Println("Error")
-		//fmt.Fprintln(os.Stderr, ui.ErrConfigMissing)
-		//fmt.Println(ui.Errorf("Error: %v", err))
-		// NEW! 02.02
-		ui.Fatal(ui.ConfigMissing(">", err))
-	}*/
 	fp, err := config.LoadFilePaths("oslist.yaml")
-if errors.Is(err, os.ErrNotExist) {
-    ui.RedError("❗️ Konfiguration fehlt", "oslist.yaml konnte nicht gelesen werden", err)
+	if errors.Is(err, os.ErrNotExist) {
+    ui.RedError("Configuration file not found", ">", err)
     os.Exit(1)
-}
-
-/*
-fp, err := config.LoadFilePaths("oslist.yaml")
-if err != nil {
-    ui.RedError("❗️ Config fehlt", "oslist.yaml nicht lesbar", err)
-    os.Exit(1)
-}
-ui.Success("✅ Config geladen", fp.ConfigFile, "")
-*/
+	}
 
 	workDir, err := config.ResolveWorkDir(fp)
 	if errors.Is(err, os.ErrNotExist) {
-		ui.RedError("🚀 virt‑install fehlt", "Prüfe $PATH", err)
+		ui.RedError("Cannot resolve work directory", "verify $PATH", err)
     os.Exit(1)
 	}
 	
 	// [Modul: config] loading global Defaults
 	osList, defaults, err := config.LoadOSList("oslist.yaml")
 	if errors.Is(err, os.ErrNotExist) {
-		ui.RedError("❗️ Konfiguration fehlt", "oslist.yaml konnte nicht gelesen werden", err)
+		ui.RedError("Configuration file not found", ">", err)
     os.Exit(1)
 	}
 
@@ -104,6 +79,7 @@ ui.Success("✅ Config geladen", fp.ConfigFile, "")
 		var sel int
 		if _, err := fmt.Scanln(&sel); err != nil {
 			fmt.Print(ui.Colourise("\nPlease enter a valid number.", ui.Red))
+			ui.SimpleError("BLA","",err, ui.Blue)
 			continue
 		}
 		switch sel {
@@ -180,9 +156,12 @@ func runNewVMWorkflow(
 
 	// Create VM
 	if err := engine.CreateVM(cfg, variant, cfg.ISOPath, fp); err != nil {
-		return fmt.Errorf("\x1b[31mVM creation failed: %w\x1b[0m", err)
+		//return fmt.Errorf("\x1b[31mVM creation failed: %w\x1b[0m", err)
+		ui.RedError("VM creation failed", cfg.Name, err)
 		// WIP
 		//return ui.Fatal(ui.ErrVMCreationFail, "%w")
+	}	else {
+		ui.Success("VM", cfg.Name, "successfully build!")
 	}
 	return nil
 }

@@ -4,6 +4,7 @@ package fileutils
 
 import (
 	"bufio"
+	//"configurator/internal/ui"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,10 +15,20 @@ import (
 /* --------------------
 	ListFiles
 -------------------- */
+
+/*
+
+if err != nil {
+return nil,
+ui.NewUIError(ui.Red, "❗️ Verzeichnis‑Lesen fehlgeschlagen", "ListFiles("+dir+")", err)
+}
+*/
 func ListFiles(dir string) ([]string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
+		//return  nil,
+		//ui.RedError("Cannot resolve work directory", "verify $PATH", err)
 	}
 	var files []string
 	for _, e := range entries {

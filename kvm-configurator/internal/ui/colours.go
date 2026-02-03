@@ -1,5 +1,5 @@
 // ui/colours.go
-// last modification: February 03 2026
+// last modification: Feb 03 2026
 package ui
 
 import (
@@ -39,15 +39,14 @@ func MakeBold(text string) string {
 func ColouriseBold(text, colour string) string {
     return colour + Bold + text + Reset
 }
-// EOF
 
 // SimpleError
 func SimpleError(prefix, ctx string, err error, colour string) {
 	if err == nil {
 		return
 	}
-	// Example: “❗️ Config missing – while loading: <original error>”
-	msg := fmt.Sprintf("%s – %s: %v", prefix, ctx, err)
+	// Example: “❗️Config missing – while loading: <original error>”
+	msg := fmt.Sprintf("❗️%s >%s %v", prefix, ctx, err)
 	fmt.Fprintln(os.Stderr, Colourise(msg, colour))
 }
 
@@ -68,12 +67,13 @@ func Success(prefix, ctx, extra string) {
 	fmt.Fprintln(os.Stdout, Colourise(msg, Green))
 }
 
-// Successf – wie fmt.Sprintf, nur farbig ausgegeben.
+// Successf – lije fmt.Sprintf but colourised
 func Successf(format string, a ...interface{}) {
 	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf(format, a...), Green))
 }
 
-// Info – neutrale, cyan‑farbene Meldungen (z. B. „Weiter geht’s…“)
+// Info – neutral colour
 func Info(prefix, ctx string) {
 	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf("%s – %s", prefix, ctx), Blue))
 }
+// EOF

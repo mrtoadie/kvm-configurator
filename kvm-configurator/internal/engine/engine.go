@@ -1,5 +1,5 @@
 // engine/engine.go
-// last modification: January 18 2026
+// last modification: Feb 03 2026
 package engine
 
 import (
@@ -23,7 +23,9 @@ import (
 func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePaths) error {
 	// Check if the ISO file exists
 	if _, err := os.Stat(isoPath); err != nil {
-		return fmt.Errorf("\x1b[31mISO not accessible: %w\x1b[0m", err)
+		//return fmt.Errorf("\x1b[31mISO not accessible: %w\x1b[0m", err)
+		ui.RedError("ISO not accessible", isoPath, err)
+		os.Exit(1)
 	}
 
 	// create Disk‑Argument
@@ -64,20 +66,21 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 
 	// Debug output
 	//fmt.Print(args)
+	
 	// SimpelProgress
 	stop := make(chan struct{})
 	spinner := ui.NewProgress("\x1b[34mRunning virt-install:")
 defer spinner.Stop()
 
-cmd := exec.Command("virt-install", args...)
-var out, errOut bytes.Buffer
-cmd.Stdout, cmd.Stderr = &out, &errOut
-if err := cmd.Run(); err != nil {
-		ui.RedError("virt-install failed: %w – %s",">", err)
-		return err
-}
+	cmd := exec.Command("virt-install", args...)
+	var out, errOut bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &out, &errOut
+	if err := cmd.Run(); err != nil {
+			ui.RedError("virt-install failed: %w – %s",">", err)
+			return err
+	}
 	
-	close(stop)
+close(stop)
 	
 	// Ensure that only one domain block is present.
 	raw := out.Bytes()
@@ -103,12 +106,13 @@ if err := cmd.Run(); err != nil {
 	
 	// Save XML
 	if err := os.WriteFile(xmlFullPath, cleanXML, 0644); err != nil {
-			return fmt.Errorf("\x1b[31mcould not write XML: %w\x1b[0m", err)
+			//return fmt.Errorf("\x1b[31mcould not write XML: %w\x1b[0m", err)
+			ui.RedError("Could not write XML", xmlFileName, err)
+			os.Exit(1)
+	} else {
+		abs, _ := filepath.Abs(xmlFullPath)
+		ui.Successf("XML definition saved under: %s", abs)
 	}
-	abs, _ := filepath.Abs(xmlFullPath)
-	//fmt.Printf("\n\x1b[32mXML definition saved under: %s\n\x1b[0m", abs)
-	//fmt.Println(ui.Successf("XML definition saved under: %s", abs))
-	ui.Successf("XML definition saved under: %s", abs)
 
 	// Define the new VM >> libvirt
 	if err := exec.Command("virsh", "define", xmlFullPath).Run(); err != nil {

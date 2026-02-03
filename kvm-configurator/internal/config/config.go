@@ -1,5 +1,5 @@
 // internal/config/config.go
-// last modification: February 01 2026
+// last modification: Feb 01 2026
 package config
 
 import (
@@ -10,7 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Distro represents a single operating‑system definition coming from the YAML file.
+// VMConfig represents a single operating‑system or guest definition coming from the YAML file
 type VMConfig struct {
 	Name        string 		`yaml:"name"`				// display name "Arch Linux"
 	ID          string 		`yaml:"id"`					// identifier, e.g. "archlinux"
