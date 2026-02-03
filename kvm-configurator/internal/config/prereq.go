@@ -1,5 +1,5 @@
 // config/prereq.go
-// last modification: January 25 2026
+// last modification: Feb 03 2026
 package config
 
 import (
@@ -40,24 +40,6 @@ func EnsureAll(commands ...string) error {
 		}
 	}
 	return nil
-}
-
-/* --------------------
-	Fatal Error? No problem >> terminate!
--------------------- */
-func FatalIfMissing(err error) {
-	if err == nil {
-		return
-	}
-	if missing, ok := err.(*CommandMissingError); ok {
-		fmt.Fprintf(os.Stderr,
-			"\x1b[31mError: %s is not installed or not in the PATH.\x1b[0m\n"+
-				"Please install: (e.g. with `sudo pacman -S %s` or the appropriate package manager).\n",
-			missing.Cmd, missing.Cmd)
-	} else {
-		fmt.Fprintf(os.Stderr, "\x1b[31mUnexpected error: %v\x1b[0m\n", err)
-	}
-	os.Exit(1)
 }
 
 /*
