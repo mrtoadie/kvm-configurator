@@ -33,7 +33,7 @@ func Start(r *bufio.Reader) {
 		choice := readChoice(r)
 
 		if choice == "q" {
-			fmt.Println(ui.Colourise("\nBack to Mainmenu", ui.Yellow))
+			fmt.Println(ui.Colourise("\nBack to Mainmenu", ui.ColorYellow))
 			return
 		}
 
@@ -42,7 +42,7 @@ func Start(r *bufio.Reader) {
 			VMMenu(bufio.NewReader(os.Stdin))
 		default:
 			fmt.Fprintln(os.Stderr,
-				ui.Colourise("Invalid selection", ui.Red))
+				ui.Colourise("Invalid selection", ui.ColorRed))
 		}
 	}
 }
@@ -52,7 +52,7 @@ func Start(r *bufio.Reader) {
 -------------------- */
 func printMenu() {
 	w := utils.NewTabWriter()
-	fmt.Fprintln(w, ui.Colourise("\n=== KVM-TOOLS ===", ui.Blue))
+	fmt.Fprintln(w, ui.Colourise("\n=== KVM-TOOLS ===", ui.ColorBlue))
 	for key, info := range menuMap {
 		fmt.Fprintf(w, "%s\t%s\n", key, info.Description)
 	}
@@ -63,7 +63,7 @@ func printMenu() {
 	Read input and remove whitespace.
 -------------------- */
 func readChoice(r *bufio.Reader) string {
-	fmt.Print(ui.Colourise("\nSelect: ", ui.Yellow))
+	fmt.Print(ui.Colourise("\nSelect: ", ui.ColorYellow))
 	raw, _ := r.ReadString('\n')
 	return strings.TrimSpace(raw)
 }
