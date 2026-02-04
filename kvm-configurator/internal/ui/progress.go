@@ -34,7 +34,7 @@ func NewProgress(msg string) *Progress {
 	return p
 }
 
-// Stop
+// stops the spinner and releases the goroutine
 func (p *Progress) Stop() {
 	close(p.stop)
 }

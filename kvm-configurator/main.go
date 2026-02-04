@@ -25,7 +25,7 @@ import (
 -------------------- */
 func main() {
 	// [Modul: prereqs] validates if (virt‑install, virsh) is installed
-	if err := config.EnsureAll("virt-install", "virsh"); err != nil {
+	if err := config.EnsureAll(config.CmdVirtInstall, config.CmdVirsh); err != nil {
 			ui.RedError("virt-install not found", "verify $PATH", err)
 			os.Exit(1)
 	}
@@ -44,7 +44,7 @@ func main() {
 		ui.RedError("File does not exist", "verify $PATH", err)
   }
 	
-	// [Modul: config] loads File‑Config (input_dir)
+	// [Modul: config] loads File‑Config (isopath)
 	fp, err := config.LoadFilePaths("oslist.yaml")
 	if errors.Is(err, os.ErrNotExist) {
     ui.RedError("Configuration file not found ", ">", err)				

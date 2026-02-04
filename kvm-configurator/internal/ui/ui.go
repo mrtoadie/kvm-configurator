@@ -1,5 +1,5 @@
 // ui/ui.go
-// last modification: February 03 2026
+// last modification: February 04 2026
 package ui
 
 import (
@@ -73,7 +73,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 	The return value is the 'absolute path' to the file (for virt‑install)
 -------------------- */
 func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
-	// workDir is directory from filepaths.input_dir
+	// workDir is directory from filepaths.isopath
 	files, err := fileutils.ListFiles(workDir)
 	if err != nil {
 		return "", fmt.Errorf("listing files in %s failed: %w", workDir, err)

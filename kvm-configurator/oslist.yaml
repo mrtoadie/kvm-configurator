@@ -5,8 +5,9 @@
 
 # default paths for your ISOs and storage location for the xml files
 filepaths:
-  input_dir: "/run/media/toadie/data/ISOs"
-  xml_dir: "${HOME}/Downloads/xml"
+  #input_dir: "/run/media/toadie/data/ISOs"
+  isopath: "/run/media/toadie/data/ISOs"
+  xmlpath: "${HOME}/Downloads/xml"
 
 advanced_features:
   start_init: false
@@ -33,7 +34,7 @@ windows_base: &windows_base
   ram: 8192
   disksize: 100
   graphics: "spice"
-  fimrware: "efi"
+  firmware: "efi"
 
 # List of predefined operating systems
 oslist:
@@ -55,7 +56,7 @@ oslist:
     ram: 512
     diskpath: "/run/media/toadie/vm/QEMU"
     disksize: 2
-    input_dir: "/run/media/toadie/data/ISOs/archlinux-2025.12.01-x86_64.iso"
+    isopath: "/run/media/toadie/data/ISOs/archlinux-2025.12.01-x86_64.iso"
 # Linux
   - name: Arch Linux
     id: archlinux

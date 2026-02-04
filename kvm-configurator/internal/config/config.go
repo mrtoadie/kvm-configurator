@@ -18,7 +18,7 @@ type VMConfig struct {
 	RAM         int    		`yaml:"ram"`				// RAM in MiB
 	DiskSize    int    		`yaml:"disksize"`		// disk size in GiB
 	DiskPath    string 		`yaml:"diskpath"`		// path disk image
-	ISOPath     string 		`yaml:"input_dir"`	// path iso image
+	ISOPath     string 		`yaml:"isopath"`	// path iso image
 	NestedVirt  string 		`yaml:"nvirt"`			// vmx (intel), smx (amd)
 	Network     string 		`yaml:"network"`   	// bridge | nat | none
 	Graphics    string 		`yaml:"graphics"`  	// graphic driver / mode: spice | vnc | none
@@ -37,8 +37,8 @@ type Defaults struct {
 --------------------------------------------------------- */
 type FilePaths struct {
 	Filepaths struct {
-		InputDir string `yaml:"input_dir"`
-		XmlDir   string `yaml:"xml_dir"`
+		IsoPath string `yaml:"isopath"`
+		XmlDir   string `yaml:"xmlpath"`
 	} `yaml:"filepaths"`
 }
 // OSRoot mirrors the top-level structure of the OS list YAML file.
@@ -115,11 +115,6 @@ func expandValue(val reflect.Value) {
 /* ---------------------------------------------------------
    LoadOSList – reads the OS list YAML file and expands env vars
 --------------------------------------------------------- */
-/*func LoadOSList(path string) (list []VMConfig, defaults struct {
-	DiskPath string
-	DiskSize int
-}, err error) {*/
-
 func LoadOSList(path string) ([]VMConfig, Defaults, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -158,8 +153,8 @@ func LoadFilePaths(path string) (*FilePaths, error) {
    (prefers the configured InputDir, falls back to the current working directory)
 --------------------------------------------------------- */
 func ResolveWorkDir(fp *FilePaths) (string, error) {
-	if fp.Filepaths.InputDir != "" {
-		return fp.Filepaths.InputDir, nil
+	if fp.Filepaths.IsoPath != "" {
+		return fp.Filepaths.IsoPath, nil
 	}
 	cwd, err := os.Getwd()
 	if err != nil {
