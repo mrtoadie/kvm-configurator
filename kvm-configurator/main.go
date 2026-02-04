@@ -45,7 +45,7 @@ func main() {
   }
 	
 	// [Modul: config] loads File‑Config (isopath)
-	fp, err := config.LoadFilePaths("oslist.yaml")
+	fp, err := config.LoadFilePaths(config.FileConfig)
 	if errors.Is(err, os.ErrNotExist) {
     ui.RedError("Configuration file not found ", ">", err)				
     //os.Exit(1)
@@ -58,7 +58,7 @@ func main() {
 	}
 	
 	// [Modul: config] loading global Defaults
-	osList, defaults, err := config.LoadOSList("oslist.yaml")
+	osList, defaults, err := config.LoadOSList(config.FileConfig)
 	if errors.Is(err, os.ErrNotExist) {
 		ui.RedError("Configuration file not found", ">", err)
     //os.Exit(1)

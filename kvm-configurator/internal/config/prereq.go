@@ -1,5 +1,5 @@
 // config/prereq.go
-// last modification: Feb 03 2026
+// last modification: Feb 04 2026
 package config
 
 import (
@@ -63,14 +63,13 @@ func Exists() (bool, error) {
 
 // only checks that oslist.yaml exists in current dir
 func Exists() (bool, error) {
-	const fileName = "oslist.yaml"
 
 	cwd, err := os.Getwd()
 	if err != nil {
 		return false, err
 	}
 
-	path := filepath.Join(cwd, fileName)
+	path := filepath.Join(cwd, FileConfig)
 	info, err := os.Stat(path)
 	
 	if err == nil {

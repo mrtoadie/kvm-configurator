@@ -3,7 +3,8 @@
 package config
 
 const (
-    CmdVirtInstall = "virt-install"
-    CmdVirsh       = "virsh"
+    CmdVirtInstall  = "virt-install"
+    CmdVirsh        = "virsh"
+    FileConfig      = "oslist.yaml"
 )
 var PrereqCommands = []string{CmdVirtInstall, CmdVirsh}
