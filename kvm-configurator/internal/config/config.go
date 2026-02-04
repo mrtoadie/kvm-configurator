@@ -1,5 +1,5 @@
 // internal/config/config.go
-// last modification: Feb 01 2026
+// last modification: Feb 04 2026
 package config
 
 import (
@@ -28,16 +28,25 @@ type VMConfig struct {
 	Firmware		string 		`yaml:"firmware"` 	// BIOS, EFI not working yet
 }
 
-// OSRoot mirrors the top‑level structure of the OS list YAML file.
-type OSRoot struct {
-	Defaults struct {
-		DiskPath string `yaml:"diskpath"`
-		DiskSize int    `yaml:"disksize"`
-	} `yaml:"defaults"`
-	OSList []VMConfig `yaml:"oslist"`
+type Defaults struct {
+	DiskPath string
+	DiskSize int
 }
-
-// AdvancedFeaturesRoot mirrors the advanced‑features YAML file (currently unused elsewhere).
+/* ---------------------------------------------------------
+   FilePaths – only the “filepaths” block from the config file
+--------------------------------------------------------- */
+type FilePaths struct {
+	Filepaths struct {
+		InputDir string `yaml:"input_dir"`
+		XmlDir   string `yaml:"xml_dir"`
+	} `yaml:"filepaths"`
+}
+// OSRoot mirrors the top-level structure of the OS list YAML file.
+type OSRoot struct {
+	Defaults Defaults  `yaml:"defaults"`
+	OSList   []VMConfig `yaml:"oslist"`
+}
+// AdvancedFeaturesRoot mirrors the advanced‑features YAML file (currently unused elsewhere)
 type AdvancedFeaturesRoot struct {
 	AdvancedFeatures struct {
 		StartInit bool `yaml:"start_init"`
@@ -56,6 +65,19 @@ func expandStrings(v interface{}) {
 	}
 	val = val.Elem()
 	expandValue(val)
+}
+
+// ExpandEnvInStruct recursively expands environment variables in all string fields
+// of structs, slices, maps, and their nested contents using os.ExpandEnv.
+func ExpandEnvInStruct(v any) {
+	if v == nil {
+		return
+	}
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Ptr || val.IsNil() {
+		return
+	}
+	expandValue(val.Elem())
 }
 
 func expandValue(val reflect.Value) {
@@ -93,34 +115,25 @@ func expandValue(val reflect.Value) {
 /* ---------------------------------------------------------
    LoadOSList – reads the OS list YAML file and expands env vars
 --------------------------------------------------------- */
-func LoadOSList(path string) (list []VMConfig, defaults struct {
+/*func LoadOSList(path string) (list []VMConfig, defaults struct {
 	DiskPath string
 	DiskSize int
-}, err error) {
-	b, err := os.ReadFile(path)
+}, err error) {*/
+
+func LoadOSList(path string) ([]VMConfig, Defaults, error) {
+	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, defaults, fmt.Errorf("read OS‑list file %q: %w", path, err)
+		return nil, Defaults{}, fmt.Errorf("read OS-list file %q: %w", path, err)
 	}
+
 	var root OSRoot
-	if err = yaml.Unmarshal(b, &root); err != nil {
-		return nil, defaults, err
+	if err := yaml.Unmarshal(data, &root); err != nil {
+		return nil, Defaults{}, fmt.Errorf("parse OS-list file %q: %w", path, err)
 	}
-	// Expand any environment placeholders that may appear in the distro definitions.
-	expandStrings(&root)
 
-	defaults.DiskPath = root.Defaults.DiskPath
-	defaults.DiskSize = root.Defaults.DiskSize
-	return root.OSList, defaults, nil
-}
+	ExpandEnvInStruct(&root)
 
-/* ---------------------------------------------------------
-   FilePaths – only the “filepaths” block from the config file
---------------------------------------------------------- */
-type FilePaths struct {
-	Filepaths struct {
-		InputDir string `yaml:"input_dir"`
-		XmlDir   string `yaml:"xml_dir"`
-	} `yaml:"filepaths"`
+	return root.OSList, root.Defaults, nil
 }
 
 /* ---------------------------------------------------------
@@ -154,5 +167,4 @@ func ResolveWorkDir(fp *FilePaths) (string, error) {
 	}
 	return cwd, nil
 }
-
 // EOF
