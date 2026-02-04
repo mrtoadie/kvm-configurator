@@ -22,10 +22,10 @@ type VMConfig struct {
 	NestedVirt  string 		`yaml:"nvirt"`			// vmx (intel), smx (amd)
 	Network     string 		`yaml:"network"`   	// bridge | nat | none
 	Graphics    string 		`yaml:"graphics"`  	// graphic driver / mode: spice | vnc | none
-	Sound       string 		`yaml:"sound"`			// ac97, ich6, ich9 (default)
-	FileSystem  string 		`yaml:"filesystem"`	//
+	Sound       string 		`yaml:"sound"`			// ac97 | ich6 | ich9 (default)
+	FileSystem  string 		`yaml:"filesystem"`	// virtiofs | 9p | none
 	BootOrder   string 		`yaml:"bootorder"` 	// stored as a string for backward compatibility
-	Firmware		string 		`yaml:"firmware"` 	// BIOS, EFI not working yet
+	Firmware		string 		`yaml:"firmware"` 	// BIOS | EFI (not working yet)
 }
 
 type Defaults struct {
