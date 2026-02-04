@@ -2,21 +2,22 @@
 // Autor: 	MrToadie
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
-// Lisence: MIT
+// License: MIT
 // last modification: Feb 03 2026
 package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
-	"errors"
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
 	"configurator/internal/model"
 	"configurator/internal/ui"
 	"configurator/kvmtools"
+	//"configurator/internal/logger"
 )
 
 /* --------------------
@@ -25,7 +26,7 @@ import (
 func main() {
 	// [Modul: prereqs] validates if (virt‑install, virsh) is installed
 	if err := config.EnsureAll("virt-install", "virsh"); err != nil {
-			ui.RedError("virt-install not found", "verfiy $PATH", err)
+			ui.RedError("virt-install not found", "verify $PATH", err)
 			os.Exit(1)
 	}
 	// for debug only
@@ -35,32 +36,32 @@ func main() {
 	ok, err := config.Exists()
   if err != nil {
     ui.RedError("Configuration file invalid or corrupt", "", err)
-		os.Exit(1)
+		//os.Exit(1)
   }
   if ok {
 		// program starts		
   } else {
-		ui.RedError("File does not exist", "verfiy $PATH", err)
+		ui.RedError("File does not exist", "verify $PATH", err)
   }
 	
 	// [Modul: config] loads File‑Config (input_dir)
 	fp, err := config.LoadFilePaths("oslist.yaml")
 	if errors.Is(err, os.ErrNotExist) {
-    ui.RedError("Configuration file not found", ">", err)
-    os.Exit(1)
+    ui.RedError("Configuration file not found ", ">", err)				
+    //os.Exit(1)
 	}
 
 	workDir, err := config.ResolveWorkDir(fp)
 	if errors.Is(err, os.ErrNotExist) {
 		ui.RedError("Cannot resolve work directory", "verify $PATH", err)
-    os.Exit(1)
+    //os.Exit(1)
 	}
 	
 	// [Modul: config] loading global Defaults
 	osList, defaults, err := config.LoadOSList("oslist.yaml")
 	if errors.Is(err, os.ErrNotExist) {
 		ui.RedError("Configuration file not found", ">", err)
-    os.Exit(1)
+    //os.Exit(1)
 	}
 
 	variantByName := make(map[string]string, len(osList))
@@ -70,16 +71,16 @@ func main() {
 
 	r := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Println(ui.Colourise("\n=== MAIN MENU ===", ui.Blue))
+		fmt.Println(ui.Colourise("\n=== MAIN MENU ===", ui.ColorBlue))
 		fmt.Println("[1] New VM")
 		fmt.Println("[2] KVM-Tools")
 		fmt.Println("[0] Exit")
-		fmt.Print(ui.Colourise("Selection: ", ui.Yellow))
+		fmt.Print(ui.Colourise("Selection: ", ui.ColorYellow))
 
 		var sel int
 		if _, err := fmt.Scanln(&sel); err != nil {
-			fmt.Print(ui.Colourise("\nPlease enter a valid number.", ui.Red))
-			ui.SimpleError("BLA","",err, ui.Blue)
+			fmt.Print(ui.Colourise("\nPlease enter a valid number.", ui.ColorRed))
+			ui.SimpleError("BLA","",err, ui.ColorBlue)
 			continue
 		}
 		switch sel {
@@ -95,12 +96,12 @@ func main() {
 				workDir,
 				fp,
 			); err != nil {
-				fmt.Fprintf(os.Stderr, "%sError: %v%s\n", ui.Red, err, ui.Reset)
+				fmt.Fprintf(os.Stderr, "%sError: %v%s\n", ui.ColorRed, err, ui.ColorReset)
 			}
 		case 2:
 			kvmtools.Start(r)
 		default:
-			fmt.Println(ui.Colourise("\nInvalid selection!", ui.Red))
+			fmt.Println(ui.Colourise("\nInvalid selection!", ui.ColorRed))
 		}
 	}
 }
@@ -125,15 +126,19 @@ func runNewVMWorkflow(
 	if err != nil {
 		return fmt.Errorf("\x1b[31mOS selection failed: %w\x1b[0m", err)
 	}
-	variant := variantByName[distro.Name]
+	// validating
+	variant, ok := variantByName[distro.Name]
+	if !ok {
+		return fmt.Errorf("no varriant found for distro %q", distro.Name)
+	}
 
-	// Disk‑Path‑Default from selectet distro
+	// Disk‑Path‑Default from selected distro
 	defaultDiskPath := distro.DiskPath
   if defaultDiskPath == "" {
     defaultDiskPath = defs.DiskPath
   }
 
-	// create basic config from default vaules
+	// create basic config from default values
 	cfg := model.DomainConfig{
 		Name:       distro.Name,
 		MemMiB:     distro.RAM,
@@ -161,7 +166,7 @@ func runNewVMWorkflow(
 		// WIP
 		//return ui.Fatal(ui.ErrVMCreationFail, "%w")
 	}	else {
-		ui.Success("VM", cfg.Name, "successfully build!")
+		ui.Success("VM", cfg.Name, "successfully built!")
 	}
 	return nil
 }
