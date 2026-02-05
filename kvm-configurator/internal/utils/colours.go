@@ -1,6 +1,6 @@
-// ui/colours.go
-// last modification: Feb 03 2026
-package ui
+// utils/colours.go
+// last modification: Feb 05 2026
+package utils
 
 import (
   "fmt"

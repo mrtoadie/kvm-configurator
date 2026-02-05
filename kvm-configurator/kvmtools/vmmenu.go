@@ -1,5 +1,5 @@
 // kvmtools/vmmenu.go
-// last modification: Feb 03 2026
+// last modification: Feb 05 2026
 package kvmtools
 
 import (
@@ -12,7 +12,6 @@ import (
 	"strings"
 	"sort"
 	// internal
-	"configurator/internal/ui"
 	"configurator/internal/utils"
 )
 
@@ -83,7 +82,7 @@ func sortVMsAlphabetically(vms []*VMInfo) []*VMInfo {
 -------------------- */
 func printVMTable(vms []*VMInfo) {
 	w := utils.NewTabWriter()
-	fmt.Fprintln(w, ui.Colourise("\n=== Available VMs ===", ui.ColorBlue))
+	fmt.Fprintln(w, utils.Colourise("\n=== Available VMs ===", utils.ColorBlue))
 	fmt.Fprintln(w, "No.\tName\tState")
 	for i, vm := range vms {
 		fmt.Fprintf(w, "%d\t%s\t%s\n", i+1, vm.Name, vm.Stat)
@@ -112,7 +111,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 	// Show the allowed actions
 	fmt.Println()
 	w := utils.NewTabWriter()
-	fmt.Fprintln(w, ui.Colourise("Action\tDescription", ui.ColorBlue))
+	fmt.Fprintln(w, utils.Colourise("Action\tDescription", utils.ColorBlue))
 	for _, a := range actions {
 		if a.Check != nil && !a.Check(vm) {
 			continue
@@ -121,7 +120,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 	}
 	w.Flush()
 
-	fmt.Print(ui.Colourise("\nSelect action (or q to exit): ", ui.ColorYellow))
+	fmt.Print(utils.Colourise("\nSelect action (or q to exit): ", utils.ColorYellow))
 	choiceRaw, _ := r.ReadString('\n')
 	choice := strings.TrimSpace(choiceRaw)
 
@@ -130,7 +129,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 			return a.Cmd
 		}
 	}
-	fmt.Fprintln(os.Stderr, ui.Colourise("Invalid selection", ui.ColorRed))
+	fmt.Fprintln(os.Stderr, utils.Colourise("Invalid selection", utils.ColorRed))
 	return ""
 }
 
@@ -156,12 +155,12 @@ func VMMenu(r *bufio.Reader) {
 		vms, err := fetchAllVMs()
 		if err != nil {
 			fmt.Fprintln(os.Stderr,
-				ui.Colourise("Error reading the VM list: "+err.Error(),
-					ui.ColorRed))
+				utils.Colourise("Error reading the VM list: "+err.Error(),
+					utils.ColorRed))
 			return
 		}
 		if len(vms) == 0 {
-			fmt.Println(ui.Colourise("No VMs found", ui.ColorYellow))
+			fmt.Println(utils.Colourise("No VMs found", utils.ColorYellow))
 			return
 		}
 		// sort alphabetically
@@ -171,7 +170,7 @@ func VMMenu(r *bufio.Reader) {
 		printVMTable(sorted)
 
 		// 4️⃣ choose VM
-		fmt.Print(ui.Colourise("\nSelect VM number (or q to exit): ", ui.ColorYellow))
+		fmt.Print(utils.Colourise("\nSelect VM number (or q to exit): ", utils.ColorYellow))
 		choiceRaw, _ := r.ReadString('\n')
 		choice := strings.TrimSpace(choiceRaw)
 		if choice == "q" || choice == "quit" {
@@ -180,7 +179,7 @@ func VMMenu(r *bufio.Reader) {
 		idx, err := strconv.Atoi(choice)
 		if err != nil || idx < 1 || idx > len(sorted) {
 			fmt.Fprintln(os.Stderr,
-				ui.Colourise("Invalid selection", ui.ColorRed))
+				utils.Colourise("Invalid selection", utils.ColorRed))
 			continue
 		}
 		selected := sorted[idx-1]
@@ -191,9 +190,9 @@ func VMMenu(r *bufio.Reader) {
 			continue // user cancelled or invalid choice
 		}
 		if err := runVMAction(action, selected.Name); err != nil {
-			fmt.Fprintln(os.Stderr, ui.Colourise(err.Error(), ui.ColorRed))
+			fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
 		} else {
-			fmt.Println(ui.Colourise("Action successfully completed", ui.ColorGreen))
+			fmt.Println(utils.Colourise("Action successfully completed", utils.ColorGreen))
 		}
 	}
 }

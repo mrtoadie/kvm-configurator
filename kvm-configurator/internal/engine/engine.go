@@ -13,7 +13,7 @@ import (
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/model"
-	"configurator/internal/ui"
+	"configurator/internal/utils"
 )
 
 /* --------------------
@@ -24,7 +24,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	// Check if the ISO file exists
 	if _, err := os.Stat(isoPath); err != nil {
 		//return fmt.Errorf("\x1b[31mISO not accessible: %w\x1b[0m", err)
-		ui.RedError("ISO not accessible", isoPath, err)
+		utils.RedError("ISO not accessible", isoPath, err)
 	}
 
 	// create Disk‑Argument
@@ -38,12 +38,12 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	}
 	// disk
 	if haveRealDisk {
-		fmt.Println(ui.Colourise(
+		fmt.Println(utils.Colourise(
     fmt.Sprintf("Using custom disk: %s", diskArg),
-    ui.ColorYellow,
+    utils.ColorYellow,
 		))
 	} else {
-		fmt.Println(ui.Colourise("\x1b[34mNo custom disk – passing '--disk none'\x1b[0m", ui.ColorYellow))
+		fmt.Println(utils.Colourise("\x1b[34mNo custom disk – passing '--disk none'\x1b[0m", utils.ColorYellow))
 	}
 
 	// Arguments for virt‑install
@@ -67,14 +67,14 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	//fmt.Print(args)
 	
 	// SimpleProgress
-	spinner := ui.NewProgress("\x1b[34mRunning virt-install:")
+	spinner := utils.NewProgress("\x1b[34mRunning virt-install:")
 	defer spinner.Stop()
 
 	cmd := exec.Command(config.CmdVirtInstall, args...)
 	var out, errOut bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errOut
 	if err := cmd.Run(); err != nil {
-			ui.RedError("virt-install failed: %w – %s",">", err)
+			utils.RedError("virt-install failed: %w – %s",">", err)
 			return err
 	}
 		
@@ -85,7 +85,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	// Find the 'first' </domain> tag – discard everything after it
 	firstEndIdx := strings.Index(xmlStr, "</domain>")
 	if firstEndIdx == -1 {
-		return fmt.Errorf(ui.Colourise("Failed to locate closing </domain> tag in virt-install output", ui.ColorRed))
+		return fmt.Errorf(utils.Colourise("Failed to locate closing </domain> tag in virt-install output", utils.ColorRed))
 	}
 	// +len("</domain>") includes the tag itself
 	cleanXMLStr := xmlStr[:firstEndIdx+len("</domain>")]
@@ -103,22 +103,22 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	// Save XML
 	if err := os.WriteFile(xmlFullPath, cleanXML, 0644); err != nil {
 			//return fmt.Errorf("\x1b[31mcould not write XML: %w\x1b[0m", err)
-			ui.RedError("Could not write XML", xmlFileName, err)
+			utils.RedError("Could not write XML", xmlFileName, err)
 			//os.Exit(1)
 	} else {
 		abs, _ := filepath.Abs(xmlFullPath)
-		ui.Successf("XML definition saved under: %s", abs)
+		utils.Successf("XML definition saved under: %s", abs)
 	}
 
 	// Define the new VM >> libvirt
 	if err := exec.Command("virsh", "define", xmlFullPath).Run(); err != nil {
 		//return fmt.Errorf("\x1b[31mvirsh define failed: %w\x1b[0m", err)
-		ui.RedError("virsh define failed: %w", ">", err)
+		utils.RedError("virsh define failed: %w", ">", err)
 		return  err
 
 	}
 	//fmt.Println(ui.Colourise("\nVM successfully registered with libvirt/qemu (not yet started).", ui.Green))
-	ui.Successf("VM successfully registered with libvirt/qemu (not yet started).")
+	utils.Successf("VM successfully registered with libvirt/qemu (not yet started).")
 	return nil
 }
 // EOF

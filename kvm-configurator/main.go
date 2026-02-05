@@ -14,7 +14,7 @@ import (
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
-	//"configurator/internal/model"
+	"configurator/internal/utils"
 	"configurator/internal/ui"
 	"configurator/kvmtools"
 )
@@ -23,43 +23,43 @@ import (
 	MAIN
 -------------------- */
 func main() {
-	// [Modul: prereqs] validates if (virt‑install, virsh) is installed
+	// [Modul: config] validates if (virt‑install, virsh) is installed
 	if err := config.EnsureAll(config.CmdVirtInstall, config.CmdVirsh); err != nil {
-			ui.RedError("virt-install not found", "verify $PATH", err)
+			utils.RedError("virt-install not found", "verify $PATH", err)
 			os.Exit(1)
 	}
 	// for debug only
 	//ui.Success("✅ Prereqs OK", "virt-install & virsh FOUND!", "")
 
-	// [Modul: prereqs] check if config file exists or invalid
+	// [Modul: config] check if config file exists or invalid
 	ok, err := config.Exists()
   if err != nil {
-    ui.RedError("Configuration file invalid or corrupt", "", err)
+    utils.RedError("Configuration file invalid or corrupt", "", err)
 		//os.Exit(1)
   }
   if ok {
 		// program starts		
   } else {
-		ui.RedError("File does not exist", "verify $PATH", err)
+		utils.RedError("File does not exist", "verify $PATH", err)
   }
 	
 	// [Modul: config] loads File‑Config (isopath)
 	fp, err := config.LoadFilePaths(config.FileConfig)
 	if errors.Is(err, os.ErrNotExist) {
-    ui.RedError("Configuration file not found ", ">", err)				
+    utils.RedError("Configuration file not found ", ">", err)				
     //os.Exit(1)
 	}
 
 	workDir, err := config.ResolveWorkDir(fp)
 	if errors.Is(err, os.ErrNotExist) {
-		ui.RedError("Cannot resolve work directory", "verify $PATH", err)
+		utils.RedError("Cannot resolve work directory", "verify $PATH", err)
     //os.Exit(1)
 	}
 	
 	// [Modul: config] loading global Defaults
 	osList, defaults, err := config.LoadOSList(config.FileConfig)
 	if errors.Is(err, os.ErrNotExist) {
-		ui.RedError("Configuration file not found", ">", err)
+		utils.RedError("Configuration file not found", ">", err)
     //os.Exit(1)
 	}
 
@@ -70,12 +70,12 @@ func main() {
 
 	r := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Println(ui.Colourise("\n=== MAIN MENU ===", ui.ColorBlue))
+		fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColorBlue))
 		fmt.Println("[1] New VM")
 		fmt.Println("[2] KVM-Tools")
 		fmt.Println("[h] Help")
 		fmt.Println("[0] Exit")
-		fmt.Print(ui.Colourise("Selection: ", ui.ColorYellow))
+		fmt.Print(utils.Colourise("Selection: ", utils.ColorYellow))
 
 		var sel string
 		if _, err := fmt.Scanln(&sel); err != nil {
@@ -94,14 +94,14 @@ func main() {
 				workDir,
 				fp,
 			); err != nil {
-				fmt.Fprintf(os.Stderr, "%sError: %v%s\n", ui.ColorRed, err, ui.ColorReset)
+				fmt.Fprintf(os.Stderr, "%sError: %v%s\n", utils.ColorRed, err, utils.ColorReset)
 			}
 		case "2":
 			kvmtools.Start(r)
 		case "h":
 			ui.PrintHelp()
 		default:
-			fmt.Println(ui.Colourise("\nInvalid selection!", ui.ColorRed))
+			fmt.Println(utils.Colourise("\nInvalid selection!", utils.ColorRed))
 		}
 	}
 }

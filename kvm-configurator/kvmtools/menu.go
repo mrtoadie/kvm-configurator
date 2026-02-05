@@ -1,5 +1,5 @@
 // kvmtools/menu.go
-// last modification: January 25 2026
+// last modification: Feb 05 2026
 package kvmtools
 
 import (
@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 	// internal
-	"configurator/internal/ui"
 	"configurator/internal/utils"
 )
 
@@ -33,7 +32,7 @@ func Start(r *bufio.Reader) {
 		choice := readChoice(r)
 
 		if choice == "q" {
-			fmt.Println(ui.Colourise("\nBack to Mainmenu", ui.ColorYellow))
+			fmt.Println(utils.Colourise("\nBack to Mainmenu", utils.ColorYellow))
 			return
 		}
 
@@ -42,7 +41,7 @@ func Start(r *bufio.Reader) {
 			VMMenu(bufio.NewReader(os.Stdin))
 		default:
 			fmt.Fprintln(os.Stderr,
-				ui.Colourise("Invalid selection", ui.ColorRed))
+				utils.Colourise("Invalid selection", utils.ColorRed))
 		}
 	}
 }
@@ -52,7 +51,7 @@ func Start(r *bufio.Reader) {
 -------------------- */
 func printMenu() {
 	w := utils.NewTabWriter()
-	fmt.Fprintln(w, ui.Colourise("\n=== KVM-TOOLS ===", ui.ColorBlue))
+	fmt.Fprintln(w, utils.Colourise("\n=== KVM-TOOLS ===", utils.ColorBlue))
 	for key, info := range menuMap {
 		fmt.Fprintf(w, "%s\t%s\n", key, info.Description)
 	}
@@ -63,7 +62,7 @@ func printMenu() {
 	Read input and remove whitespace.
 -------------------- */
 func readChoice(r *bufio.Reader) string {
-	fmt.Print(ui.Colourise("\nSelect: ", ui.ColorYellow))
+	fmt.Print(utils.Colourise("\nSelect: ", utils.ColorYellow))
 	raw, _ := r.ReadString('\n')
 	return strings.TrimSpace(raw)
 }

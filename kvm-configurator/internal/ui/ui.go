@@ -1,5 +1,5 @@
 // ui/ui.go
-// last modification: February 04 2026
+// last modification: February 05 2026
 package ui
 
 import (
@@ -39,7 +39,7 @@ func ReadLine(r *bufio.Reader, prompt string) (string, error) {
 	Loading distro list from yaml
 -------------------- */
 func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfig, error) {
-	fmt.Println(Colourise("\n=== Select an operating system ===", ColorBlue))
+	fmt.Println(utils.Colourise("\n=== Select an operating system ===", utils.ColorBlue))
 	sorted := append([]config.VMConfig(nil), list...)
 	sort.Slice(sorted, func(i, j int) bool {
 		return strings.ToLower(sorted[i].Name) < strings.ToLower(sorted[j].Name)
@@ -53,7 +53,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 	}
 	w.Flush()
 
-	line, err := ReadLine(r, Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", ColorYellow))
+	line, err := ReadLine(r, utils.Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", utils.ColorYellow))
 	if err != nil {
 		return config.VMConfig{}, err
 	}
@@ -62,7 +62,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 		if i, e := strconv.Atoi(line); e == nil && i >= 1 && i <= len(sorted) {
 			idx = i
 		} else {
-			return config.VMConfig{}, fmt.Errorf(Colourise("Invalid selection", ColorRed))
+			return config.VMConfig{}, fmt.Errorf(utils.Colourise("Invalid selection", utils.ColorRed))
 		}
 	}
 	return sorted[idx-1], nil
@@ -92,7 +92,7 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 		return "", err
 	}
 	if choice == 0 {
-		return "", fmt.Errorf(Colourise("selection aborted", ColorYellow))
+		return "", fmt.Errorf(utils.Colourise("selection aborted", utils.ColorYellow))
 	}
 	selected := files[choice-1]
 
@@ -107,7 +107,7 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string, isoWorkDir string) {
 	w := utils.NewTabWriter()
 	for {
-		fmt.Fprintln(w, Colourise("\n=== VM-Config ===\t", ColorBlue))
+		fmt.Fprintln(w, utils.Colourise("\n=== VM-Config ===\t", utils.ColorBlue))
 		fmt.Fprintf(w, "[1] Name:\t%s\t[default]\n", cfg.Name)
 		fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t\n", cfg.MemMiB)
 		fmt.Fprintf(w, "[3] vCPU:\t%d\t[default]\n", cfg.VCPU)
@@ -118,7 +118,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		fmt.Fprintf(w, "[8] ISO:\t%s\n", cfg.ISOPath)
 		w.Flush()
 
-		f, _ := ReadLine(r, Colourise("\nSelect or press Enter to continue: ", ColorYellow))
+		f, _ := ReadLine(r, utils.Colourise("\nSelect or press Enter to continue: ", utils.ColorYellow))
 		if f == "" {
 			break
 		}
@@ -180,7 +180,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 	w := utils.NewTabWriter()
 	for {
-		fmt.Fprintln(w, Colourise("\n=== Advanced Parameters ===\t", ColorBlue))
+		fmt.Fprintln(w, utils.Colourise("\n=== Advanced Parameters ===\t", utils.ColorBlue))
 		fmt.Fprintln(w, "Parameter\t Default\t Set")
 		fmt.Fprintln(w, "[a] Nested-Virtualisation\t", cfg.NestedVirt)
 		fmt.Fprintln(w, "[b] Boot-Order\t", cfg.BootOrder)
@@ -191,13 +191,13 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 		fmt.Fprintln(w, "[0] Back to main menu")
 		w.Flush()
 
-		choice, _ := ReadLine(r, Colourise("\nSelect an option (or press Enter to go back): ", ColorYellow))
+		choice, _ := ReadLine(r, utils.Colourise("\nSelect an option (or press Enter to go back): ", utils.ColorYellow))
 		if choice == "" || strings.EqualFold(choice, "0") {
 			return
 		}
 		switch strings.ToLower(choice) {
 		case "a":
-			if v, _ := ReadLine(r, Colourise(">> Nested-Virtualisation (vmx for Intel or smx for AMD): ", ColorBlue)); v != "" {
+			if v, _ := ReadLine(r, utils.Colourise(">> Nested-Virtualisation (vmx for Intel or smx for AMD): ", utils.ColorBlue)); v != "" {
 				cfg.NestedVirt = v
 				fmt.Println("Nested-Virtualisation is set to\x1b[32m", v)
 			}
@@ -207,19 +207,19 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 				fmt.Println("Boot order is set to", v)
 			}
 		case "c":
-			if v, _ := ReadLine(r, Colourise(">> Graphics (spice (default) or vnc): ", ColorBlue)); v != "" {
+			if v, _ := ReadLine(r, utils.Colourise(">> Graphics (spice (default) or vnc): ", utils.ColorBlue)); v != "" {
 				cfg.Graphics = v
-				fmt.Println(Colourise("Graphics is set to", ColorBlue), v)
+				fmt.Println(utils.Colourise("Graphics is set to", utils.ColorBlue), v)
 			}
 		case "d":
-			if v, _ := ReadLine(r, Colourise(">> Sound (none, ac97, ich6 or ich9 (default)): ", ColorBlue)); v != "" {
+			if v, _ := ReadLine(r, utils.Colourise(">> Sound (none, ac97, ich6 or ich9 (default)): ", utils.ColorBlue)); v != "" {
 				cfg.Sound = v
-				fmt.Println(Colourise("Sound is set to", ColorBlue), v)
+				fmt.Println(utils.Colourise("Sound is set to", utils.ColorBlue), v)
 			}
 		case "e":
-			if v, _ := ReadLine(r, Colourise(">> Filesystem / Mount (/my/source/dir,/dir/in/guest): ", ColorBlue)); v != "" {
+			if v, _ := ReadLine(r, utils.Colourise(">> Filesystem / Mount (/my/source/dir,/dir/in/guest): ", utils.ColorBlue)); v != "" {
 				cfg.FileSystem = v
-				fmt.Println(Colourise("Filesystem / Mount is set to", ColorBlue), v)
+				fmt.Println(utils.Colourise("Filesystem / Mount is set to", utils.ColorBlue), v)
 			}
 		default:
 			//fmt.Println(Colourise("Invalid input!", Red))
@@ -233,7 +233,7 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 -------------------- */
 func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	w := utils.NewTabWriter()
-	fmt.Fprintln(w, Colourise("\n=== VM-SUMMARY ===", ColorBlue))
+	fmt.Fprintln(w, utils.Colourise("\n=== VM-SUMMARY ===", utils.ColorBlue))
 	fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
 	fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)
 	fmt.Fprintf(w, "vCPU:\t%d\n", cfg.VCPU)
@@ -248,7 +248,7 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Fprintf(w, "Filesystem:\t%s\n", cfg.FileSystem)
 	w.Flush()
 
-	fmt.Print(Colourise("\nPress ENTER to create VM … ", ColorYellow))
+	fmt.Print(utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
 	_, _ = r.ReadString('\n')
 }
 // EOF

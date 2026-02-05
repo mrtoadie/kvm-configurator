@@ -1,5 +1,5 @@
 // internal/config/config.go
-// last modification: Feb 04 2026
+// last modification: Feb 05 2026
 package config
 
 import (
@@ -8,8 +8,8 @@ import (
 	"reflect"
 	// external
 	"gopkg.in/yaml.v3"
+	//"configurator/internal/utils"
 )
-
 // VMConfig represents a single operating‑system or guest definition coming from the YAML file
 type VMConfig struct {
 	Name        string 		`yaml:"name"`				// display name "Arch Linux"
