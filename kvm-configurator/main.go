@@ -3,7 +3,7 @@
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // License: MIT
-// last modification: Feb 04 2026
+// last modification: Feb 05 2026
 package main
 
 import (
@@ -74,20 +74,19 @@ func main() {
 		fmt.Println(ui.Colourise("\n=== MAIN MENU ===", ui.ColorBlue))
 		fmt.Println("[1] New VM")
 		fmt.Println("[2] KVM-Tools")
+		fmt.Println("[h] Help")
 		fmt.Println("[0] Exit")
 		fmt.Print(ui.Colourise("Selection: ", ui.ColorYellow))
 
-		var sel int
+		var sel string
 		if _, err := fmt.Scanln(&sel); err != nil {
-			fmt.Print(ui.Colourise("\nPlease enter a valid number.", ui.ColorRed))
-			ui.SimpleError("BLA","",err, ui.ColorBlue)
 			continue
 		}
 		switch sel {
-		case 0:
+		case "0":
 			fmt.Println("Bye!")
 			return
-		case 1:
+		case "1":
 			if err := runNewVMWorkflow(
 				r,
 				osList,
@@ -98,8 +97,10 @@ func main() {
 			); err != nil {
 				fmt.Fprintf(os.Stderr, "%sError: %v%s\n", ui.ColorRed, err, ui.ColorReset)
 			}
-		case 2:
+		case "2":
 			kvmtools.Start(r)
+		case "h":
+			ui.PrintHelp()
 		default:
 			fmt.Println(ui.Colourise("\nInvalid selection!", ui.ColorRed))
 		}
