@@ -14,10 +14,9 @@ import (
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
-	"configurator/internal/model"
+	//"configurator/internal/model"
 	"configurator/internal/ui"
 	"configurator/kvmtools"
-	//"configurator/internal/logger"
 )
 
 /* --------------------
@@ -87,7 +86,7 @@ func main() {
 			fmt.Println("Bye!")
 			return
 		case "1":
-			if err := runNewVMWorkflow(
+			if err := engine.RunNewVMWorkflow(
 				r,
 				osList,
 				defaults,
@@ -110,6 +109,7 @@ func main() {
 /* --------------------
 	Workflow "New VM"
 -------------------- */
+/*
 func runNewVMWorkflow(
 	r *bufio.Reader,
 	osList []config.VMConfig,
@@ -170,5 +170,5 @@ func runNewVMWorkflow(
 		ui.Success("VM", cfg.Name, "successfully built!")
 	}
 	return nil
-}
+}*/
 // EOF
