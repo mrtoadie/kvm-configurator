@@ -70,12 +70,19 @@ func main() {
 
 	r := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColorBlue))
-		fmt.Println("[1] New VM")
-		fmt.Println("[2] KVM-Tools")
-		fmt.Println("[h] Help")
-		fmt.Println("[0] Exit")
-		fmt.Print(utils.Colourise("Selection: ", utils.ColorYellow))
+		//fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColorBlue))
+		fmt.Println(utils.BoxCenter(21, []string{"=== MAIN MENU ==="}))
+		    fmt.Println(utils.Box(21, []string{
+        "[1] New VM",
+        "[2] KVM-Tools",
+        "[h] Help",
+				"[0] Exit",
+    }))
+		//fmt.Println("[1] New VM")
+		//fmt.Println("[2] KVM-Tools")
+		//fmt.Println("[h] Help")
+		//fmt.Println("[0] Exit")
+		fmt.Print(utils.Colourise(" Selection: ", utils.ColorYellow))
 
 		var sel string
 		if _, err := fmt.Scanln(&sel); err != nil {

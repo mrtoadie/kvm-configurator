@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 
+	"text/tabwriter"
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/fileutils"
@@ -39,12 +40,14 @@ func ReadLine(r *bufio.Reader, prompt string) (string, error) {
 	Loading distro list from yaml
 -------------------- */
 func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfig, error) {
-	fmt.Println(utils.Colourise("\n=== Select an operating system ===", utils.ColorBlue))
+	//fmt.Println(utils.Colourise("\n=== Select an operating system ===", utils.ColorBlue))
+	fmt.Println(utils.BoxCenter(51, []string{"Select an operating system"}))
+	
 	sorted := append([]config.VMConfig(nil), list...)
 	sort.Slice(sorted, func(i, j int) bool {
 		return strings.ToLower(sorted[i].Name) < strings.ToLower(sorted[j].Name)
 	})
-
+/*
 	w := utils.NewTabWriter()
 	fmt.Fprintln(w, "No.\tName\tCPU\tRAM (MiB)\tDisk (GB)")
 	for i, d := range sorted {
@@ -52,6 +55,18 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 			i+1, d.Name, d.CPU, d.RAM, d.DiskSize)
 	}
 	w.Flush()
+*/
+// NEW
+lines := utils.TableToLines(func(w *tabwriter.Writer) {
+    fmt.Fprintln(w, "No.\tName\tCPU\tRAM (MiB)\tDisk (GB)")
+for i, d := range sorted {
+		fmt.Fprintf(w, "%2d\t%s\t%d\t%d\t%d\n",
+			i+1, d.Name, d.CPU, d.RAM, d.DiskSize)
+	}
+	w.Flush()
+	})
+fmt.Print(utils.Box(51, lines))
+// END NEW
 
 	line, err := ReadLine(r, utils.Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", utils.ColorYellow))
 	if err != nil {
@@ -232,7 +247,16 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 	Summary table
 -------------------- */
 func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
-	w := utils.NewTabWriter()
+
+// HERE GOES WEITER :P	
+lines := utils.TableToLines(func(w *tabwriter.Writer) {
+    fmt.Fprintln(w, "VM-SUMMARY")
+
+	w.Flush()
+	})
+fmt.Print(utils.Box(51, lines))
+	
+	w := utils.NewTabWriter()	
 	fmt.Fprintln(w, utils.Colourise("\n=== VM-SUMMARY ===", utils.ColorBlue))
 	fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
 	fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)
