@@ -1,5 +1,5 @@
 // fileutils/fileutils.go
-// last modification: January 18 2026
+// last modification: Feb 05 2026
 package fileutils
 
 import (
@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	// internal
+	"configurator/internal/utils"
 )
 
 /* --------------------
@@ -26,9 +28,9 @@ ui.NewUIError(ui.Red, "❗️ Verzeichnis‑Lesen fehlgeschlagen", "ListFiles("+
 func ListFiles(dir string) ([]string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		return nil, err
+		//return nil, err
 		//return  nil,
-		//ui.RedError("Cannot resolve work directory", "verify $PATH", err)
+		utils.RedError("Cannot resolve work directory", "verify $PATH", err)
 	}
 	var files []string
 	for _, e := range entries {
@@ -54,7 +56,7 @@ func PromptSelection(files []string) (int, error) {
 	for i, f := range files {
 		fmt.Printf("[%d] %s\n", i+1, filepath.Base(f))
 	}
-	fmt.Print("\nPlease enter number (or 0 to cancel): ")
+	fmt.Print(utils.Colourise("Please enter number (or 0 to cancel): ", utils.ColorYellow))
 
 	reader := bufio.NewReader(os.Stdin)
 	line, err := reader.ReadString('\n')
