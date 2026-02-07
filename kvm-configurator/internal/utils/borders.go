@@ -51,7 +51,7 @@ func BoxCenter(width int, lines []string) string {
     b.WriteString(top + "\n")
     
     for _, l := range lines {
-        // Zentrierung: Leerzeichen links + Text + Leerzeichen rechts
+        // Centering Space left + text + space right
         padding := (maxLen - len(l)) / 2
         centered := strings.Repeat(" ", padding) + l + strings.Repeat(" ", maxLen-len(l)-padding)
         b.WriteString(fmt.Sprintf("\033[34m│ %s │\033[0m\n", centered))

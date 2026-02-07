@@ -1,5 +1,5 @@
 // utils/colours.go
-// last modification: Feb 05 2026
+// last modification: Feb 07 2026
 package utils
 
 import (
@@ -19,23 +19,17 @@ const (
     ColorBold   = "\033[1m"
 )
 
-/* --------------------
-  Colourise wraps a plain string in the given colour code
--------------------- */
+// Colourise wraps a plain string in the given colour code
 func Colourise(text, colour string) string {
     return colour + text + ColorReset
 }
 
-/* --------------------
-  Bold wraps a string in the “bold” escape sequence
--------------------- */
+// Bold wraps a string in the “bold” escape sequence
 func MakeBold(text string) string {
     return ColorBold + text + ColorReset
 }
 
-/* --------------------
-  combines colour & bold
--------------------- */
+// combines colour & bold
 func ColouriseBold(text, colour string) string {
     return colour + ColorBold + text + ColorReset
 }
@@ -55,10 +49,12 @@ func RedError(prefix, ctx string, err error) {
 	SimpleError(prefix, ctx, err, ColorRed)
 }
 
-// Success – displays a green success message.
-// prefix = short title (e.g., “✅ VM created”)
-// ctx = additional information (e.g., “my-vm-01”)
-// extra = optional additional text (can be empty)
+/*
+	Success – displays a green success message.
+	prefix = short title (e.g., “✅ VM created”)
+	ctx = additional information (e.g., “my-vm-01”)
+	extra = optional additional text (can be empty)
+*/
 func Success(prefix, ctx, extra string) {
 	msg := fmt.Sprintf("%s – %s", prefix, ctx)
 	if extra != "" {
@@ -77,34 +73,3 @@ func Info(prefix, ctx string) {
 	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf("%s – %s", prefix, ctx), ColorBlue))
 }
 // EOF
-
-// TEST
-/*
-// 2️⃣  Kleine Struktur, die alles hält, was du brauchst
-type UIError struct {
-	Prefix string // z. B. "❗️ Config fehlt"
-	Colour string // Rot, Gelb … (kann leer bleiben → keine Farbe)
-	Err    error  // originaler Fehler, damit errors.Is/As weiter funktioniert
-}
-
-// Error erfüllt das built‑in error‑Interface
-func (e *UIError) Error() string {
-	msg := fmt.Sprintf("%s – %v", e.Prefix, e.Err)
-	if e.Colour != "" {
-		return e.Colour + msg + Reset
-	}
-	return msg
-}
-
-// Unwrap ermöglicht errors.Is/As
-func (e *UIError) Unwrap() error { return e.Err }
-// 3️⃣  Schnell‑Factory – du rufst nur diese eine Funktion auf
-func NewUIError(colour, prefix string, ctx string, err error) error {
-	if err == nil {
-		return nil
-	}
-	// Kontext‑Text wird zwischen Prefix und Original‑Error eingefügt
-	fullPrefix := fmt.Sprintf("%s – %s", prefix, ctx)
-	return &UIError{Prefix: fullPrefix, Colour: colour, Err: err}
-}
-*/

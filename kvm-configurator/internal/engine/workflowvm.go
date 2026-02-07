@@ -1,5 +1,5 @@
 // engine/workflowvm.go
-// last modification: Feb 05 2026
+// last modification: Feb 07 2026
 package engine
 
 import (
@@ -10,9 +10,8 @@ import (
 	"configurator/internal/utils"
 	"configurator/internal/model"
 )
-/* --------------------
-	Workflow "New VM"
--------------------- */
+
+// Workflow "New VM"
 func RunNewVMWorkflow(
 	r *bufio.Reader,
 	osList []config.VMConfig,

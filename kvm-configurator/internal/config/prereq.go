@@ -1,5 +1,5 @@
 // config/prereq.go
-// last modification: Feb 04 2026
+// last modification: Feb 07 2026
 package config
 
 import (
@@ -9,9 +9,7 @@ import (
 	"path/filepath"
 )
 
-/* --------------------
-	CommandMissingError
--------------------- */
+// CommandMissingError
 type CommandMissingError struct {
 	Cmd string
 }
@@ -20,9 +18,7 @@ func (e *CommandMissingError) Error() string {
 	return fmt.Sprintf("command %q not found in PATH", e.Cmd)
 }
 
-/* --------------------
-	RequireCommand checks whether an executable program is located in $PATH
--------------------- */
+// RequireCommand checks whether an executable program is located in $PATH
 func RequireCommand(name string) error {
 	if _, err := exec.LookPath(name); err != nil {
 		return &CommandMissingError{Cmd: name}
@@ -30,9 +26,7 @@ func RequireCommand(name string) error {
 	return nil
 }
 
-/* --------------------
-	EnsureAll performs several checks in sequence
--------------------- */
+// EnsureAll performs several checks in sequence
 func EnsureAll(commands ...string) error {
 	for _, cmd := range commands {
 		if err := RequireCommand(cmd); err != nil {

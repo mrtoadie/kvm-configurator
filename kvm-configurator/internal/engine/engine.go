@@ -1,5 +1,5 @@
 // engine/engine.go
-// last modification: Feb 04 2026
+// last modification: Feb 07 2026
 package engine
 
 import (
@@ -16,17 +16,16 @@ import (
 	"configurator/internal/utils"
 )
 
-/* --------------------
+/*
 	CreateVM receives a fully‑filled DomainConfig, the os‑variant string
 	and the absolute path to the ISO file
--------------------- */
+*/
 func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePaths) error {
 	// Check if the ISO file exists
 	if _, err := os.Stat(isoPath); err != nil {
 		//return fmt.Errorf("\x1b[31mISO not accessible: %w\x1b[0m", err)
 		utils.RedError("ISO not accessible", isoPath, err)
 	}
-
 	// create Disk‑Argument
 	diskArg, haveRealDisk := model.BuildDiskArg(cfg)
 

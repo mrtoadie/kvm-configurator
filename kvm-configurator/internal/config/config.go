@@ -1,5 +1,5 @@
 // internal/config/config.go
-// last modification: Feb 05 2026
+// last modification: Feb 07 2026
 package config
 
 import (
@@ -10,6 +10,7 @@ import (
 	"gopkg.in/yaml.v3"
 	//"configurator/internal/utils"
 )
+
 // VMConfig represents a single operating‑system or guest definition coming from the YAML file
 type VMConfig struct {
 	Name        string 		`yaml:"name"`				// display name "Arch Linux"
@@ -18,7 +19,7 @@ type VMConfig struct {
 	RAM         int    		`yaml:"ram"`				// RAM in MiB
 	DiskSize    int    		`yaml:"disksize"`		// disk size in GiB
 	DiskPath    string 		`yaml:"diskpath"`		// path disk image
-	ISOPath     string 		`yaml:"isopath"`	// path iso image
+	ISOPath     string 		`yaml:"isopath"`		// path iso image
 	NestedVirt  string 		`yaml:"nvirt"`			// vmx (intel), smx (amd)
 	Network     string 		`yaml:"network"`   	// bridge | nat | none
 	Graphics    string 		`yaml:"graphics"`  	// graphic driver / mode: spice | vnc | none
@@ -32,9 +33,8 @@ type Defaults struct {
 	DiskPath string
 	DiskSize int
 }
-/* ---------------------------------------------------------
-   FilePaths – only the “filepaths” block from the config file
---------------------------------------------------------- */
+
+// FilePaths – only the “filepaths” block from the config file
 type FilePaths struct {
 	Filepaths struct {
 		IsoPath string `yaml:"isopath"`
@@ -54,10 +54,10 @@ type AdvancedFeaturesRoot struct {
 	AdvFeatures []AdvancedFeaturesRoot `yaml:"oslist"`
 }
 
-/* ---------------------------------------------------------
-   Helper: expand all string fields in a struct using os.ExpandEnv
-   (recursively handles nested structs, slices and maps)
---------------------------------------------------------- */
+/*
+	Helper: expand all string fields in a struct using os.ExpandEnv
+  (recursively handles nested structs, slices and maps)
+*/
 func expandStrings(v interface{}) {
 	val := reflect.ValueOf(v)
 	if val.Kind() != reflect.Ptr || val.IsNil() {
@@ -67,8 +67,10 @@ func expandStrings(v interface{}) {
 	expandValue(val)
 }
 
-// ExpandEnvInStruct recursively expands environment variables in all string fields
-// of structs, slices, maps, and their nested contents using os.ExpandEnv.
+/*
+	ExpandEnvInStruct recursively expands environment variables in all string fields
+	of structs, slices, maps, and their nested contents using os.ExpandEnv.
+*/
 func ExpandEnvInStruct(v any) {
 	if v == nil {
 		return
@@ -112,9 +114,7 @@ func expandValue(val reflect.Value) {
 	}
 }
 
-/* ---------------------------------------------------------
-   LoadOSList – reads the OS list YAML file and expands env vars
---------------------------------------------------------- */
+// LoadOSList – reads the OS list YAML file and expands env vars
 func LoadOSList(path string) ([]VMConfig, Defaults, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -131,9 +131,7 @@ func LoadOSList(path string) ([]VMConfig, Defaults, error) {
 	return root.OSList, root.Defaults, nil
 }
 
-/* ---------------------------------------------------------
-   LoadFilePaths – reads the filepaths block and expands env vars
---------------------------------------------------------- */
+// LoadFilePaths – reads the filepaths block and expands env vars
 func LoadFilePaths(path string) (*FilePaths, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -148,10 +146,10 @@ func LoadFilePaths(path string) (*FilePaths, error) {
 	return &fp, nil
 }
 
-/* ---------------------------------------------------------
-   ResolveWorkDir – returns the directory that should be scanned
-   (prefers the configured InputDir, falls back to the current working directory)
---------------------------------------------------------- */
+/*
+  ResolveWorkDir – returns the directory that should be scanned
+	(prefers the configured InputDir, falls back to the current working directory)
+*/
 func ResolveWorkDir(fp *FilePaths) (string, error) {
 	if fp.Filepaths.IsoPath != "" {
 		return fp.Filepaths.IsoPath, nil

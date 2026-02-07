@@ -19,9 +19,7 @@ import (
 	"configurator/kvmtools"
 )
 
-/* --------------------
-	MAIN
--------------------- */
+// MAIN
 func main() {
 	// [Modul: config] validates if (virt‑install, virsh) is installed
 	if err := config.EnsureAll(config.CmdVirtInstall, config.CmdVirsh); err != nil {
@@ -71,8 +69,8 @@ func main() {
 	r := bufio.NewReader(os.Stdin)
 	for {
 		//fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColorBlue))
-		fmt.Println(utils.BoxCenter(21, []string{"=== MAIN MENU ==="}))
-		    fmt.Println(utils.Box(21, []string{
+		fmt.Println(utils.BoxCenter(20, []string{"KVM-CONFIGURATOR"}))
+		    fmt.Println(utils.Box(20, []string{
         "[1] New VM",
         "[2] KVM-Tools",
         "[h] Help",

@@ -1,5 +1,5 @@
 // fileutils/fileutils.go
-// last modification: Feb 05 2026
+// last modification: Feb 07 2026
 package fileutils
 
 import (
@@ -14,17 +14,7 @@ import (
 	"configurator/internal/utils"
 )
 
-/* --------------------
-	ListFiles
--------------------- */
-
-/*
-
-if err != nil {
-return nil,
-ui.NewUIError(ui.Red, "❗️ Verzeichnis‑Lesen fehlgeschlagen", "ListFiles("+dir+")", err)
-}
-*/
+// ListFiles
 func ListFiles(dir string) ([]string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -45,9 +35,7 @@ func ListFiles(dir string) ([]string, error) {
 	return files, nil
 }
 
-/* --------------------
-	PromptSelection
--------------------- */
+// PromptSelection
 func PromptSelection(files []string) (int, error) {
 	if len(files) == 0 {
 		return -1, fmt.Errorf("no files found")
