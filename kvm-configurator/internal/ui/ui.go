@@ -59,6 +59,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 // NEW
 lines := utils.TableToLines(func(w *tabwriter.Writer) {
     fmt.Fprintln(w, "No.\tName\tCPU\tRAM (MiB)\tDisk (GB)")
+		fmt.Fprintln(w, "---\t----\t---\t---------\t---------")
 for i, d := range sorted {
 		fmt.Fprintf(w, "%2d\t%s\t%d\t%d\t%d\n",
 			i+1, d.Name, d.CPU, d.RAM, d.DiskSize)
@@ -119,11 +120,14 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 /* --------------------
 	Form – allows changes to the fields
 -------------------- */
+/*
 func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string, isoWorkDir string) {
+	fmt.Println(utils.BoxCenter(51, []string{"=== VM-CONFIG ==="}))
+	
 	w := utils.NewTabWriter()
 	
 	for {
-		fmt.Fprintln(w, utils.Colourise("\n=== VM-Config ===\t", utils.ColorBlue))
+		//fmt.Fprintln(w, utils.Colourise("\n=== VM-Config ===\t", utils.ColorBlue))
 		fmt.Fprintf(w, "[1] Name:\t%s\t[default]\n", cfg.Name)
 		fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t\n", cfg.MemMiB)
 		fmt.Fprintf(w, "[3] vCPU:\t%d\t[default]\n", cfg.VCPU)
@@ -189,23 +193,98 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		}
 	}
 }
+*/
+func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string, isoWorkDir string) {
+    for {
+			isoFile := filepath.Base(cfg.ISOPath)
+			fmt.Println(utils.BoxCenter(51, []string{"=== VM-CONFIG ==="}))
+        // 1) Menüzeilen mit Tabwriter in Zeilen-Slice umwandeln
+        lines := utils.TableToLines(func(w *tabwriter.Writer) {
+            fmt.Fprintf(w, "[1] Name:\t%s\t[default]\n", cfg.Name)
+            fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t\n", cfg.MemMiB)
+            fmt.Fprintf(w, "[3] vCPU:\t%d\t[default]\n", cfg.VCPU)
+            fmt.Fprintf(w, "[4] Disk-Path:\t%s\t[default = no disk path]\n", cfg.DiskPath)
+            fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\t[default]\n", cfg.DiskSize)
+            fmt.Fprintf(w, "[6] Network:\t%s\t[default]\n", cfg.Network)
+            fmt.Fprintf(w, "[7] Advanced Parameters\n")
+            fmt.Fprintf(w, "[8] ISO:\t%s\n", isoFile)//cfg.ISOPath)
+        })
 
+        // 2) Box darum bauen und ausgeben
+        fmt.Println(utils.Box(70, lines))
+
+        // 3) Prompt wie gehabt
+        f, _ := ReadLine(r, utils.Colourise("\nSelect or press Enter to continue: ", utils.ColorYellow))
+        if f == "" {
+            break
+        }
+
+        switch f {
+        case "1":
+            if v, _ := ReadLine(r, ">> New Name: "); v != "" {
+                cfg.Name = v
+            }
+        case "2":
+            if v, _ := ReadLine(r, ">> RAM (MiB): "); v != "" {
+                if i, e := strconv.Atoi(v); e == nil && i > 0 {
+                    cfg.MemMiB = i
+                }
+            }
+        case "3":
+            if v, _ := ReadLine(r, ">> vCPU: "); v != "" {
+                if i, e := strconv.Atoi(v); e == nil && i > 0 {
+                    cfg.VCPU = i
+                }
+            }
+        case "4":
+            prompt := fmt.Sprintf(">> Disk path (default: %s): ", defaultDiskPath)
+            if v, _ := ReadLine(r, prompt); v != "" {
+                cfg.DiskPath = os.ExpandEnv(v)
+            } else {
+                cfg.DiskPath = os.ExpandEnv(defaultDiskPath)
+            }
+            fmt.Printf("\x1b[32mDisk will be stored at: %s\x1b[0m\n", cfg.DiskPath)
+        case "5":
+            if v, _ := ReadLine(r, ">> Disksize (GB): "); v != "" {
+                if i, e := strconv.Atoi(v); e == nil && i > 0 {
+                    cfg.DiskSize = i
+                }
+            }
+        case "6":
+            if v, _ := ReadLine(r, ">> Network (none or default): "); true {
+                cfg.Network = v
+            }
+        case "7":
+            editAdvanced(r, cfg)
+        case "8":
+            isoPath, err := PromptSelectISO(r, isoWorkDir)
+            if err != nil {
+                fmt.Printf("\x1b[31mISO selection failed: %v\x1b[0m\n", err)
+                continue
+            }
+            cfg.ISOPath = isoPath
+            fmt.Printf("\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
+        }
+    }
+}
 /* --------------------
 	Form – Advanced Parameters
 -------------------- */
 func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
-	w := utils.NewTabWriter()
+	fmt.Println(utils.BoxCenter(51, []string{"=== ADVANCED PARAMETERS ==="}))
 	for {
-		fmt.Fprintln(w, utils.Colourise("\n=== Advanced Parameters ===\t", utils.ColorBlue))
+		lines := utils.TableToLines(func(w *tabwriter.Writer) {
+		//fmt.Fprintln(w, utils.Colourise("\n=== Advanced Parameters ===\t", utils.ColorBlue))
 		fmt.Fprintln(w, "Parameter\t Default\t Set")
+		fmt.Fprintln(w, "---------\t -------\t ---")
 		fmt.Fprintln(w, "[a] Nested-Virtualisation\t", cfg.NestedVirt)
 		fmt.Fprintln(w, "[b] Boot-Order\t", cfg.BootOrder)
 		fmt.Fprintln(w, "[c] Graphics\t", cfg.Graphics)
 		fmt.Fprintln(w, "[d] Sound\t", cfg.Sound)
 		fmt.Fprintln(w, "[e] Filesystem\t", cfg.FileSystem)
-		fmt.Fprintln(w, "-------------------------------------")
 		fmt.Fprintln(w, "[0] Back to main menu")
-		w.Flush()
+		})
+		fmt.Println(utils.Box(60, lines))
 
 		choice, _ := ReadLine(r, utils.Colourise("\nSelect an option (or press Enter to go back): ", utils.ColorYellow))
 		if choice == "" || strings.EqualFold(choice, "0") {
@@ -289,7 +368,7 @@ fmt.Println(utils.BoxCenter(51, []string{"=== VM-SUMMARY ==="}))
     })
 		
 
-    fmt.Println(utils.Box(50, lines)) // 50 = gewünschte Mindestbreite innen
+    fmt.Println(utils.Box(60, lines)) // 50 = gewünschte Mindestbreite innen
 // END NEW
 
 	fmt.Print(utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
