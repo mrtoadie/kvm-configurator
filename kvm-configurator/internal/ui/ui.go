@@ -121,6 +121,7 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 -------------------- */
 func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string, isoWorkDir string) {
 	w := utils.NewTabWriter()
+	
 	for {
 		fmt.Fprintln(w, utils.Colourise("\n=== VM-Config ===\t", utils.ColorBlue))
 		fmt.Fprintf(w, "[1] Name:\t%s\t[default]\n", cfg.Name)
@@ -247,15 +248,11 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 	Summary table
 -------------------- */
 func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
+	// trim filepath and filename to only display filename
+	isoFile := filepath.Base(cfg.ISOPath)
+	//isoName := strings.TrimSuffix(isoFile, filepath.Ext(isoFile))
 
-// HERE GOES WEITER :P	
-lines := utils.TableToLines(func(w *tabwriter.Writer) {
-    fmt.Fprintln(w, "VM-SUMMARY")
-
-	w.Flush()
-	})
-fmt.Print(utils.Box(51, lines))
-	
+	/*
 	w := utils.NewTabWriter()	
 	fmt.Fprintln(w, utils.Colourise("\n=== VM-SUMMARY ===", utils.ColorBlue))
 	fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
@@ -271,6 +268,29 @@ fmt.Print(utils.Box(51, lines))
 	fmt.Fprintf(w, "Sound:\t%s\n", cfg.Sound)
 	fmt.Fprintf(w, "Filesystem:\t%s\n", cfg.FileSystem)
 	w.Flush()
+*/
+fmt.Println(utils.BoxCenter(51, []string{"=== VM-SUMMARY ==="}))
+// NEW
+    lines := utils.TableToLines(func(w *tabwriter.Writer) {
+        //fmt.Fprintln(w, utils.Colourise("=== VM-SUMMARY ===", utils.ColorBlue))
+        fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
+        fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)
+        fmt.Fprintf(w, "vCPU:\t%d\n", cfg.VCPU)
+        fmt.Fprintf(w, "Disk-Path:\t%s\n", cfg.DiskPath)
+        fmt.Fprintf(w, "Disk-Size (GB):\t%d\n", cfg.DiskSize)
+        fmt.Fprintf(w, "Network:\t%s\n", cfg.Network)
+        fmt.Fprintf(w, "Nested-Virtualisation:\t%s\n", cfg.NestedVirt)
+        //fmt.Fprintf(w, "ISO-File:\t%s\n", cfg.ISOPath)
+				fmt.Fprintf(w, "ISO-File:\t%s\n", isoFile)
+        fmt.Fprintf(w, "Boot-Order:\t%s\n", cfg.BootOrder)
+        fmt.Fprintf(w, "Graphic:\t%s\n", cfg.Graphics)
+        fmt.Fprintf(w, "Sound:\t%s\n", cfg.Sound)
+        fmt.Fprintf(w, "Filesystem:\t%s\n", cfg.FileSystem)
+    })
+		
+
+    fmt.Println(utils.Box(50, lines)) // 50 = gewünschte Mindestbreite innen
+// END NEW
 
 	fmt.Print(utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
 	_, _ = r.ReadString('\n')
