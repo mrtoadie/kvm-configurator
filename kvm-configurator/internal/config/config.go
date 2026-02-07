@@ -10,6 +10,17 @@ import (
 	"gopkg.in/yaml.v3"
 	//"configurator/internal/utils"
 )
+type FullConfig struct {
+    // Das, was bisher in FilePaths steckt
+    IsoPath string
+    XmlDir  string
+
+    // Global‑Defaults (DiskPath, DiskSize …)
+    Defaults Defaults
+
+    // Die eigentliche OS‑Liste
+    OSList []VMConfig
+}
 
 // VMConfig represents a single operating‑system or guest definition coming from the YAML file
 type VMConfig struct {
@@ -159,5 +170,41 @@ func ResolveWorkDir(fp *FilePaths) (string, error) {
 		return "", fmt.Errorf("cannot determine working directory: %w", err)
 	}
 	return cwd, nil
+}
+
+// internal/config/config.go
+func LoadAll(path string) (*FullConfig, error) {
+    // 1️⃣ Datei einlesen (einmal!)
+    data, err := os.ReadFile(path)
+    if err != nil {
+        return nil, fmt.Errorf("cannot read config %q: %w", path, err)
+    }
+
+    // 2️⃣ In ein temporäres Root‑Struct unmarshallen,
+    //    das sowohl filepaths als auch oslist enthält.
+    var raw struct {
+        Filepaths struct {
+            IsoPath string `yaml:"isopath"`
+            XmlDir  string `yaml:"xmlpath"`
+        } `yaml:"filepaths"`
+
+        Defaults Defaults   `yaml:"defaults"`
+        OSList   []VMConfig `yaml:"oslist"`
+    }
+
+    if err := yaml.Unmarshal(data, &raw); err != nil {
+        return nil, fmt.Errorf("parse config %q: %w", path, err)
+    }
+
+    // 3️⃣ Env‑Variablen expanden (wie bisher)
+    ExpandEnvInStruct(&raw)
+
+    // 4️⃣ Ergebnis zusammenbauen
+    return &FullConfig{
+        IsoPath:  raw.Filepaths.IsoPath,
+        XmlDir:   raw.Filepaths.XmlDir,
+        Defaults: raw.Defaults,
+        OSList:   raw.OSList,
+    }, nil
 }
 // EOF

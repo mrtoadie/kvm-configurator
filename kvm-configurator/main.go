@@ -1,14 +1,14 @@
-// Version 1.0.6
+// Version 1.0.7
 // Autor: 	MrToadie
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // License: MIT
-// last modification: Feb 05 2026
+// last modification: Feb 07 2026
 package main
 
 import (
 	"bufio"
-	"errors"
+	//"errors"
 	"fmt"
 	"os"
 	// internal
@@ -20,6 +20,7 @@ import (
 )
 
 // MAIN
+/*
 func main() {
 	// [Modul: config] validates if (virt‑install, virsh) is installed
 	if err := config.EnsureAll(config.CmdVirtInstall, config.CmdVirsh); err != nil {
@@ -110,70 +111,97 @@ func main() {
 		}
 	}
 }
+*/
 
-/* --------------------
-	Workflow "New VM"
--------------------- */
-/*
-func runNewVMWorkflow(
-	r *bufio.Reader,
-	osList []config.VMConfig,
-	defs struct {
-		DiskPath string
-		DiskSize int
-	},
-	variantByName map[string]string,
-	isoWorkDir string,
-	fp *config.FilePaths, //load xml_dir
-) error {
+func main() {
+	// [Modul: config] validates if (virt‑install, virsh) is installed
+	if err := config.EnsureAll(config.CmdVirtInstall, config.CmdVirsh); err != nil {
+		// exit if virt-install or virsh are not found
+		utils.RedError("virt-install not found", "verify $PATH", err)
+		os.Exit(1)
+	}
+	// for debug only
+	//ui.Success("✅ Prereqs OK", "virt-install & virsh FOUND!", "")
 
-	// choosing distribution
-	distro, err := ui.PromptSelectDistro(r, osList)
+	// Get everything from the YAML file in one go
+	cfg, err := config.LoadAll(config.FileConfig) // One call, one result
 	if err != nil {
-		return fmt.Errorf("\x1b[31mOS selection failed: %w\x1b[0m", err)
-	}
-	// validating
-	variant, ok := variantByName[distro.Name]
-	if !ok {
-		return fmt.Errorf("no varriant found for distro %q", distro.Name)
+		utils.RedError("Failed to load configuration", "", err)
+		os.Exit(1)
 	}
 
-	// Disk‑Path‑Default from selected distro
-	defaultDiskPath := distro.DiskPath
-  if defaultDiskPath == "" {
-    defaultDiskPath = defs.DiskPath
-  }
-
-	// create basic config from default values
-	cfg := model.DomainConfig{
-		Name:       distro.Name,
-		MemMiB:     distro.RAM,
-		VCPU:       distro.CPU,
-		DiskSize:   model.EffectiveDiskSize(distro, defs),
-		ISOPath:		distro.ISOPath,
-		Network: 		distro.Network,
-		NestedVirt: distro.NestedVirt,
-		Graphics: 	distro.Graphics,
-		Sound:			distro.Sound,
-		FileSystem: distro.FileSystem,
-		BootOrder: 	distro.BootOrder,
+	// Determine working directory (ISO folder)
+	workDir := cfg.IsoPath
+	if workDir == "" {
+		// fallback dir
+		if cwd, e := os.Getwd(); e == nil {
+			workDir = cwd
+		}
 	}
 
-	// Optional Edit Menu for last edits
-	ui.PromptEditDomainConfig(r, &cfg, defaultDiskPath, isoWorkDir)
-
-	// Summary
-	ui.ShowSummary(r, &cfg, cfg.ISOPath)
-
-	// Create VM
-	if err := engine.CreateVM(cfg, variant, cfg.ISOPath, fp); err != nil {
-		//return fmt.Errorf("\x1b[31mVM creation failed: %w\x1b[0m", err)
-		ui.RedError("VM creation failed", cfg.Name, err)
-		// WIP
-		//return ui.Fatal(ui.ErrVMCreationFail, "%w")
-	}	else {
-		ui.Success("VM", cfg.Name, "successfully built!")
+	// // [Modul: config] 
+	osList   := cfg.OSList		// the list of supported distributions
+	defaults := cfg.Defaults	// global specifications (disk path, size, ...)
+	variantByName := make(map[string]string, len(osList))
+	for _, d := range osList {
+		variantByName[d.Name] = d.ID
 	}
-	return nil
-}*/
+
+	// main menu loop
+	r := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColorBlue))
+		fmt.Println(utils.Box(20, []string{"KVM-CONFIGURATOR"}))
+
+		fmt.Println(utils.Box(20, []string{
+			"[1] New VM",
+			"[2] KVM‑Tools",
+			"[h] Help",
+			"[0] Exit",
+		}))
+		fmt.Print(utils.Colourise(" Selection: ", utils.ColorYellow))
+
+		var sel string
+		if _, err := fmt.Scanln(&sel); err != nil {
+			// Invalid entry → we simply ask again
+			continue
+		}
+
+		switch sel {
+		case "0":
+			fmt.Println("Bye!")
+			return
+
+		case "1":
+			// The actual “launch sequence” for a new VM
+			if err := engine.RunNewVMWorkflow(
+				r,
+				osList,
+				defaults,
+				variantByName,
+				workDir,
+				&config.FilePaths{
+					Filepaths: struct {
+						IsoPath string `yaml:"isopath"`
+						XmlDir  string `yaml:"xmlpath"`
+					}{
+						IsoPath: cfg.IsoPath,
+						XmlDir:  cfg.XmlDir,
+					},
+				},
+			); err != nil {
+				// error
+				fmt.Fprintf(os.Stderr, "%sError: %v%s\n",
+					utils.ColorRed, err, utils.ColorReset)
+			}
+
+		case "2":
+			kvmtools.Start(r)
+		case "h":
+			ui.PrintHelp()
+		default:
+			fmt.Println(utils.Colourise("\nInvalid selection!", utils.ColorRed))
+		}
+	}
+}
 // EOF
