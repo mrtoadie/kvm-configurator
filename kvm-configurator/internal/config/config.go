@@ -9,7 +9,6 @@ import (
 
 	// external
 	"gopkg.in/yaml.v3"
-	//"configurator/internal/utils"
 )
 
 type FullConfig struct {
