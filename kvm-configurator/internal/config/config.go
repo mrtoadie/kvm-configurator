@@ -1,86 +1,51 @@
 // internal/config/config.go
-// last modification: Feb 07 2026
+// last modification: Feb 08 2026
 package config
 
 import (
 	"fmt"
 	"os"
 	"reflect"
+
 	// external
 	"gopkg.in/yaml.v3"
 	//"configurator/internal/utils"
 )
+
 type FullConfig struct {
-    // Das, was bisher in FilePaths steckt
-    IsoPath string
-    XmlDir  string
-
-    // Global‑Defaults (DiskPath, DiskSize …)
-    Defaults Defaults
-
-    // Die eigentliche OS‑Liste
-    OSList []VMConfig
+	IsoPath  string     // path to iso dir
+	XmlDir   string     // path to xml save dir
+	Defaults Defaults   // global‑dDefaults (DiskPath, DiskSize …)
+	OSList   []VMConfig // OS‑Liste
 }
 
 // VMConfig represents a single operating‑system or guest definition coming from the YAML file
 type VMConfig struct {
-	Name        string 		`yaml:"name"`				// display name "Arch Linux"
-	ID          string 		`yaml:"id"`					// identifier, e.g. "archlinux"
-	CPU         int    		`yaml:"cpu"`				// number of vCPUs
-	RAM         int    		`yaml:"ram"`				// RAM in MiB
-	DiskSize    int    		`yaml:"disksize"`		// disk size in GiB
-	DiskPath    string 		`yaml:"diskpath"`		// path disk image
-	ISOPath     string 		`yaml:"isopath"`		// path iso image
-	NestedVirt  string 		`yaml:"nvirt"`			// vmx (intel), smx (amd)
-	Network     string 		`yaml:"network"`   	// bridge | nat | none
-	Graphics    string 		`yaml:"graphics"`  	// graphic driver / mode: spice | vnc | none
-	Sound       string 		`yaml:"sound"`			// ac97 | ich6 | ich9 (default)
-	FileSystem  string 		`yaml:"filesystem"`	// virtiofs | 9p | none
-	BootOrder   string 		`yaml:"bootorder"` 	// stored as a string for backward compatibility
-	Firmware		string 		`yaml:"firmware"` 	// BIOS | EFI (not working yet)
+	Name       string `yaml:"name"`       // display name "Arch Linux"
+	ID         string `yaml:"id"`         // identifier, e.g. "archlinux"
+	CPU        int    `yaml:"cpu"`        // number of vCPUs
+	RAM        int    `yaml:"ram"`        // RAM in MiB
+	DiskSize   int    `yaml:"disksize"`   // disk size in GiB
+	DiskPath   string `yaml:"diskpath"`   // path disk image
+	ISOPath    string `yaml:"isopath"`    // path iso image
+	NestedVirt string `yaml:"nvirt"`      // vmx (intel), smx (amd)
+	Network    string `yaml:"network"`    // bridge | nat | none
+	Graphics   string `yaml:"graphics"`   // graphic driver / mode: spice | vnc | none
+	Sound      string `yaml:"sound"`      // ac97 | ich6 | ich9 (default)
+	FileSystem string `yaml:"filesystem"` // virtiofs | 9p | none
+	BootOrder  string `yaml:"bootorder"`  // stored as a string for backward compatibility
+	Firmware   string `yaml:"firmware"`   // BIOS | EFI (not working yet)
 }
 
+// global defaults (are overwritten by every VM entry)
 type Defaults struct {
 	DiskPath string
 	DiskSize int
 }
 
-// FilePaths – only the “filepaths” block from the config file
-type FilePaths struct {
-	Filepaths struct {
-		IsoPath string `yaml:"isopath"`
-		XmlDir   string `yaml:"xmlpath"`
-	} `yaml:"filepaths"`
-}
-// OSRoot mirrors the top-level structure of the OS list YAML file.
-type OSRoot struct {
-	Defaults Defaults  `yaml:"defaults"`
-	OSList   []VMConfig `yaml:"oslist"`
-}
-// AdvancedFeaturesRoot mirrors the advanced‑features YAML file (currently unused elsewhere)
-type AdvancedFeaturesRoot struct {
-	AdvancedFeatures struct {
-		StartInit bool `yaml:"start_init"`
-	} `yaml:"advanced_features"`
-	AdvFeatures []AdvancedFeaturesRoot `yaml:"oslist"`
-}
-
 /*
-	Helper: expand all string fields in a struct using os.ExpandEnv
-  (recursively handles nested structs, slices and maps)
-*/
-func expandStrings(v interface{}) {
-	val := reflect.ValueOf(v)
-	if val.Kind() != reflect.Ptr || val.IsNil() {
-		return // nothing to do
-	}
-	val = val.Elem()
-	expandValue(val)
-}
-
-/*
-	ExpandEnvInStruct recursively expands environment variables in all string fields
-	of structs, slices, maps, and their nested contents using os.ExpandEnv.
+ExpandEnvInStruct recursively expands environment variables in all string fields
+of structs, slices, maps, and their nested contents using os.ExpandEnv.
 */
 func ExpandEnvInStruct(v any) {
 	if v == nil {
@@ -125,86 +90,37 @@ func expandValue(val reflect.Value) {
 	}
 }
 
-// LoadOSList – reads the OS list YAML file and expands env vars
-func LoadOSList(path string) ([]VMConfig, Defaults, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, Defaults{}, fmt.Errorf("read OS-list file %q: %w", path, err)
-	}
-
-	var root OSRoot
-	if err := yaml.Unmarshal(data, &root); err != nil {
-		return nil, Defaults{}, fmt.Errorf("parse OS-list file %q: %w", path, err)
-	}
-
-	ExpandEnvInStruct(&root)
-
-	return root.OSList, root.Defaults, nil
-}
-
-// LoadFilePaths – reads the filepaths block and expands env vars
-func LoadFilePaths(path string) (*FilePaths, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var fp FilePaths
-	if err = yaml.Unmarshal(data, &fp); err != nil {
-		return nil, err
-	}
-	// Expand ${HOME}, ${USER}, … in the two path strings.
-	expandStrings(&fp)
-	return &fp, nil
-}
-
-/*
-  ResolveWorkDir – returns the directory that should be scanned
-	(prefers the configured InputDir, falls back to the current working directory)
-*/
-func ResolveWorkDir(fp *FilePaths) (string, error) {
-	if fp.Filepaths.IsoPath != "" {
-		return fp.Filepaths.IsoPath, nil
-	}
-	cwd, err := os.Getwd()
-	if err != nil {
-		return "", fmt.Errorf("cannot determine working directory: %w", err)
-	}
-	return cwd, nil
-}
-
-// internal/config/config.go
+// load yaml
 func LoadAll(path string) (*FullConfig, error) {
-    // 1️⃣ Datei einlesen (einmal!)
-    data, err := os.ReadFile(path)
-    if err != nil {
-        return nil, fmt.Errorf("cannot read config %q: %w", path, err)
-    }
+	// read config file
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read config %q: %w", path, err)
+	}
 
-    // 2️⃣ In ein temporäres Root‑Struct unmarshallen,
-    //    das sowohl filepaths als auch oslist enthält.
-    var raw struct {
-        Filepaths struct {
-            IsoPath string `yaml:"isopath"`
-            XmlDir  string `yaml:"xmlpath"`
-        } `yaml:"filepaths"`
+	// Unmarshall into a temporary root struct containing both filepaths and oslist
+	var raw struct {
+		Filepaths struct {
+			IsoPath string `yaml:"isopath"`
+			XmlDir  string `yaml:"xmlpath"`
+		} `yaml:"filepaths"`
 
-        Defaults Defaults   `yaml:"defaults"`
-        OSList   []VMConfig `yaml:"oslist"`
-    }
+		Defaults Defaults   `yaml:"defaults"`
+		OSList   []VMConfig `yaml:"oslist"`
+	}
 
-    if err := yaml.Unmarshal(data, &raw); err != nil {
-        return nil, fmt.Errorf("parse config %q: %w", path, err)
-    }
+	if err := yaml.Unmarshal(data, &raw); err != nil {
+		return nil, fmt.Errorf("parse config %q: %w", path, err)
+	}
 
-    // 3️⃣ Env‑Variablen expanden (wie bisher)
-    ExpandEnvInStruct(&raw)
+	ExpandEnvInStruct(&raw)
 
-    // 4️⃣ Ergebnis zusammenbauen
-    return &FullConfig{
-        IsoPath:  raw.Filepaths.IsoPath,
-        XmlDir:   raw.Filepaths.XmlDir,
-        Defaults: raw.Defaults,
-        OSList:   raw.OSList,
-    }, nil
+	// assemble result
+	return &FullConfig{
+		IsoPath:  raw.Filepaths.IsoPath,
+		XmlDir:   raw.Filepaths.XmlDir,
+		Defaults: raw.Defaults,
+		OSList:   raw.OSList,
+	}, nil
 }
 // EOF

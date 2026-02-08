@@ -1,5 +1,5 @@
 // engine/engine.go
-// last modification: Feb 07 2026
+// last modification: Feb 08 2026
 package engine
 
 import (
@@ -20,7 +20,7 @@ import (
 	CreateVM receives a fully‑filled DomainConfig, the os‑variant string
 	and the absolute path to the ISO file
 */
-func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePaths) error {
+func CreateVM(cfg model.DomainConfig, variant, isoPath string, xmlDir string) error {
 	// Check if the ISO file exists
 	if _, err := os.Stat(isoPath); err != nil {
 		//return fmt.Errorf("\x1b[31mISO not accessible: %w\x1b[0m", err)
@@ -91,7 +91,6 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, fp *config.FilePa
 	cleanXML := []byte(cleanXMLStr)
 
 	// xml path from config
-	xmlDir := strings.TrimSpace(fp.Filepaths.XmlDir) 
 	if xmlDir == "" {
 		// fallback to current dir
 		xmlDir = "."

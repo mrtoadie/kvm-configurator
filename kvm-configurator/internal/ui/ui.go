@@ -21,7 +21,7 @@ import (
 	"configurator/internal/utils"
 )
 
-//	waiting for input
+// waiting for input
 func ReadLine(r *bufio.Reader, prompt string) (string, error) {
 	fmt.Print(prompt)
 	s, err := r.ReadString('\n')
@@ -71,8 +71,8 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 }
 
 /*
-	PromptSelectISO – selects an ISO file from the specified directory
-	The return value is the 'absolute path' to the file (for virt‑install)
+PromptSelectISO – selects an ISO file from the specified directory
+The return value is the 'absolute path' to the file (for virt‑install)
 */
 func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 	// workDir is directory from filepaths.isopath

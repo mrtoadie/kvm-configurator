@@ -1,14 +1,14 @@
 // engine/workflowvm.go
-// last modification: Feb 07 2026
+// last modification: Feb 08 2026
 package engine
 
 import (
-	"fmt"
 	"bufio"
 	"configurator/internal/config"
+	"configurator/internal/model"
 	"configurator/internal/ui"
 	"configurator/internal/utils"
-	"configurator/internal/model"
+	"fmt"
 )
 
 // Workflow "New VM"
@@ -20,10 +20,10 @@ func RunNewVMWorkflow(
 		DiskSize int
 	},
 	variantByName map[string]string,
-	isoWorkDir string,
-	fp *config.FilePaths, //load xml_dir
+	isoWorkDir string, // directory in which the ISOs are located
+	isoPath string, // Path to ISO directory (can be empty → cwd fallback)
+	xmlDir string, // Destination directory for the libvirt XML file
 ) error {
-
 	// choosing distribution
 	distro, err := ui.PromptSelectDistro(r, osList)
 	if err != nil {
@@ -37,9 +37,9 @@ func RunNewVMWorkflow(
 
 	// Disk‑Path‑Default from selected distro
 	defaultDiskPath := distro.DiskPath
-  if defaultDiskPath == "" {
-    defaultDiskPath = defs.DiskPath
-  }
+	if defaultDiskPath == "" {
+		defaultDiskPath = defs.DiskPath
+	}
 
 	// create basic config from default values
 	cfg := model.DomainConfig{
@@ -47,13 +47,13 @@ func RunNewVMWorkflow(
 		MemMiB:     distro.RAM,
 		VCPU:       distro.CPU,
 		DiskSize:   model.EffectiveDiskSize(distro, defs),
-		ISOPath:		distro.ISOPath,
-		Network: 		distro.Network,
+		ISOPath:    distro.ISOPath,
+		Network:    distro.Network,
 		NestedVirt: distro.NestedVirt,
-		Graphics: 	distro.Graphics,
-		Sound:			distro.Sound,
+		Graphics:   distro.Graphics,
+		Sound:      distro.Sound,
 		FileSystem: distro.FileSystem,
-		BootOrder: 	distro.BootOrder,
+		BootOrder:  distro.BootOrder,
 	}
 
 	// Optional Edit Menu for last edits
@@ -63,13 +63,14 @@ func RunNewVMWorkflow(
 	ui.ShowSummary(r, &cfg, cfg.ISOPath)
 
 	// Create VM
-	if err := CreateVM(cfg, variant, cfg.ISOPath, fp); err != nil {
+	if err := CreateVM(cfg, variant, cfg.ISOPath, xmlDir); err != nil {
 		//return fmt.Errorf("\x1b[31mVM creation failed: %w\x1b[0m", err)
 		utils.RedError("VM creation failed", cfg.Name, err)
 		// WIP
 		//return ui.Fatal(ui.ErrVMCreationFail, "%w")
-	}	else {
+	} else {
 		utils.Success("VM", cfg.Name, "successfully built!")
 	}
 	return nil
 }
+// EOF
