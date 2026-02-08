@@ -18,8 +18,6 @@ import (
 func ListFiles(dir string) ([]string, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
-		//return nil, err
-		//return  nil,
 		utils.RedError("Cannot resolve work directory", "verify $PATH", err)
 	}
 	var files []string
