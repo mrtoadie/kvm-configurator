@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/model"
@@ -17,55 +18,40 @@ import (
 )
 
 /*
-	CreateVM receives a fully‑filled DomainConfig, the os‑variant string
-	and the absolute path to the ISO file
+CreateVM receives a fully‑filled DomainConfig, the os‑variant string
+and the absolute path to the ISO file
 */
-func CreateVM(cfg model.DomainConfig, variant, isoPath string, xmlDir string) error {
-	// Check if the ISO file exists
-	if _, err := os.Stat(isoPath); err != nil {
-		//return fmt.Errorf("\x1b[31mISO not accessible: %w\x1b[0m", err)
-		utils.RedError("ISO not accessible", isoPath, err)
-	}
-	// create Disk‑Argument
-	diskArg, haveRealDisk := model.BuildDiskArg(cfg)
+func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
+	// build disk arguments (multiple!)
+	diskArgs := model.BuildDiskArgs(cfg.Disks, cfg.Name)
 
-	// CPU‑Argument (Nested Virtualisation)
-	cpuBase := "host-passthrough" // always included
+	// CPU arguments
+	cpuBase := "host-passthrough"
 	cpuArg := cpuBase
 	if strings.TrimSpace(cfg.NestedVirt) != "" {
 		cpuArg = fmt.Sprintf("%s,+%s", cpuBase, cfg.NestedVirt)
 	}
-	// disk
-	if haveRealDisk {
-		fmt.Println(utils.Colourise(
-    fmt.Sprintf("Using custom disk: %s", diskArg),
-    utils.ColorYellow,
-		))
-	} else {
-		fmt.Println(utils.Colourise("\x1b[34mNo custom disk – passing '--disk none'\x1b[0m", utils.ColorYellow))
-	}
 
-	// Arguments for virt‑install
+	// base arguments
 	args := []string{
 		"--name", cfg.Name,
 		"--memory", strconv.Itoa(cfg.MemMiB),
 		"--vcpus", strconv.Itoa(cfg.VCPU),
 		"--cpu", cpuArg,
 		"--os-variant", variant,
-		"--disk", diskArg,
 		"--cdrom", cfg.ISOPath,
 		"--boot", "hd,cdrom",
-		//"--boot", cfg.BootOrder,
 		"--graphics", cfg.Graphics,
 		"--sound", cfg.Sound,
 		"--filesystem", cfg.FileSystem,
 		"--print-xml",
 	}
 
-	// Debug output
-	//fmt.Print(args)
-	
-	// SimpleProgress
+	// append all disk arguments (each “--disk” + the argument)
+	for _, da := range diskArgs {
+		args = append(args, "--disk", da)
+	}
+
 	spinner := utils.NewProgress("\x1b[34mRunning virt-install:")
 	defer spinner.Stop()
 
@@ -73,10 +59,10 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, xmlDir string) er
 	var out, errOut bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errOut
 	if err := cmd.Run(); err != nil {
-			utils.RedError("virt-install failed: %w – %s",">", err)
-			return err
+		utils.RedError("virt-install failed: %w – %s", ">", err)
+		return err
 	}
-		
+
 	// Ensure that only one domain block is present
 	raw := out.Bytes()
 	xmlStr := string(raw)
@@ -97,22 +83,22 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath string, xmlDir string) er
 	}
 	xmlFileName := cfg.Name + ".xml"
 	xmlFullPath := filepath.Join(xmlDir, xmlFileName)
-	
-	// Save XML
+
+	// save XML
 	if err := os.WriteFile(xmlFullPath, cleanXML, 0644); err != nil {
-			//return fmt.Errorf("\x1b[31mcould not write XML: %w\x1b[0m", err)
-			utils.RedError("Could not write XML", xmlFileName, err)
-			//os.Exit(1)
+		//return fmt.Errorf("\x1b[31mcould not write XML: %w\x1b[0m", err)
+		utils.RedError("Could not write XML", xmlFileName, err)
+		//os.Exit(1)
 	} else {
 		abs, _ := filepath.Abs(xmlFullPath)
 		utils.Successf("XML definition saved under: %s", abs)
 	}
 
-	// Define the new VM >> libvirt
+	// define the new VM >> libvirt
 	if err := exec.Command("virsh", "define", xmlFullPath).Run(); err != nil {
 		//return fmt.Errorf("\x1b[31mvirsh define failed: %w\x1b[0m", err)
 		utils.RedError("virsh define failed: %w", ">", err)
-		return  err
+		return err
 
 	}
 	//fmt.Println(ui.Colourise("\nVM successfully registered with libvirt/qemu (not yet started).", ui.Green))
