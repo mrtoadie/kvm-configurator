@@ -1,5 +1,5 @@
 // ui/ui.go
-// last modification: February 07 2026
+// last modification: February 08 2026
 package ui
 
 import (
@@ -111,11 +111,18 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			fmt.Fprintf(w, "[1] Name:\t%s\n", cfg.Name)
 			fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t\n", cfg.MemMiB)
 			fmt.Fprintf(w, "[3] vCPU:\t%d\n", cfg.VCPU)
-			fmt.Fprintf(w, "[4] Disk-Path:\t%s\n", cfg.DiskPath)
-			fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\n", cfg.DiskSize)
+			// show first disk
+			if primary := cfg.PrimaryDisk(); primary != nil {
+				fmt.Fprintf(w, "[4] Disk-Path:\t%s\n", primary.Path)
+				fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\n", primary.SizeGiB)
+			} else {
+				fmt.Fprintf(w, "[4] Disk-Path:\t<none>\n")
+				fmt.Fprintf(w, "[5] Disk-Size (GB):\t<none>\n")
+			}
 			fmt.Fprintf(w, "[6] ISO:\t%s\n", isoFile) //cfg.ISOPath
 			fmt.Fprintf(w, "[7] Network:\t%s\n", cfg.Network)
 			fmt.Fprintf(w, "[8] Advanced Parameters\n")
+			fmt.Fprintf(w, "[9] Add disks\n")
 		})
 		// Build a box around it and spend it
 		fmt.Println(utils.Box(51, lines))
@@ -143,17 +150,48 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 				}
 			}
 		case "4":
+			// Change disk path (we edit the *first*disk)
 			prompt := fmt.Sprintf(">> Disk path (default: %s): ", defaultDiskPath)
 			if v, _ := ReadLine(r, prompt); v != "" {
-				cfg.DiskPath = os.ExpandEnv(v)
+				// If no disc exists yet, we create one
+				if primary := cfg.PrimaryDisk(); primary != nil {
+					primary.Path = os.ExpandEnv(v)
+				} else {
+					// Create a new system disk
+					cfg.Disks = append(cfg.Disks, model.DiskSpec{
+						Name: "system",
+						Path: os.ExpandEnv(v),
+						// Size and Bus remain empty -can be set later
+					})
+				}
 			} else {
-				cfg.DiskPath = os.ExpandEnv(defaultDiskPath)
+				// Empty input → use default
+				if primary := cfg.PrimaryDisk(); primary != nil {
+					primary.Path = os.ExpandEnv(defaultDiskPath)
+				} else {
+					cfg.Disks = append(cfg.Disks, model.DiskSpec{
+						Name: "system",
+						Path: os.ExpandEnv(defaultDiskPath),
+					})
+				}
 			}
-			fmt.Printf("\x1b[32mDisk will be stored at: %s\x1b[0m\n", cfg.DiskPath)
+			if primary := cfg.PrimaryDisk(); primary != nil {
+				fmt.Printf("\x1b[32mDisk will be stored at: %s\x1b[0m\n", primary.Path)
+			}
+
 		case "5":
-			if v, _ := ReadLine(r, ">> Disksize (GB): "); v != "" {
+			// Change disk size (only for the first disk)
+			if v, _ := ReadLine(r, ">> Disk size (GB): "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
-					cfg.DiskSize = i
+					if primary := cfg.PrimaryDisk(); primary != nil {
+						primary.SizeGiB = i
+					} else {
+						// no disc yet > create a new one
+						cfg.Disks = append(cfg.Disks, model.DiskSpec{
+							Name:    "system",
+							SizeGiB: i,
+						})
+					}
 				}
 			}
 		case "7":
@@ -170,6 +208,10 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			}
 			cfg.ISOPath = isoPath
 			fmt.Printf("\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
+		case "9":
+			if err := PromptAddDisk(r, cfg, defaultDiskPath); err != nil {
+				utils.RedError("Add Disk failed", "", err)
+			}
 		}
 	}
 }
@@ -238,8 +280,14 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 		fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
 		fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)
 		fmt.Fprintf(w, "vCPU:\t%d\n", cfg.VCPU)
-		fmt.Fprintf(w, "Disk-Path:\t%s\n", cfg.DiskPath)
-		fmt.Fprintf(w, "Disk-Size (GB):\t%d\n", cfg.DiskSize)
+		// is disk primary or addition
+		if primary := cfg.PrimaryDisk(); primary != nil {
+			fmt.Fprintf(w, "Disk-Path:\t%s\n", primary.Path)
+			fmt.Fprintf(w, "Disk-Size (GB):\t%d\n", primary.SizeGiB)
+		} else {
+			fmt.Fprintf(w, "Disk-Path:\t<none>\n")
+			fmt.Fprintf(w, "Disk-Size (GB):\t<none>\n")
+		}
 		fmt.Fprintf(w, "Network:\t%s\n", cfg.Network)
 		fmt.Fprintf(w, "Nested-Virtualisation:\t%s\n", cfg.NestedVirt)
 		fmt.Fprintf(w, "ISO-File:\t%s\n", isoFile)
@@ -254,4 +302,5 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Print(utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
 	_, _ = r.ReadString('\n')
 }
+
 // EOF

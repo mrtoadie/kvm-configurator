@@ -43,10 +43,22 @@ func RunNewVMWorkflow(
 
 	// create basic config from default values
 	cfg := model.DomainConfig{
-		Name:       distro.Name,
-		MemMiB:     distro.RAM,
-		VCPU:       distro.CPU,
-		DiskSize:   model.EffectiveDiskSize(distro, defs),
+		Name:   distro.Name,
+		MemMiB: distro.RAM,
+		VCPU:   distro.CPU,
+		/*
+			We create the *system disk*(first element).
+			The path can be a directory (later becomes <vm>-system.qcow2)
+			or a complete file name
+		*/
+		Disks: []model.DiskSpec{
+			{
+				Name:    "system",                              // name of the first disk
+				Path:    defaultDiskPath,                       // can be empty → will be filled later
+				SizeGiB: model.EffectiveDiskSize(distro, defs), // Size (if defined)
+				Bus:     "virtio",                              // Default bus type (can be changed later)
+			},
+		},
 		ISOPath:    distro.ISOPath,
 		Network:    distro.Network,
 		NestedVirt: distro.NestedVirt,
