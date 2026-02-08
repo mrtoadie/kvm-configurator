@@ -1,11 +1,12 @@
 // model/model.go
-// last modification: February 03 2026
+// last modification: February 08 2026
 package model
 
 import (
 	"fmt"
 	"path/filepath"
 	"strings"
+
 	// internal
 	"configurator/internal/config"
 )
@@ -13,16 +14,35 @@ import (
 /* --------------------
 	[Modul: config] Load DomainConfig
 -------------------- */
+
 type DomainConfig struct {
-	Name, DiskPath, Network, ISOPath string
-	NestedVirt, BootOrder string
-	Graphics, Sound, FileSystem string
-	MemMiB, VCPU, DiskSize int
+	Name    string // VM‑Name (z. B. "arch‑01")
+	ISOPath string // Path to ISO file (can be empty > later prompt)
+	MemMiB int // RAM in MiB
+	VCPU   int // Anzahl vCPUs
+
+	//A VM can have any number of disks.
+	//The first disk will typically be the system drive.
+	Disks []DiskSpec
+
+	// network & other hardware
+	Network    string // bridge | nat | none
+	NestedVirt string // vmx | smx 
+	Graphics   string // spice | vnc | none
+	Sound      string // ac97 | ich6 | ich9
+	FileSystem string // virtiofs | 9p | none
+	BootOrder  string // e.g. "cdrom,hd"
+	Firmware   string // BIOS | EFI (optional, not yet active)
 }
 
-/* --------------------
-	[Modul: config] Load Distro‑Defaults
--------------------- */
+type DiskSpec struct {
+	Name    string
+	Path    string
+	SizeGiB int
+	Bus     string
+}
+
+// [Modul: config] Load Distro‑Defaults
 func EffectiveDiskPath(d config.VMConfig, global struct {
 	DiskPath string
 	DiskSize int
@@ -43,39 +63,45 @@ func EffectiveDiskSize(d config.VMConfig, global struct {
 	return global.DiskSize
 }
 
-/* --------------------
-	buildDiskArg create string for --disk
--------------------- */
-func BuildDiskArg(cfg DomainConfig) (arg string, ok bool) {
-	// no input > no disk-arg
-	if strings.TrimSpace(cfg.DiskPath) == "" {
-		return "", false
-	}
+// buildDiskArg create string for --disk
+func BuildDiskArgs(disks []DiskSpec, vmName string) []string {
+	var args []string
+	for _, d := range disks {
+		// Determine base path
+		base := strings.TrimSpace(d.Path)
 
-	// normalise base path
-	base := strings.TrimSpace(cfg.DiskPath)
-
-	// check if needs to attach '.qcow2'
-	if strings.Contains(filepath.Base(base), ".") {
-		if !strings.HasSuffix(base, ".qcow2") {
+		// If only one directory is specified → <dir>/<vmName>-<disk.Name>.qcow2
+		if !strings.Contains(filepath.Base(base), ".") {
+			// no file name > we build a unique name
+			file := fmt.Sprintf("%s-%s.qcow2", vmName, d.Name)
+			base = filepath.Join(base, file)
+		} else if !strings.HasSuffix(base, ".qcow2") {
 			base += ".qcow2"
 		}
-	} else {
-		// Only directory specified > Append file <VM name>.qcow2
-		base = filepath.Join(base, cfg.Name+".qcow2")
-	}
 
-	// put them together
-	opts := []string{
-		fmt.Sprintf("path=%s", base),
-		"format=qcow2",
-	}
-	// add disk size if > 0
-	if cfg.DiskSize > 0 {
-		opts = append([]string{fmt.Sprintf("size=%d", cfg.DiskSize)}, opts...)
-	}
+		// Assemble options
+		opts := []string{
+			fmt.Sprintf("path=%s", base),
+			"format=qcow2",
+		}
+		if d.SizeGiB > 0 {
+			opts = append([]string{fmt.Sprintf("size=%d", d.SizeGiB)}, opts...)
+		}
+		if d.Bus != "" {
+			opts = append(opts, fmt.Sprintf("bus=%s", d.Bus))
+		}
 
-	return strings.Join(opts, ","), true
+		// The finished argument (e.g. "size=20,path=/var/vms/system.qcow2,format=qcow2,bus=virtio")
+		args = append(args, strings.Join(opts, ","))
+	}
+	return args
+}
+
+// Helper: return the *first* Disk (System‑Disk) of a VM
+func (c *DomainConfig) PrimaryDisk() *DiskSpec {
+	if len(c.Disks) == 0 {
+		return nil // no disc defined yet
+	}
+	return &c.Disks[0] // the first element is considered the “system disk”
 }
 // EOF
-
