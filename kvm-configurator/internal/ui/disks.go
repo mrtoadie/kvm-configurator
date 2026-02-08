@@ -14,7 +14,7 @@ func PromptAddDisk(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath str
 	fmt.Println(utils.BoxCenter(55, []string{"=== ADD DISK ==="}))
 
 	// disk name
-	name, _ := ReadLine(r, utils.Colourise("Disk name (e.g. system, data, backup): ", utils.ColorYellow))
+	name, _ := ReadLine(r, utils.Colourise("Disk name (e.g. swap, data, backup): ", utils.ColorYellow))
 	if name == "" {
 		return nil
 	}
@@ -38,7 +38,7 @@ func PromptAddDisk(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath str
 	size, _ := strconv.Atoi(sizeStr)
 
 	// Bus‑Typ (optional)
-	bus, _ := ReadLine(r, utils.Colourise("Bus (virtio|scsi|ide, default virtio): ", utils.ColorYellow))
+	bus, _ := ReadLine(r, utils.Colourise("Bus (virtio|scsi|sata|usb, default virtio): ", utils.ColorYellow))
 	if bus == "" {
 		bus = "virtio"
 	}

@@ -10,10 +10,7 @@ import (
 	"configurator/internal/config"
 )
 
-/* --------------------
-	[Modul: config] Load DomainConfig
--------------------- */
-
+// [Modul: config] Load DomainConfig
 type DomainConfig struct {
 	Name    string // VM‑Name (z. B. "arch‑01")
 	ISOPath string // Path to ISO file (can be empty > later prompt)
