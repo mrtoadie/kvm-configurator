@@ -119,10 +119,10 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 				fmt.Fprintf(w, "[4] Disk-Path:\t<none>\n")
 				fmt.Fprintf(w, "[5] Disk-Size (GB):\t<none>\n")
 			}
-			fmt.Fprintf(w, "[6] ISO:\t%s\n", isoFile) //cfg.ISOPath
-			fmt.Fprintf(w, "[7] Network:\t%s\n", cfg.Network)
-			fmt.Fprintf(w, "[8] Advanced Parameters\n")
-			fmt.Fprintf(w, "[9] Add disks\n")
+			fmt.Fprintf(w, "[6] Add more disks\n")
+			fmt.Fprintf(w, "[7] ISO:\t%s\n", isoFile)
+			fmt.Fprintf(w, "[8] Network:\t%s\n", cfg.Network)
+			fmt.Fprintf(w, "[0] Advanced Parameters\n")
 		})
 		// Build a box around it and spend it
 		fmt.Println(utils.Box(51, lines))
@@ -194,13 +194,11 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 					}
 				}
 			}
-		case "7":
-			if v, _ := ReadLine(r, ">> Network (none or default): "); true {
-				cfg.Network = v
-			}
-		case "8":
-			editAdvanced(r, cfg)
 		case "6":
+			if err := PromptAddDisk(r, cfg, defaultDiskPath); err != nil {
+				utils.RedError("Add Disk failed", "", err)
+			}
+		case "7":
 			isoPath, err := PromptSelectISO(r, isoWorkDir)
 			if err != nil {
 				fmt.Printf("\x1b[31mISO selection failed: %v\x1b[0m\n", err)
@@ -208,10 +206,12 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			}
 			cfg.ISOPath = isoPath
 			fmt.Printf("\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
-		case "9":
-			if err := PromptAddDisk(r, cfg, defaultDiskPath); err != nil {
-				utils.RedError("Add Disk failed", "", err)
+		case "8":
+			if v, _ := ReadLine(r, ">> Network (none or default): "); true {
+				cfg.Network = v
 			}
+		case "0":
+			editAdvanced(r, cfg)		
 		}
 	}
 }
