@@ -101,8 +101,6 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 	return abs, nil
 }
 
-
-
 // Form – allows changes to the fields
 func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string, isoWorkDir string) {
 	for {
@@ -115,11 +113,11 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			fmt.Fprintf(w, "[3] vCPU:\t%d\n", cfg.VCPU)
 			// show first disk
 			if primary := cfg.PrimaryDisk(); primary != nil {
-    		fmt.Fprintf(w, "[4] Disk-Path:\t%s\n", primary.Path)
-    		fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\n", primary.SizeGiB)
+				fmt.Fprintf(w, "[4] Disk-Path:\t%s\n", primary.Path)
+				fmt.Fprintf(w, "[5] Disk-Size (GB):\t%d\n", primary.SizeGiB)
 			} else {
-    		fmt.Fprintf(w, "[4] Disk-Path:\t<none>\n")
-    		fmt.Fprintf(w, "[5] Disk-Size (GB):\t<none>\n")
+				fmt.Fprintf(w, "[4] Disk-Path:\t<none>\n")
+				fmt.Fprintf(w, "[5] Disk-Size (GB):\t<none>\n")
 			}
 			fmt.Fprintf(w, "[6] ISO:\t%s\n", isoFile) //cfg.ISOPath
 			fmt.Fprintf(w, "[7] Network:\t%s\n", cfg.Network)
@@ -152,50 +150,50 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 				}
 			}
 		case "4":
-    // Change disk path (we edit the *first*disk)
-    prompt := fmt.Sprintf(">> Disk path (default: %s): ", defaultDiskPath)
-    if v, _ := ReadLine(r, prompt); v != "" {
-        // If no disc exists yet, we create one
-        if primary := cfg.PrimaryDisk(); primary != nil {
-            primary.Path = os.ExpandEnv(v)
-        } else {
-            // Create a new system disk
-            cfg.Disks = append(cfg.Disks, model.DiskSpec{
-                Name: "system",
-                Path: os.ExpandEnv(v),
-                // Size and Bus remain empty -can be set later
-            })
-        }
-    } else {
-        // Empty input → use default
-        if primary := cfg.PrimaryDisk(); primary != nil {
-            primary.Path = os.ExpandEnv(defaultDiskPath)
-        } else {
-            cfg.Disks = append(cfg.Disks, model.DiskSpec{
-                Name: "system",
-                Path: os.ExpandEnv(defaultDiskPath),
-            })
-        }
-    }
-    if primary := cfg.PrimaryDisk(); primary != nil {
-        fmt.Printf("\x1b[32mDisk will be stored at: %s\x1b[0m\n", primary.Path)
-    }
+			// Change disk path (we edit the *first*disk)
+			prompt := fmt.Sprintf(">> Disk path (default: %s): ", defaultDiskPath)
+			if v, _ := ReadLine(r, prompt); v != "" {
+				// If no disc exists yet, we create one
+				if primary := cfg.PrimaryDisk(); primary != nil {
+					primary.Path = os.ExpandEnv(v)
+				} else {
+					// Create a new system disk
+					cfg.Disks = append(cfg.Disks, model.DiskSpec{
+						Name: "system",
+						Path: os.ExpandEnv(v),
+						// Size and Bus remain empty -can be set later
+					})
+				}
+			} else {
+				// Empty input → use default
+				if primary := cfg.PrimaryDisk(); primary != nil {
+					primary.Path = os.ExpandEnv(defaultDiskPath)
+				} else {
+					cfg.Disks = append(cfg.Disks, model.DiskSpec{
+						Name: "system",
+						Path: os.ExpandEnv(defaultDiskPath),
+					})
+				}
+			}
+			if primary := cfg.PrimaryDisk(); primary != nil {
+				fmt.Printf("\x1b[32mDisk will be stored at: %s\x1b[0m\n", primary.Path)
+			}
 
-case "5":
-    // Change disk size (only for the first disk)
-    if v, _ := ReadLine(r, ">> Disk size (GB): "); v != "" {
-        if i, e := strconv.Atoi(v); e == nil && i > 0 {
-            if primary := cfg.PrimaryDisk(); primary != nil {
-                primary.SizeGiB = i
-            } else {
-                // Noch keine Disk → neue anlegen
-                cfg.Disks = append(cfg.Disks, model.DiskSpec{
-                    Name:    "system",
-                    SizeGiB: i,
-                })
-            }
-        }
-    }
+		case "5":
+			// Change disk size (only for the first disk)
+			if v, _ := ReadLine(r, ">> Disk size (GB): "); v != "" {
+				if i, e := strconv.Atoi(v); e == nil && i > 0 {
+					if primary := cfg.PrimaryDisk(); primary != nil {
+						primary.SizeGiB = i
+					} else {
+						// no disc yet > create a new one
+						cfg.Disks = append(cfg.Disks, model.DiskSpec{
+							Name:    "system",
+							SizeGiB: i,
+						})
+					}
+				}
+			}
 		case "7":
 			if v, _ := ReadLine(r, ">> Network (none or default): "); true {
 				cfg.Network = v
@@ -211,9 +209,9 @@ case "5":
 			cfg.ISOPath = isoPath
 			fmt.Printf("\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
 		case "9":
-    	if err := PromptAddDisk(r, cfg); err != nil {
-        utils.RedError("Add Disk failed", "", err)
-    	}
+			if err := PromptAddDisk(r, cfg, defaultDiskPath); err != nil {
+				utils.RedError("Add Disk failed", "", err)
+			}
 		}
 	}
 }
@@ -284,11 +282,11 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 		fmt.Fprintf(w, "vCPU:\t%d\n", cfg.VCPU)
 		// is disk primary or addition
 		if primary := cfg.PrimaryDisk(); primary != nil {
-    	fmt.Fprintf(w, "Disk-Path:\t%s\n", primary.Path)
-    	fmt.Fprintf(w, "Disk-Size (GB):\t%d\n", primary.SizeGiB)
+			fmt.Fprintf(w, "Disk-Path:\t%s\n", primary.Path)
+			fmt.Fprintf(w, "Disk-Size (GB):\t%d\n", primary.SizeGiB)
 		} else {
-    	fmt.Fprintf(w, "Disk-Path:\t<none>\n")
-    	fmt.Fprintf(w, "Disk-Size (GB):\t<none>\n")
+			fmt.Fprintf(w, "Disk-Path:\t<none>\n")
+			fmt.Fprintf(w, "Disk-Size (GB):\t<none>\n")
 		}
 		fmt.Fprintf(w, "Network:\t%s\n", cfg.Network)
 		fmt.Fprintf(w, "Nested-Virtualisation:\t%s\n", cfg.NestedVirt)
@@ -304,4 +302,5 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Print(utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
 	_, _ = r.ReadString('\n')
 }
+
 // EOF
