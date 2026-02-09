@@ -7,4 +7,4 @@ const (
     CmdVirsh        = "virsh"
     FileConfig      = "oslist.yaml"
 )
-var PrereqCommands = []string{CmdVirtInstall, CmdVirsh}
+//var PrereqCommands = []string{CmdVirtInstall, CmdVirsh}

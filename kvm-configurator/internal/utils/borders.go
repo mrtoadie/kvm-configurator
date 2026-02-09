@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+const (
+    BorderColorReset  = "\033[0m"
+    BorderColorBlue   = "\033[34m"
+)
+
 func Box(width int, lines []string) string {
 	// kills the last line
 	var cleanLines []string
@@ -24,8 +29,8 @@ func Box(width int, lines []string) string {
     }
   }
 	// top and bottom style
-  top    := "\033[34m╭\033[0m" + strings.Repeat("\033[34m─\033[0m", maxLen+2) + "\033[34m╮\033[0m"
-  bottom := "\033[34m╰\033[0m" + strings.Repeat("\033[34m─\033[0m", maxLen+2) + "\033[34m╯\033[0m"
+  top    := BorderColorBlue + "╭" + BorderColorReset + strings.Repeat(BorderColorBlue + "─" + BorderColorReset, maxLen+2) + BorderColorBlue + "╮" + BorderColorReset
+  bottom := BorderColorBlue + "╰" + BorderColorReset + strings.Repeat(BorderColorBlue + "─" + BorderColorReset, maxLen+2) + BorderColorBlue + "╯" + BorderColorReset
 
   var b strings.Builder
   b.WriteString(top + "\n")
@@ -44,8 +49,8 @@ func BoxCenter(width int, lines []string) string {
         }
     }
 
-    top    := "\033[34m╭\033[0m" + strings.Repeat("\033[34m─\033[0m", maxLen+2) + "\033[34m╮\033[0m"
-    bottom := "\033[34m╰\033[0m" + strings.Repeat("\033[34m─\033[0m", maxLen+2) + "\033[34m╯\033[0m"
+  top    := BorderColorBlue + "╭" + BorderColorReset + strings.Repeat(BorderColorBlue + "─" + BorderColorReset, maxLen+2) + BorderColorBlue + "╮" + BorderColorReset
+  bottom := BorderColorBlue + "╰" + BorderColorReset + strings.Repeat(BorderColorBlue + "─" + BorderColorReset, maxLen+2) + BorderColorBlue + "╯" + BorderColorReset
 
     var b strings.Builder
     b.WriteString(top + "\n")

@@ -1,5 +1,5 @@
 // kvmtools/menu.go
-// last modification: Feb 05 2026
+// last modification: Feb 09 2026
 package kvmtools
 
 import (
@@ -11,9 +11,7 @@ import (
 	"configurator/internal/utils"
 )
 
-/* --------------------
-	only one entry - the rest is in vmmenu.go
--------------------- */
+// only one entry - the rest is in vmmenu.go
 type commandInfo struct {
 	Description string
 }
@@ -23,32 +21,28 @@ var menuMap = map[string]commandInfo{
 	"q": {"Back to Mainmenu"},
 }
 
-/* --------------------
-	lightweight dispatcher
--------------------- */
-func Start(r *bufio.Reader) {
-	for {
-		printMenu()
-		choice := readChoice(r)
+// lightweight dispatcher
+func Start(r *bufio.Reader, xmlDir string) {
+    for {
+        printMenu()
+        choice := readChoice(r)
 
-		if choice == "q" {
-			fmt.Println(utils.Colourise("\nBack to Mainmenu", utils.ColorYellow))
-			return
-		}
+        if choice == "q" {
+            fmt.Println(utils.Colourise("\nBack to Mainmenu", utils.ColorYellow))
+            return
+        }
 
-		switch choice {
-		case "1":
-			VMMenu(bufio.NewReader(os.Stdin))
-		default:
-			fmt.Fprintln(os.Stderr,
-				utils.Colourise("Invalid selection", utils.ColorRed))
-		}
-	}
+        switch choice {
+        case "1":
+            VMMenu(r, xmlDir)
+        default:
+            fmt.Fprintln(os.Stderr,
+                utils.Colourise("Invalid selection", utils.ColorRed))
+        }
+    }
 }
 
-/* --------------------
-	print kvm-tools menu
--------------------- */
+// print kvm-tools menu
 func printMenu() {
 	w := utils.NewTabWriter()
 	fmt.Fprintln(w, utils.Colourise("\n=== KVM-TOOLS ===", utils.ColorBlue))
@@ -58,9 +52,7 @@ func printMenu() {
 	w.Flush()
 }
 
-/* --------------------
-	Read input and remove whitespace.
--------------------- */
+// Read input and remove whitespace.
 func readChoice(r *bufio.Reader) string {
 	fmt.Print(utils.Colourise("\nSelect: ", utils.ColorYellow))
 	raw, _ := r.ReadString('\n')

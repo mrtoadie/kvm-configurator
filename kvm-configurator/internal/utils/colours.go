@@ -24,11 +24,6 @@ func Colourise(text, colour string) string {
     return colour + text + ColorReset
 }
 
-// Bold wraps a string in the “bold” escape sequence
-func MakeBold(text string) string {
-    return ColorBold + text + ColorReset
-}
-
 // combines colour & bold
 func ColouriseBold(text, colour string) string {
     return colour + ColorBold + text + ColorReset
@@ -63,7 +58,7 @@ func Success(prefix, ctx, extra string) {
 	fmt.Fprintln(os.Stdout, Colourise(msg, ColorGreen))
 }
 
-// Successf – lije fmt.Sprintf but colourised
+// Successf – fmt.Sprintf but colourised
 func Successf(format string, a ...interface{}) {
 	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf(format, a...), ColorGreen))
 }

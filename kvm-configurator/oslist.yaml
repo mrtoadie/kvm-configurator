@@ -56,7 +56,7 @@ oslist:
     ram: 512
     diskpath: "/run/media/toadie/vm/QEMU"
     disksize: 2
-    isopath: "/run/media/toadie/data/ISOs/archlinux-2025.12.01-x86_64.iso"
+    isopath: "/run/media/toadie/data/ISOs/clonezilla-live-20251017-questing-amd64.iso"
 # Linux
   - name: Arch Linux
     id: archlinux

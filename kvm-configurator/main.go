@@ -3,7 +3,7 @@
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // License: MIT
-// last modification: Feb 08 2026
+// last modification: Feb 09 2026
 package main
 
 import (
@@ -11,11 +11,12 @@ import (
 	//"errors"
 	"fmt"
 	"os"
+
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
-	"configurator/internal/utils"
 	"configurator/internal/ui"
+	"configurator/internal/utils"
 	"configurator/kvmtools"
 )
 
@@ -37,6 +38,7 @@ func main() {
 		os.Exit(1)
 	}
 
+xmlDir := cfg.XmlDir
 	// Determine working directory (ISO folder)
 	workDir := cfg.IsoPath
 	if workDir == "" {
@@ -46,9 +48,9 @@ func main() {
 		}
 	}
 
-	// // [Modul: config] 
-	osList   := cfg.OSList		// the list of supported distributions
-	defaults := cfg.Defaults	// global specifications (disk path, size, ...)
+	// // [Modul: config]
+	osList := cfg.OSList     // the list of supported distributions
+	defaults := cfg.Defaults // global specifications (disk path, size, ...)
 	variantByName := make(map[string]string, len(osList))
 	for _, d := range osList {
 		variantByName[d.Name] = d.ID
@@ -88,14 +90,15 @@ func main() {
 				variantByName,
 				workDir,
 				cfg.IsoPath,
-    		cfg.XmlDir,
+				cfg.XmlDir,
 			); err != nil {
 				// error
 				fmt.Fprintf(os.Stderr, "%sError: %v%s\n",
 					utils.ColorRed, err, utils.ColorReset)
 			}
 		case "2":
-			kvmtools.Start(r)
+			//kvmtools.Start(r)
+			kvmtools.Start(bufio.NewReader(os.Stdin), xmlDir)
 		case "h":
 			ui.PrintHelp()
 		default:
