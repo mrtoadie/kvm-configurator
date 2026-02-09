@@ -14,7 +14,7 @@ import (
 type FullConfig struct {
 	IsoPath  string     // path to iso dir
 	XmlDir   string     // path to xml save dir
-	Defaults Defaults   // global‑dDefaults (DiskPath, DiskSize …)
+	Defaults Defaults   // global‑defaults (DiskPath, DiskSize …)
 	OSList   []VMConfig // OS‑Liste
 }
 
