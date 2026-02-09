@@ -31,7 +31,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 	if strings.TrimSpace(cfg.NestedVirt) != "" {
 		cpuArg = fmt.Sprintf("%s,+%s", cpuBase, cfg.NestedVirt)
 	}
-
+	
 	// base arguments
 	args := []string{
 		"--name", cfg.Name,
@@ -101,7 +101,6 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 		return err
 
 	}
-	//fmt.Println(ui.Colourise("\nVM successfully registered with libvirt/qemu (not yet started).", ui.Green))
 	utils.Successf("VM successfully registered with libvirt/qemu (not yet started).")
 	return nil
 }
