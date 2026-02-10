@@ -1,4 +1,5 @@
 // kvmtools/confirm.go
+// last modification: Feb 10 2026
 package kvmtools
 
 import (
@@ -7,8 +8,7 @@ import (
 	"strings"
 )
 
-// AskYesNo fragt den Nutzer nach einer Bestätigung.
-// Gibt true zurück, wenn die Antwort mit „y“ oder „yes“ beginnt (case‑insensitive).
+// ask prompt yes/no
 func AskYesNo(r *bufio.Reader, prompt string) (bool, error) {
 	fmt.Print(prompt + " [y/N]: ")
 	line, err := r.ReadString('\n')
