@@ -1,5 +1,5 @@
 // utils/colours.go
-// last modification: Feb 07 2026
+// last modification: Feb 10 2026
 package utils
 
 import (
@@ -30,18 +30,18 @@ func ColouriseBold(text, colour string) string {
 }
 
 // SimpleError
-func SimpleError(prefix, ctx string, err error, colour string) {
+func SimpleError(prefix, ctx string, err error) {
 	if err == nil {
 		return
 	}
 	// Example: “❗️Config missing – while loading: <original error>”
 	msg := fmt.Sprintf("❗️%s >%s %v", prefix, ctx, err)
-	fmt.Fprintln(os.Stderr, Colourise(msg, colour))
+	fmt.Fprintln(os.Stderr, Colourise(msg, ColorRed))
 }
 
 // Convenience wrapper for the usual red error
 func RedError(prefix, ctx string, err error) {
-	SimpleError(prefix, ctx, err, ColorRed)
+	SimpleError(prefix, ctx, err)
 }
 
 /*
