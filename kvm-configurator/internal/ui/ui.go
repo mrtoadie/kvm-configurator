@@ -36,7 +36,6 @@ func ReadLine(r *bufio.Reader, prompt string) (string, error) {
 
 // Loading distro list from yaml
 func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfig, error) {
-	//fmt.Println(utils.Colourise("\n=== Select an operating system ===", utils.ColorBlue))
 	fmt.Println(utils.BoxCenter(51, []string{"Select an operating system"}))
 
 	sorted := append([]config.VMConfig(nil), list...)
@@ -249,5 +248,4 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Print(utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
 	_, _ = r.ReadString('\n')
 }
-
 // EOF

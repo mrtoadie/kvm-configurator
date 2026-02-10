@@ -136,8 +136,8 @@ func runVMAction(action Action, vmName string) error {
 }
 
 /*
-	VMMenu – public entry point
-	xmlDir: Path in which the libvirt XML files are located (e.g. "./xml")
+VMMenu – public entry point
+xmlDir: Path in which the libvirt XML files are located (e.g. "./xml")
 */
 func VMMenu(r *bufio.Reader, xmlDir string) {
 	for {
