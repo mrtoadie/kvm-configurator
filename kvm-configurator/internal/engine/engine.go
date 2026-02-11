@@ -40,17 +40,21 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 		"--cpu", cpuArg,
 		"--os-variant", variant,
 		"--cdrom", cfg.ISOPath,
-		"--boot", "hd,cdrom",
+		//"--boot", "hd,cdrom",
+		//"--boot", cfg.BootOrder,
+		"--boot", "network,cdrom,hd",
 		"--graphics", cfg.Graphics,
 		"--sound", cfg.Sound,
 		"--filesystem", cfg.FileSystem,
 		"--print-xml",
+		//"--print-step",
 	}
 
 	// append all disk arguments (each “--disk” + the argument)
 	for _, da := range diskArgs {
 		args = append(args, "--disk", da)
 	}
+	
 
 	spinner := utils.NewProgress("\x1b[34mRunning virt-install:")
 	defer spinner.Stop()
