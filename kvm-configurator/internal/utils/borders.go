@@ -124,5 +124,4 @@ func truncateOrWrap(s string, max int) []string {
 	}
 	return parts
 }
-
 // EOF
