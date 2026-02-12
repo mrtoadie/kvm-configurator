@@ -1,5 +1,5 @@
 // kvmtools/vmmenu.go
-// last modification: Feb 09 2026
+// last modification: Feb 10 2026
 package kvmtools
 
 import (
@@ -180,7 +180,7 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 			continue
 		}
 
-		// 5️⃣ Run – special case “Undefine + Disk Cleanup”
+		// run – special case “Undefine + Disk Cleanup”
 		if action == ActDelete {
 			if err := deleteVMWithDisks(r, selected.Name, xmlDir); err != nil {
 				fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
@@ -245,3 +245,4 @@ func deleteVMWithDisks(r *bufio.Reader, vmName, xmlDir string) error {
 	fmt.Println("All associated hard drives of " + vmName + " have been successfully removed.")
 	return nil
 }
+// EOF
