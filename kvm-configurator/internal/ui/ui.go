@@ -243,7 +243,7 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 		fmt.Fprintf(w, "Filesystem:\t%s\n", cfg.FileSystem)
 	})
 
-	fmt.Println(utils.Box(60, lines))
+	fmt.Println(utils.Box(51, lines))
 
 	fmt.Print(utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
 	_, _ = r.ReadString('\n')
