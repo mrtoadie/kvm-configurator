@@ -38,15 +38,6 @@ windows_base: &windows_base
 
 # List of predefined operating systems
 oslist:
-# TESTING
-  - name: _test
-    id: archlinux
-    cpu: 1
-    ram: 512
-    diskpath: "/run/media/toadie/vm/QEMU"
-    disksize: 2
-    isopath: "/run/media/toadie/data/ISOs/clonezilla-live-20251017-questing-amd64.iso"
-    bootorder: "network,cdrom,hd"
 # Linux
   - name: Arch Linux
     id: archlinux
