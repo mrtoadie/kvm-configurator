@@ -1,9 +1,9 @@
-// Version 1.0.7
+// Version 1.0.9
 // Autor: 	MrToadie
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // License: MIT
-// last modification: Feb 09 2026
+// last modification: Feb 13 2026
 package main
 
 import (
@@ -31,15 +31,45 @@ func main() {
 	// for debug only
 	//ui.Success("✅ Prereqs OK", "virt-install & virsh FOUND!", "")
 
-	// Get everything from the YAML file in one go
-	cfg, err := config.LoadAll(config.FileConfig) // One call, one result
+
+
+	// -----------------------------------------------------------------
+	// 1️⃣ Verify that the configuration file exists in $HOME/.config/kvm-configurator
+	// -----------------------------------------------------------------
+	if ok, err := config.Exists(); err != nil || !ok {
+		// Give the user a friendly hint where the file should be.
+		utils.RedError(
+			"Configuration not found",
+			"expected at "+config.ConfigFilePath(),
+			err,
+		)
+		os.Exit(1)
+	}
+/*
+	// -----------------------------------------------------------------
+	// 2️⃣ Load the YAML from the correct location
+	// -----------------------------------------------------------------
+	cfg, err := config.LoadAll(config.ConfigFilePath())
 	if err != nil {
 		utils.RedError("Failed to load configuration", "", err)
 		os.Exit(1)
 	}
 
-xmlDir := cfg.XmlDir
-	// Determine working directory (ISO folder)
+*/
+
+
+
+	// Get everything from the YAML file in one go
+	cfg, err := config.LoadAll(config.ConfigFilePath())
+	//cfg, err := config.LoadAll(config.FileConfig) // One call, one result
+	if err != nil {
+		utils.RedError("Failed to load configuration", "", err)
+		os.Exit(1)
+	}
+
+	// determine xml save path
+	xmlDir := cfg.XmlDir
+	// determine working directory (ISO folder)
 	workDir := cfg.IsoPath
 	if workDir == "" {
 		// fallback dir
