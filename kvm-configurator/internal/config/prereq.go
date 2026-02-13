@@ -40,22 +40,25 @@ func EnsureAll(commands ...string) error {
 	not good, need improvment
 */
 // function to check if config file exists
-/*
+
 func Exists() (bool, error) {
-	var fileName = ".config/arkrc"
+	//var fileName = ".config/kvm-configurator/"
   home, err := os.UserHomeDir()
   if err != nil {
     return false, err
   }
-	path := filepath.Join(home, fileName)
+	//path := filepath.Join(home, fileName)
+	path := filepath.Join(home, ConfigDir, FileConfig)
   info, err := os.Stat(path)
   if err == nil {
     return !info.IsDir(), nil
   }
   return false, err
-}*/
+}
+
 
 // only checks that oslist.yaml exists in current dir
+/*
 func Exists() (bool, error) {
 
 	cwd, err := os.Getwd()
@@ -73,5 +76,5 @@ func Exists() (bool, error) {
 		return false, nil
 	}
 	return false, err
-}
+}*/
 // EOF
