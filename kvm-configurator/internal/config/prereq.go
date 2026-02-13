@@ -1,5 +1,5 @@
 // config/prereq.go
-// last modification: Feb 07 2026
+// last modification: Feb 13 2026
 package config
 
 import (
@@ -36,11 +36,7 @@ func EnsureAll(commands ...string) error {
 	return nil
 }
 
-/*
-	not good, need improvment
-*/
 // function to check if config file exists
-
 func Exists() (bool, error) {
 	//var fileName = ".config/kvm-configurator/"
   home, err := os.UserHomeDir()
@@ -55,26 +51,4 @@ func Exists() (bool, error) {
   }
   return false, err
 }
-
-
-// only checks that oslist.yaml exists in current dir
-/*
-func Exists() (bool, error) {
-
-	cwd, err := os.Getwd()
-	if err != nil {
-		return false, err
-	}
-
-	path := filepath.Join(cwd, FileConfig)
-	info, err := os.Stat(path)
-	
-	if err == nil {
-		return !info.IsDir(), nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return false, err
-}*/
 // EOF
