@@ -60,6 +60,7 @@ kvm-configurator/
 ```
 ## Install
 ### Arch Linux
+Install from [AUR](https://aur.archlinux.org/packages/kvm-configurator)
 ```bash
 yay -S kvm-configurator
 ```
