@@ -58,8 +58,11 @@ kvm-configurator/
 │
 └─ main.go                    # Entry point, orchestrates the entire workflow
 ```
-
-## Running the Application
+## Install
+### Arch Linux
+```bash
+yay -S kvm-configurator
+```
 ### Compiled version
 Download the two files oslist.yaml and kvm-config_x.x.
 Set kvm-config_x.x as an executable file:
