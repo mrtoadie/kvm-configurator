@@ -1,5 +1,5 @@
 // utils/progress.go
-// last modification: Feb 05 2026
+// last modification: Feb 14 2026
 package utils
 
 import (
@@ -13,7 +13,7 @@ type Progress struct {
 }
 
 // NewProgress starts a spinner with the message passed
-func NewProgress(msg string) *Progress {
+func SpinnerProgress(msg string) *Progress {
 	p := &Progress{stop: make(chan struct{})}
 	go func() {
 		chars := []rune{'⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'}

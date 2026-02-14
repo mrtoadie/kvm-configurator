@@ -1,5 +1,5 @@
 // config/prereq.go
-// last modification: Feb 13 2026
+// last modification: Feb 14 2026
 package config
 
 import (
@@ -36,7 +36,7 @@ func EnsureAll(commands ...string) error {
 	return nil
 }
 
-// function to check if config file exists
+// check if config file exists
 func Exists() (bool, error) {
 	//var fileName = ".config/kvm-configurator/"
   home, err := os.UserHomeDir()

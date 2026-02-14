@@ -1,5 +1,5 @@
 // internal/constants.go
-// last modification: February 13 2026
+// last modification: February 14 2026
 package config
 
 import (
@@ -24,3 +24,4 @@ func ConfigFilePath() string {
 	}
 	return filepath.Join(home, ConfigDir, FileConfig)
 }
+// EOF

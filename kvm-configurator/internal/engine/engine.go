@@ -1,5 +1,5 @@
 // engine/engine.go
-// last modification: Feb 08 2026
+// last modification: Feb 14 2026
 package engine
 
 import (
@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
-
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/model"
@@ -55,8 +54,8 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 		args = append(args, "--disk", da)
 	}
 	
-
-	spinner := utils.NewProgress("\x1b[34mRunning virt-install:")
+	// progress-spinner
+	spinner := utils.SpinnerProgress("\x1b[34mRunning virt-install:")
 	defer spinner.Stop()
 
 	cmd := exec.Command(config.CmdVirtInstall, args...)

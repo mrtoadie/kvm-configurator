@@ -1,5 +1,5 @@
 // ui/ui.go
-// last modification: February 09 2026
+// last modification: February 14 2026
 package ui
 
 import (
@@ -12,7 +12,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
 	"text/tabwriter"
 	// internal
 	"configurator/internal/config"
@@ -156,7 +155,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 				if primary := cfg.PrimaryDisk(); primary != nil {
 					primary.Path = os.ExpandEnv(v)
 				} else {
-					// Create a new system disk
+					// create a new system disk
 					cfg.Disks = append(cfg.Disks, model.DiskSpec{
 						Name: "system",
 						Path: os.ExpandEnv(v),
@@ -164,7 +163,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 					})
 				}
 			} else {
-				// Empty input → use default
+				// empty input > use default
 				if primary := cfg.PrimaryDisk(); primary != nil {
 					primary.Path = os.ExpandEnv(defaultDiskPath)
 				} else {
@@ -179,7 +178,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			}
 
 		case "5":
-			// Change disk size (only for the first disk)
+			// change disk size (only for the first disk)
 			if v, _ := ReadLine(r, ">> Disk size (GB): "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					if primary := cfg.PrimaryDisk(); primary != nil {
