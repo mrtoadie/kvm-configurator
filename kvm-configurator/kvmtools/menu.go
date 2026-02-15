@@ -1,5 +1,5 @@
 // kvmtools/menu.go
-// last modification: Feb 09 2026
+// last modification: Feb 14 2026
 package kvmtools
 
 import (
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	//"text/tabwriter"
 	// internal
 	"configurator/internal/utils"
 )
@@ -44,8 +45,8 @@ func Start(r *bufio.Reader, xmlDir string) {
 
 // print kvm-tools menu
 func printMenu() {
+	fmt.Println(utils.Box(20, []string{"KVM-TOOLS"}))
 	w := utils.NewTabWriter()
-	fmt.Fprintln(w, utils.Colourise("\n=== KVM-TOOLS ===", utils.ColorBlue))
 	for key, info := range menuMap {
 		fmt.Fprintf(w, "%s\t%s\n", key, info.Description)
 	}

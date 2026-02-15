@@ -1,5 +1,5 @@
 // kvmtools/vmmenu.go
-// last modification: Feb 10 2026
+// last modification: Feb 14 2026
 package kvmtools
 
 import (
@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-
+	"text/tabwriter"
 	// internal
 	"configurator/internal/utils"
 )
@@ -74,13 +74,17 @@ func sortVMsAlphabetically(vms []*VMInfo) []*VMInfo {
 
 // printVMTable – prints the VM list formatted
 func printVMTable(vms []*VMInfo) {
-	w := utils.NewTabWriter()
-	fmt.Fprintln(w, utils.Colourise("\n=== Available VMs ===", utils.ColorBlue))
+	//w := utils.NewTabWriter()
+	//fmt.Fprintln(w, utils.Colourise("\n=== Available VMs ===", utils.ColorBlue))
+	fmt.Println(utils.BoxCenter(51, []string{"AVALABLE VIRTUAL MACHINES"}))
+	lines := utils.TableToLines(func(w *tabwriter.Writer) {
 	fmt.Fprintln(w, "No.\tName\tState")
 	for i, vm := range vms {
 		fmt.Fprintf(w, "%d\t%s\t%s\n", i+1, vm.Name, vm.Stat)
 	}
 	w.Flush()
+	})
+	fmt.Print(utils.Box(51, lines))
 }
 
 // pickAction – zeigt nur zulässige Aktionen für den jeweiligen Status
@@ -201,7 +205,7 @@ func deleteVMWithDisks(r *bufio.Reader, vmName, xmlDir string) error {
 	if err := runVMAction(ActDelete, vmName); err != nil {
 		return err
 	}
-	fmt.Printf("\n✅ VM %s became undefined.\n", vmName)
+	fmt.Printf("\nVM %s became undefined.\n", vmName)
 
 	// determine disk paths (XML > fallback virsh)
 	var diskPaths []string
