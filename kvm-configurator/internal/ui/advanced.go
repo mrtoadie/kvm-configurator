@@ -3,12 +3,12 @@
 package ui
 
 import (
-	"fmt"
 	"bufio"
+	"configurator/internal/model"
+	"configurator/internal/utils"
+	"fmt"
 	"strings"
 	"text/tabwriter"
-	"configurator/internal/utils"
-	"configurator/internal/model"
 )
 
 // Form – Advanced Parameters
@@ -38,8 +38,26 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 				fmt.Println("Nested-Virtualisation is set to\x1b[32m", v)
 			}
 		case "b": // bug - nothing happend
-			if v, _ := ReadLine(r, ">> Boot order: "); v != "" {
+			if v, _ := ReadLine(r, ">> Boot order (hd, cdrom, network): "); v != "" {
 				cfg.BootOrder = v
+				// valid input check
+				valid := map[string]bool{
+					"hd": true, "cdrom": true, "network": true,
+				}
+				parts := strings.Split(v, ",")
+				ok := true
+				for _, p := range parts {
+					if !valid[strings.TrimSpace(p)] {
+						ok = false
+						break
+					}
+				}
+				if ok {
+					cfg.BootOrder = v
+				} else {
+					fmt.Println(utils.Colourise("Invalid boot order specification", utils.ColorRed))
+				}
+
 				fmt.Println("Boot order is set to", v)
 			}
 		case "c":
