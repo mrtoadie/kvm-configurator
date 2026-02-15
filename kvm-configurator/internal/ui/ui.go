@@ -1,5 +1,5 @@
 // ui/ui.go
-// last modification: February 14 2026
+// last modification: February 15 2026
 package ui
 
 import (
@@ -103,7 +103,7 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string, isoWorkDir string) {
 	for {
 		isoFile := filepath.Base(cfg.ISOPath)
-		fmt.Println(utils.BoxCenter(51, []string{"=== VM-CONFIG ==="}))
+		fmt.Println(utils.BoxCenter(51, []string{"VM-CONFIG"}))
 		// Convert menu lines into line slices with Tabwriter
 		lines := utils.TableToLines(func(w *tabwriter.Writer) {
 			fmt.Fprintf(w, "[1] Name:\t%s\n", cfg.Name)
@@ -220,7 +220,7 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	isoFile := filepath.Base(cfg.ISOPath)
 	//isoName := strings.TrimSuffix(isoFile, filepath.Ext(isoFile))
 
-	fmt.Println(utils.BoxCenter(51, []string{"=== VM-SUMMARY ==="}))
+	fmt.Println(utils.BoxCenter(51, []string{"VM-SUMMARY"}))
 	lines := utils.TableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
 		fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)

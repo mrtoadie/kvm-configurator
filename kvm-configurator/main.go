@@ -1,9 +1,9 @@
-// Version 1.0.9.5
+// Version 1.0.9.6
 // Autor: 	MrToadie
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // License: MIT
-// last modification: Feb 13 2026
+// last modification: Feb 15 2026
 package main
 
 import (
@@ -43,14 +43,7 @@ func main() {
 
 		config.EnsureConfig()
 	}
-/*
-	cfg, err := config.LoadAll(config.ConfigFilePath())
-	if err != nil {
-		utils.RedError("Failed to load configuration", "", err)
-		os.Exit(1)
-	}
 
-*/
 	// get everything from the YAML file in one go
 	cfg, err := config.LoadAll(config.ConfigFilePath())
 	//cfg, err := config.LoadAll(config.FileConfig) // One call, one result
@@ -81,7 +74,7 @@ func main() {
 	// main menu loop
 	r := bufio.NewReader(os.Stdin)
 	for {
-		fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColorBlue))
+		//fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColorBlue))
 		fmt.Println(utils.Box(20, []string{"KVM-CONFIGURATOR"}))
 
 		fmt.Println(utils.Box(20, []string{
@@ -128,4 +121,5 @@ func main() {
 		}
 	}
 }
+
 // EOF

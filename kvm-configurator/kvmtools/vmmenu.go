@@ -1,5 +1,5 @@
 // kvmtools/vmmenu.go
-// last modification: Feb 14 2026
+// last modification: Feb 15 2026
 package kvmtools
 
 import (
@@ -87,7 +87,7 @@ func printVMTable(vms []*VMInfo) {
 	fmt.Print(utils.Box(51, lines))
 }
 
-// pickAction – zeigt nur zulässige Aktionen für den jeweiligen Status
+// pickAction – only shows permitted actions for the respective status
 func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 	actions := []struct {
 		Key   string
@@ -103,10 +103,9 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 		{"q", "Back to VM overview", "", nil},
 	}
 
-	// print menu
-	fmt.Println()
-	w := utils.NewTabWriter()
-	fmt.Fprintln(w, utils.Colourise("Action\tDescription", utils.ColorBlue))
+	// print actions menu
+	lines := utils.TableToLines(func(w *tabwriter.Writer) {
+	fmt.Fprintln(w, "Action\tDescription")
 	for _, a := range actions {
 		if a.Check != nil && !a.Check(vm) {
 			continue
@@ -114,6 +113,8 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 		fmt.Fprintf(w, "%s\t%s\n", a.Key, a.Desc)
 	}
 	w.Flush()
+	})
+	fmt.Print(utils.Box(51, lines))
 
 	fmt.Print(utils.Colourise("\nSelect action (or q to exit): ", utils.ColorYellow))
 	choiceRaw, _ := r.ReadString('\n')
