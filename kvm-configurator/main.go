@@ -92,7 +92,7 @@ func main() {
 		}
 
 		switch sel {
-		case "0":
+		case "0", "q", "Q":
 			fmt.Println("Bye!")
 			return
 
