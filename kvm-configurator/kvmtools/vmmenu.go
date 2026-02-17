@@ -1,5 +1,5 @@
 // kvmtools/vmmenu.go
-// last modification: Feb 15 2026
+// last modification: Feb 17 2026
 package kvmtools
 
 import (
@@ -99,6 +99,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 		{"2", "Restart", ActReboot, func(v *VMInfo) bool { return v.Stat == "running" }},
 		{"3", "Shutdown", ActShutdown, func(v *VMInfo) bool { return v.Stat == "running" }},
 		{"4", "Force-Shutdown", ActDestroy, func(v *VMInfo) bool { return v.Stat == "running" }},
+		{"5", "Disk-Operations", ActDiskOps, func(v *VMInfo) bool { return true }},
 		{"0", "Undefine", ActDelete, func(v *VMInfo) bool { return v.Stat == "shut off" }},
 		{"q", "Back to VM overview", "", nil},
 	}
@@ -181,10 +182,19 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		// Determine action
 		action := pickAction(r, selected)
 		if action == "" {
-			//User canceled or invalid input
-			continue
+			continue // user canceled or invalid input
 		}
 
+		// new 16.02
+if action == ActDiskOps {
+    // Disk‑Ops‑Sub‑Menu starten (nur VM‑Name übergeben)
+    if err := DiskOpsMenu(r, selected.Name); err != nil {
+        fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
+    }
+    // danach zurück zur VM‑Übersicht
+    continue
+}
+		//////////
 		// run – special case “Undefine + Disk Cleanup”
 		if action == ActDelete {
 			if err := deleteVMWithDisks(r, selected.Name, xmlDir); err != nil {
@@ -251,3 +261,26 @@ func deleteVMWithDisks(r *bufio.Reader, vmName, xmlDir string) error {
 	return nil
 }
 // EOF
+
+func showRealDiskPaths(vmName string) error {
+    paths, err := GetDiskPathsViaVirsh(vmName)
+    if err != nil {
+        return fmt.Errorf("konnte Disk‑Pfade nicht ermitteln: %w", err)
+    }
+
+    if len(paths) == 0 {
+        fmt.Println(utils.Colourise("Keine Disk‑Einträge gefunden – VM hat vermutlich keine persistenten Laufwerke.", utils.ColorYellow))
+        return nil
+    }
+
+    // Schön formatieren – wir nutzen das gleiche Box‑Utility wie sonst
+    lines := []string{
+        utils.ColouriseBold("WIRKLICHE DISK‑PFADE FÜR VM: "+vmName, utils.ColorCyan),
+    }
+    for i, p := range paths {
+        lines = append(lines, fmt.Sprintf("[%d] %s", i+1, p))
+    }
+
+    fmt.Println(utils.Box(0, lines))
+    return nil
+}
