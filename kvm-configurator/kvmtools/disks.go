@@ -1,5 +1,5 @@
 // kvmtools/disks.go
-// last modification: Feb 17 2026
+// last modification: Feb 18 2026
 package kvmtools
 
 import (
@@ -43,36 +43,36 @@ func GetDiskPathsFromXML(xmlPath string) ([]string, error) {
 	return out, nil
 }
 
-// Fallback method via `virsh domblklist --details`
+// fallback method via `virsh domblklist --details`
 func GetDiskPathsViaVirsh(vmName string) ([]string, error) {
-    // 1️⃣ Aufruf von virsh
+    // call from virsh
     out, err := exec.Command("virsh", "domblklist", vmName, "--details").
         CombinedOutput()
     if err != nil {
         return nil, fmt.Errorf("virsh domblklist failed: %w – %s", err, out)
     }
 
-    // 2️⃣ Zeilenweise durchgehen
+    // go through line by line
     var paths []string
     scanner := bufio.NewScanner(bytes.NewReader(out))
     for scanner.Scan() {
         line := strings.TrimSpace(scanner.Text())
-        // Header‑Zeile und leere Zeilen überspringen
+        // skip header line and empty lines
         if line == "" || strings.HasPrefix(line, "Target") || strings.HasPrefix(line, "---") {
             continue
         }
 
-        // 3️⃣ Felder splitten (Whitespace‑basiert)
+        // split fields (whitespace based)
         fields := strings.Fields(line)
-        // Erwartetes Layout: Target Device Type Source
-        // Beispiel: vda disk block /var/lib/libvirt/images/my-vm-system.qcow2
+        // expected Layout: Target Device Type Source
+        // example: vda disk block /var/lib/libvirt/images/my-vm-system.qcow2
         if len(fields) < 4 {
-            // malformed – ignorieren, aber nicht fatal
+            // malformed – ignore, but not fatal
             continue
         }
 
-        device := fields[1] // zweites Feld = "disk" oder "cdrom"
-        source := fields[3] // viertes Feld = Pfad
+        device := fields[1] // second field = "disk" or "cdrom"
+        source := fields[3] // fourth field = path
 
         if device == "disk" && source != "" && source != "-" {
             paths = append(paths, source)

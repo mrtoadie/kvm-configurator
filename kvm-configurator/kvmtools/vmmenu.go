@@ -1,5 +1,5 @@
 // kvmtools/vmmenu.go
-// last modification: Feb 17 2026
+// last modification: Feb 18 2026
 package kvmtools
 
 import (
@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+
 	// internal
 	"configurator/internal/utils"
 )
@@ -78,11 +79,11 @@ func printVMTable(vms []*VMInfo) {
 	//fmt.Fprintln(w, utils.Colourise("\n=== Available VMs ===", utils.ColorBlue))
 	fmt.Println(utils.BoxCenter(51, []string{"AVALABLE VIRTUAL MACHINES"}))
 	lines := utils.TableToLines(func(w *tabwriter.Writer) {
-	fmt.Fprintln(w, "No.\tName\tState")
-	for i, vm := range vms {
-		fmt.Fprintf(w, "%d\t%s\t%s\n", i+1, vm.Name, vm.Stat)
-	}
-	w.Flush()
+		fmt.Fprintln(w, "No.\tName\tState")
+		for i, vm := range vms {
+			fmt.Fprintf(w, "%d\t%s\t%s\n", i+1, vm.Name, vm.Stat)
+		}
+		w.Flush()
 	})
 	fmt.Print(utils.Box(51, lines))
 }
@@ -106,14 +107,14 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 
 	// print actions menu
 	lines := utils.TableToLines(func(w *tabwriter.Writer) {
-	fmt.Fprintln(w, "Action\tDescription")
-	for _, a := range actions {
-		if a.Check != nil && !a.Check(vm) {
-			continue
+		fmt.Fprintln(w, "Action\tDescription")
+		for _, a := range actions {
+			if a.Check != nil && !a.Check(vm) {
+				continue
+			}
+			fmt.Fprintf(w, "%s\t%s\n", a.Key, a.Desc)
 		}
-		fmt.Fprintf(w, "%s\t%s\n", a.Key, a.Desc)
-	}
-	w.Flush()
+		w.Flush()
 	})
 	fmt.Print(utils.Box(51, lines))
 
@@ -141,10 +142,9 @@ func runVMAction(action Action, vmName string) error {
 	return cmd.Run()
 }
 
-/*
-VMMenu – public entry point
-xmlDir: Path in which the libvirt XML files are located (e.g. "./xml")
-*/
+
+// VMMenu – public entry point
+// xmlDir: Path in which the libvirt XML files are located (e.g. "./xml")
 func VMMenu(r *bufio.Reader, xmlDir string) {
 	for {
 		// fetch all VMs
@@ -185,16 +185,14 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 			continue // user canceled or invalid input
 		}
 
-		// new 16.02
-if action == ActDiskOps {
-    // Disk‑Ops‑Sub‑Menu starten (nur VM‑Name übergeben)
-    if err := DiskOpsMenu(r, selected.Name); err != nil {
-        fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
-    }
-    // danach zurück zur VM‑Übersicht
-    continue
-}
-		//////////
+		if action == ActDiskOps {
+			// Start Disk Ops submenu (only pass VM name)
+			if err := DiskOpsMenu(r, selected.Name); err != nil {
+				fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
+			}
+			continue
+		}
+
 		// run – special case “Undefine + Disk Cleanup”
 		if action == ActDelete {
 			if err := deleteVMWithDisks(r, selected.Name, xmlDir); err != nil {
@@ -260,27 +258,5 @@ func deleteVMWithDisks(r *bufio.Reader, vmName, xmlDir string) error {
 	fmt.Println("All associated hard drives of " + vmName + " have been successfully removed.")
 	return nil
 }
+
 // EOF
-
-func showRealDiskPaths(vmName string) error {
-    paths, err := GetDiskPathsViaVirsh(vmName)
-    if err != nil {
-        return fmt.Errorf("konnte Disk‑Pfade nicht ermitteln: %w", err)
-    }
-
-    if len(paths) == 0 {
-        fmt.Println(utils.Colourise("Keine Disk‑Einträge gefunden – VM hat vermutlich keine persistenten Laufwerke.", utils.ColorYellow))
-        return nil
-    }
-
-    // Schön formatieren – wir nutzen das gleiche Box‑Utility wie sonst
-    lines := []string{
-        utils.ColouriseBold("WIRKLICHE DISK‑PFADE FÜR VM: "+vmName, utils.ColorCyan),
-    }
-    for i, p := range paths {
-        lines = append(lines, fmt.Sprintf("[%d] %s", i+1, p))
-    }
-
-    fmt.Println(utils.Box(0, lines))
-    return nil
-}
