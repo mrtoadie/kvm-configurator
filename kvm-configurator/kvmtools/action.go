@@ -1,5 +1,5 @@
 // kvmtools/action.go
-// last modification: Feb 03 2026
+// last modification: Feb 16 2026
 package kvmtools
 
 type Action string
@@ -10,5 +10,6 @@ const (
 	ActShutdown Action = "shutdown"
 	ActDestroy  Action = "destroy"
 	ActDelete		Action = "undefine"
+	ActDiskOps 	Action = "diskops"
 )
 // EOF

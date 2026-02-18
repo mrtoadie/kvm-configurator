@@ -1,9 +1,9 @@
-// Version 1.0.9.6
+// Version 1.0.9.9
 // Autor: 	MrToadie
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // License: MIT
-// last modification: Feb 15 2026
+// last modification: Feb 17 2026
 package main
 
 import (
