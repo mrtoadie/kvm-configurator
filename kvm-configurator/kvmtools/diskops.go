@@ -56,9 +56,7 @@ func ResizeDisk(r *bufio.Reader, vmName string) error {
 	return nil
 }
 
-// ------------------------------------------------------------
-// 2️⃣ Convert
-// ------------------------------------------------------------
+// convert
 func ConvertDisk(r *bufio.Reader, vmName string) error {
 	srcPath, err := getRealDiskPath(vmName)
 	if err != nil {
