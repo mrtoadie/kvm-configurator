@@ -1,5 +1,5 @@
 // kvmtools/vmmenu.go
-// last modification: Feb 18 2026
+// last modification: Feb 19 2026
 package kvmtools
 
 import (
@@ -101,6 +101,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 		{"3", "Shutdown", ActShutdown, func(v *VMInfo) bool { return v.Stat == "running" }},
 		{"4", "Force-Shutdown", ActDestroy, func(v *VMInfo) bool { return v.Stat == "running" }},
 		{"5", "Disk-Operations", ActDiskOps, func(v *VMInfo) bool { return true }},
+		{"6", "Rename VM", ActRename, func(v *VMInfo) bool { return true }},
 		{"0", "Undefine", ActDelete, func(v *VMInfo) bool { return v.Stat == "shut off" }},
 		{"q", "Back to VM overview", "", nil},
 	}
@@ -193,6 +194,14 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 			continue
 		}
 
+		if action == ActRename {
+    if err := RenameVM(r, selected.Name, xmlDir); err != nil {
+        fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
+    }
+    // zurück zur VM‑Übersicht
+    continue
+}
+
 		// run – special case “Undefine + Disk Cleanup”
 		if action == ActDelete {
 			if err := deleteVMWithDisks(r, selected.Name, xmlDir); err != nil {
@@ -258,5 +267,4 @@ func deleteVMWithDisks(r *bufio.Reader, vmName, xmlDir string) error {
 	fmt.Println("All associated hard drives of " + vmName + " have been successfully removed.")
 	return nil
 }
-
 // EOF

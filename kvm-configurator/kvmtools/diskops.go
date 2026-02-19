@@ -190,7 +190,7 @@ func DiskOpsMenu(r *bufio.Reader, vmName string) error {
 		case "3":
 			return RepairDisk(r, vmName)
 		case "0", "":
-			return nil // zurück zum VM‑Menu
+			return nil
 		default:
 			fmt.Println(utils.Colourise("Invalid selection!", utils.ColorRed))
 		}
