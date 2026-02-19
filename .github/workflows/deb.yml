@@ -1,0 +1,93 @@
+name: Build & Release DEB
+
+on:
+  push:
+    tags:
+      - 'v*'          # Trigger bei Tags wie v1.0.9.5
+  workflow_dispatch:   # Manuelles Auslösen aus UI
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write          # für Release‑Upload
+      packages: write          # falls du ein GitHub‑Package‑Registry‑Repo nutzt
+
+    steps:
+      # -------------------------------------------------
+      # 1️⃣ Checkout + Go‑Setup
+      # -------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0               # für git‑describe (Versions‑Tag)
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'          # oder deine minimale Version
+
+      # -------------------------------------------------
+      # 2️⃣ Install Debian‑Packaging‑Tools
+      # -------------------------------------------------
+      - name: Install packaging deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y debhelper dh-make devscripts fakeroot lintian
+
+      # -------------------------------------------------
+      # 3️⃣ Build the .deb (dh_make + debuild)
+      # -------------------------------------------------
+      - name: Build DEB package
+        env:
+          VERSION: ${{ github.ref_name }}   # z. B. v1.0.9.5
+        run: |
+          # Entferne das führende "v", damit debian/control die Version versteht
+          export DEB_VERSION=${VERSION#v}
+          # Wir setzen das Debian‑Verzeichnis auf die aktuelle Version
+          dch -v "${DEB_VERSION}-1" "Automated build from GitHub Actions."
+          # Build
+          debuild -us -uc -b
+          # Das .deb liegt jetzt eine Ebene höher (../*.deb)
+
+      # -------------------------------------------------
+      # 4️⃣ Lint (optional, aber progressiv)
+      # -------------------------------------------------
+      - name: Lint the package
+        run: |
+          lintian ../kvm-configurator_${DEB_VERSION}-1_amd64.deb || true
+
+      # -------------------------------------------------
+      # 5️⃣ Upload artifact (für Debugging)
+      # -------------------------------------------------
+      - name: Upload .deb as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kvm-configurator-deb
+          path: ../kvm-configurator_*.deb
+
+      # -------------------------------------------------
+      # 6️⃣ Create GitHub Release & attach .deb
+      # -------------------------------------------------
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "kvm-configurator ${{ github.ref_name }}"
+          body: |
+            Automated Debian/Ubuntu package built from commit ${{ github.sha }}.
+            ```bash
+            wget https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/kvm-configurator_${{ env.DEB_VERSION }}-1_amd64.deb
+            sudo dpkg -i kvm-configurator_${{ env.DEB_VERSION }}-1_amd64.deb
+            ```
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload DEB to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ../kvm-configurator_*.deb
+          token: ${{ secrets.GITHUB_TOKEN }}
