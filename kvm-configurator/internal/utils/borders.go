@@ -1,5 +1,5 @@
-// utils/borders.go
-// last modification: Feb 12 2026
+// utils/display.go
+// last modification: Feb 21 2026
 package utils
 
 import (
@@ -9,48 +9,23 @@ import (
 )
 
 const (
-	BorderColorReset = "\033[0m"
-	BorderColorBlue  = "\033[34m"
-	BoxStdWidth      = 60
+	borderBlue  = "\033[34m"
+	borderReset = "\033[0m"
+	BoxStdWidth = 60
 )
 
+// Box prints a normal left‑aligned box.
 func Box(width int, lines []string) string {
-	if width <= 0 {
-		width = BoxStdWidth
-	}
-
-	// wrap / truncate
-	var wrapped []string
-	for _, l := range lines {
-		// skip blank lines
-		if strings.TrimSpace(l) == "" {
-			continue
-		}
-		wrapped = append(wrapped, truncateOrWrap(l, width)...)
-	}
-	lines = wrapped
-
-	// determine maxLen (can be smaller than width)
-	maxLen := width
-	for _, l := range lines {
-		if len(l) > maxLen {
-			maxLen = len(l)
-		}
-	}
-	// top and bottom style
-	top := BorderColorBlue + "╭" + BorderColorReset + strings.Repeat(BorderColorBlue+"─"+BorderColorReset, maxLen+2) + BorderColorBlue + "╮" + BorderColorReset
-	bottom := BorderColorBlue + "╰" + BorderColorReset + strings.Repeat(BorderColorBlue+"─"+BorderColorReset, maxLen+2) + BorderColorBlue + "╯" + BorderColorReset
-
-	var b strings.Builder
-	b.WriteString(top + "\n")
-	for _, l := range lines {
-		b.WriteString(fmt.Sprintf("\033[34m│\033[0m %-*s \033[34m│\033[0m\n", maxLen, l))
-	}
-	b.WriteString(bottom)
-	return b.String()
+	return drawBox(width, lines, false)
 }
 
+// BoxCenter prints a box where each line is horizontally centred.
 func BoxCenter(width int, lines []string) string {
+	return drawBox(width, lines, true)
+}
+
+// internal helper – shared rendering logic.
+func drawBox(width int, lines []string, centre bool) string {
 	if width <= 0 {
 		width = BoxStdWidth
 	}
@@ -58,68 +33,66 @@ func BoxCenter(width int, lines []string) string {
 	// wrap / truncate
 	var wrapped []string
 	for _, l := range lines {
-		// skip blank lines
 		if strings.TrimSpace(l) == "" {
 			continue
 		}
 		wrapped = append(wrapped, truncateOrWrap(l, width)...)
 	}
-	lines = wrapped
 
-	// determine maxLen (can be smaller than width)
+	// longest line > maxLen
 	maxLen := width
-	for _, l := range lines {
+	for _, l := range wrapped {
 		if len(l) > maxLen {
 			maxLen = len(l)
 		}
 	}
 
-	top := BorderColorBlue + "╭" + BorderColorReset +
-		strings.Repeat(BorderColorBlue+"─"+BorderColorReset, maxLen+2) +
-		BorderColorBlue + "╮" + BorderColorReset
-	bottom := BorderColorBlue + "╰" + BorderColorReset +
-		strings.Repeat(BorderColorBlue+"─"+BorderColorReset, maxLen+2) +
-		BorderColorBlue + "╯" + BorderColorReset
+	// top / bottom border
+	top := borderBlue + "╭" + borderReset + strings.Repeat(borderBlue+"─"+borderReset, maxLen+2) + borderBlue + "╮" + borderReset
+	bottom := borderBlue + "╰" + borderReset + strings.Repeat(borderBlue+"─"+borderReset, maxLen+2) + borderBlue + "╯" + borderReset
 
 	var b strings.Builder
 	b.WriteString(top + "\n")
-	for _, l := range lines {
-		// centering – calculate left and right padding
-		padding := (maxLen - len(l)) / 2
-		rightPad := maxLen - len(l) - padding
-		centered := strings.Repeat(" ", padding) + l + strings.Repeat(" ", rightPad)
-		b.WriteString(fmt.Sprintf("\033[34m│ %s │\033[0m\n", centered))
+	for _, l := range wrapped {
+		if centre {
+			// centre the line
+			left := (maxLen - len(l)) / 2
+			right := maxLen - len(l) - left
+			centered := strings.Repeat(" ", left) + l + strings.Repeat(" ", right)
+			b.WriteString(fmt.Sprintf("%s│ %s │%s\n", borderBlue, centered, borderReset))
+		} else {
+			b.WriteString(fmt.Sprintf("%s│%s %-*s %s│%s\n", borderBlue, borderReset, maxLen, l, borderBlue, borderReset))
+		}
 	}
 	b.WriteString(bottom)
 	return b.String()
 }
 
+// truncateOrWrap cuts a string to `max` runes, returning one or more parts.
+// if the original fits, it is returned unchanged.
 func truncateOrWrap(s string, max int) []string {
 	if max <= 0 {
 		return []string{s}
 	}
-
-	// quick check: is it okay?
 	if utf8.RuneCountInString(s) <= max {
 		return []string{s}
 	}
 
 	var parts []string
 	runes := []rune(s)
+
 	for len(runes) > max {
-		// cut off exactly `max` runes
-		part := string(runes[:max])
-		parts = append(parts, part)
+		parts = append(parts, string(runes[:max]))
 		runes = runes[max:]
 	}
-	// rest (can be shorter)
-	if len(runes) > 0 {
-		// if already had at least one section, mark the last one as cut off
-		if len(parts) > 0 {
-			parts = append(parts, string(runes)+"…")
-		} else {
-			// no previous section → simple shortening
+
+	if len(parts) > 0 && len(runes) > 0 {
+		parts = append(parts, string(runes)+"…")
+	} else if len(runes) > 0 {
+		if max > 1 {
 			parts = []string{string(runes[:max-1]) + "…"}
+		} else {
+			parts = []string{"…"}
 		}
 	}
 	return parts
