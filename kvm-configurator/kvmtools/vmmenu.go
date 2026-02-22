@@ -78,7 +78,7 @@ func printVMTable(vms []*VMInfo) {
 	//w := utils.NewTabWriter()
 	//fmt.Fprintln(w, utils.Colourise("\n=== Available VMs ===", utils.ColorBlue))
 	fmt.Println(utils.BoxCenter(51, []string{"AVALABLE VIRTUAL MACHINES"}))
-	lines := utils.TableToLines(func(w *tabwriter.Writer) {
+	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintln(w, "No.\tName\tState")
 		for i, vm := range vms {
 			fmt.Fprintf(w, "%d\t%s\t%s\n", i+1, vm.Name, vm.Stat)
@@ -107,7 +107,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 	}
 
 	// print actions menu
-	lines := utils.TableToLines(func(w *tabwriter.Writer) {
+	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintln(w, "Action\tDescription")
 		for _, a := range actions {
 			if a.Check != nil && !a.Check(vm) {

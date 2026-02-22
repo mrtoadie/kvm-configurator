@@ -1,5 +1,5 @@
 // kvmtools/diskops.go
-// last modification: Feb 18 2026
+// last modification: Feb 22 2026
 package kvmtools
 
 import (
@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 	// internal
-	"configurator/internal/ui"
 	"configurator/internal/utils"
 )
 
@@ -33,7 +32,7 @@ func ResizeDisk(r *bufio.Reader, vmName string) error {
 		return err
 	}
 
-	sizeStr, _ := ui.ReadLine(r,
+	sizeStr, _ := utils.Prompt(r, os.Stdout,
 		utils.Colourise("New size (e.g. 10 to add 10 GiB to the disk): ", utils.ColorYellow))
 	newSize, err := strconv.Atoi(sizeStr)
 	if err != nil || newSize <= 0 {
@@ -68,7 +67,7 @@ func ConvertDisk(r *bufio.Reader, vmName string) error {
 	fmt.Println("[2] raw     (uncompressed, fast)")
 	fmt.Println("[3] vdi     (VirtualBox-Compatible)")
 
-	choice, _ := ui.ReadLine(r,
+	choice, _ := utils.Prompt(r, os.Stdout,
 		utils.Colourise("Select format: ", utils.ColorYellow))
 
 	var tgtFmt string
@@ -177,7 +176,7 @@ func DiskOpsMenu(r *bufio.Reader, vmName string) error {
 			"[0] Back",
 		}))
 
-		choice, _ := ui.ReadLine(r,
+		choice, _ := utils.Prompt(r, os.Stdout, 
 			utils.Colourise("\nSelection: ", utils.ColorYellow))
 
 		switch choice {

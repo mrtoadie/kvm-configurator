@@ -1,12 +1,10 @@
 // ui/ui.go
-// last modification: February 15 2026
+// last modification: February 22 2026
 package ui
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"sort"
@@ -20,19 +18,6 @@ import (
 	"configurator/internal/utils"
 )
 
-// waiting for input
-func ReadLine(r *bufio.Reader, prompt string) (string, error) {
-	fmt.Print(prompt)
-	s, err := r.ReadString('\n')
-	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return "", io.EOF // clean exit (e.g. CTRL+D)
-		}
-		return "", err
-	}
-	return strings.TrimSpace(s), nil
-}
-
 // Loading distro list from yaml
 func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfig, error) {
 	fmt.Println(utils.BoxCenter(51, []string{"Select an operating system"}))
@@ -42,7 +27,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 		return strings.ToLower(sorted[i].Name) < strings.ToLower(sorted[j].Name)
 	})
 
-	lines := utils.TableToLines(func(w *tabwriter.Writer) {
+	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintln(w, "No.\tName\tCPU\tRAM (MiB)\tDisk (GB)")
 		fmt.Fprintln(w, "---\t----\t---\t---------\t---------")
 		for i, d := range sorted {
@@ -53,7 +38,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 	})
 	fmt.Print(utils.Box(51, lines))
 
-	line, err := ReadLine(r, utils.Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", utils.ColorYellow))
+	line, err := utils.Prompt(r, os.Stdout, utils.Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", utils.ColorYellow))
 	if err != nil {
 		return config.VMConfig{}, err
 	}
@@ -105,7 +90,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		isoFile := filepath.Base(cfg.ISOPath)
 		fmt.Println(utils.BoxCenter(51, []string{"VM-CONFIG"}))
 		// Convert menu lines into line slices with Tabwriter
-		lines := utils.TableToLines(func(w *tabwriter.Writer) {
+		lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
 			fmt.Fprintf(w, "[1] Name:\t%s\n", cfg.Name)
 			fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t\n", cfg.MemMiB)
 			fmt.Fprintf(w, "[3] vCPU:\t%d\n", cfg.VCPU)
@@ -125,24 +110,24 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		// Build a box around it and spend it
 		fmt.Println(utils.Box(51, lines))
 
-		f, _ := ReadLine(r, utils.Colourise("\nSelect or press Enter to continue: ", utils.ColorYellow))
+		f, _ := utils.Prompt(r, os.Stdout, utils.Colourise("\nSelect or press Enter to continue: ", utils.ColorYellow))
 		if f == "" {
 			break
 		}
 
 		switch f {
 		case "1":
-			if v, _ := ReadLine(r, ">> New Name: "); v != "" {
+			if v, _ := utils.Prompt(r, os.Stdout, ">> New Name: "); v != "" {
 				cfg.Name = v
 			}
 		case "2":
-			if v, _ := ReadLine(r, ">> RAM (MiB): "); v != "" {
+			if v, _ := utils.Prompt(r, os.Stdout, ">> RAM (MiB): "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					cfg.MemMiB = i
 				}
 			}
 		case "3":
-			if v, _ := ReadLine(r, ">> vCPU: "); v != "" {
+			if v, _ := utils.Prompt(r, os.Stdout, ">> vCPU: "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					cfg.VCPU = i
 				}
@@ -150,7 +135,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		case "4":
 			// Change disk path (we edit the *first*disk)
 			prompt := fmt.Sprintf(">> Disk path (default: %s): ", defaultDiskPath)
-			if v, _ := ReadLine(r, prompt); v != "" {
+			if v, _ := utils.Prompt(r, os.Stdout, prompt); v != "" {
 				// If no disc exists yet, we create one
 				if primary := cfg.PrimaryDisk(); primary != nil {
 					primary.Path = os.ExpandEnv(v)
@@ -179,7 +164,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 
 		case "5":
 			// change disk size (only for the first disk)
-			if v, _ := ReadLine(r, ">> Disk size (GB): "); v != "" {
+			if v, _ := utils.Prompt(r, os.Stdout, ">> Disk size (GB): "); v != "" {
 				if i, e := strconv.Atoi(v); e == nil && i > 0 {
 					if primary := cfg.PrimaryDisk(); primary != nil {
 						primary.SizeGiB = i
@@ -205,7 +190,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			cfg.ISOPath = isoPath
 			fmt.Printf("\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
 		case "8":
-			if v, _ := ReadLine(r, ">> Network (none or default): "); true {
+			if v, _ := utils.Prompt(r, os.Stdout, ">> Network (none or default): "); true {
 				cfg.Network = v
 			}
 		case "0":
@@ -221,7 +206,7 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	//isoName := strings.TrimSuffix(isoFile, filepath.Ext(isoFile))
 
 	fmt.Println(utils.BoxCenter(51, []string{"VM-SUMMARY"}))
-	lines := utils.TableToLines(func(w *tabwriter.Writer) {
+	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
 		fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)
 		fmt.Fprintf(w, "vCPU:\t%d\n", cfg.VCPU)
@@ -244,7 +229,7 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 
 	fmt.Println(utils.Box(51, lines))
 
-	fmt.Print(utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
-	_, _ = r.ReadString('\n')
+	_, _ = utils.Prompt(r, os.Stdout,
+    utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
 }
 // EOF

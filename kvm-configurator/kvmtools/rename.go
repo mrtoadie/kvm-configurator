@@ -1,5 +1,5 @@
 // kvmtools/rename.go
-// last modification: Feb 19 2026
+// last modification: Feb 22 2026
 package kvmtools
 
 import (
@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"configurator/internal/ui"
 	"configurator/internal/utils"
 )
 
@@ -23,7 +22,7 @@ func RenameVM(r *bufio.Reader, oldName, xmlDir string) error {
 	// -------------------------------------------------
 	// ask for new name
 	// -------------------------------------------------
-	newName, err := ui.ReadLine(r,
+	newName, err := utils.Prompt(r, os.Stdout,
 		utils.Colourise(fmt.Sprintf("New name for VM %q: ", oldName), utils.ColorYellow))
 	if err != nil {
 		return fmt.Errorf("Entry failed: %w", err)

@@ -1,20 +1,21 @@
 // ui/disks.go
-// last modification: Feb 08 2026
+// last modification: Feb 22 2026
 package ui
 
 import (
-	"fmt"
-	"strconv"
 	"bufio"
-	"configurator/internal/utils"
 	"configurator/internal/model"
+	"configurator/internal/utils"
+	"fmt"
+	"os"
+	"strconv"
 )
 
 func PromptAddDisk(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string) error {
 	fmt.Println(utils.BoxCenter(55, []string{"=== ADD DISK ==="}))
 
 	// disk name
-	name, _ := ReadLine(r, utils.Colourise("Disk name (e.g. swap, data, backup): ", utils.ColorYellow))
+	name, _ := utils.Prompt(r, os.Stdout, utils.Colourise("Disk name (e.g. swap, data, backup): ", utils.ColorYellow))
 	if name == "" {
 		return nil
 	}
@@ -27,18 +28,18 @@ func PromptAddDisk(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath str
 		suggestedPath = defaultDiskPath // global default if no disk exists yet
 	}
 	prompt := fmt.Sprintf("Disk path (default: %s): ", suggestedPath)
-	path, _ := ReadLine(r, utils.Colourise(prompt, utils.ColorYellow))
+	path, _ := utils.Prompt(r, os.Stdout, utils.Colourise(prompt, utils.ColorYellow))
 	if path == "" {
 		// User has not entered anything > using default
 		path = suggestedPath
 	}
 
 	// size
-	sizeStr, _ := ReadLine(r, utils.Colourise("Size in GiB (0 = default): ", utils.ColorYellow))
+	sizeStr, _ := utils.Prompt(r, os.Stdout, utils.Colourise("Size in GiB (0 = default): ", utils.ColorYellow))
 	size, _ := strconv.Atoi(sizeStr)
 
 	// Bus‑Typ (optional)
-	bus, _ := ReadLine(r, utils.Colourise("Bus (virtio|scsi|sata|usb, default virtio): ", utils.ColorYellow))
+	bus, _ := utils.Prompt(r, os.Stdout, utils.Colourise("Bus (virtio|scsi|sata|usb, default virtio): ", utils.ColorYellow))
 	if bus == "" {
 		bus = "virtio"
 	}
