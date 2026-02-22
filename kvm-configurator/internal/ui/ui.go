@@ -13,7 +13,6 @@ import (
 	"text/tabwriter"
 	// internal
 	"configurator/internal/config"
-	"configurator/internal/fileutils"
 	"configurator/internal/model"
 	"configurator/internal/utils"
 )
@@ -59,7 +58,7 @@ The return value is the 'absolute path' to the file (for virt‑install)
 */
 func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 	// workDir is directory from filepaths.isopath
-	files, err := fileutils.ListFiles(workDir)
+	files, err := utils.ListFiles(workDir)
 	if err != nil {
 		return "", fmt.Errorf("listing files in %s failed: %w", workDir, err)
 	}
@@ -71,7 +70,7 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 		return strings.ToLower(files[i]) < strings.ToLower(files[j])
 	})
 	// Show menu for selection
-	choice, err := fileutils.PromptSelection(files)
+	choice, err := utils.PromptSelection(bufio.NewReader(os.Stdin), os.Stdout, files)
 	if err != nil {
 		return "", err
 	}

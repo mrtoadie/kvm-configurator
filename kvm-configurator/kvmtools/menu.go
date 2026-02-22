@@ -1,13 +1,15 @@
 // kvmtools/menu.go
-// last modification: Feb 15 2026
+// last modification: Feb 22 2026
 package kvmtools
 
 import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
-	//"text/tabwriter"
+	"text/tabwriter"
+
 	// internal
 	"configurator/internal/utils"
 )
@@ -18,39 +20,58 @@ type commandInfo struct {
 }
 
 var menuMap = map[string]commandInfo{
-	"1": {"Show VMs"},
-	"q": {"Back to Mainmenu"},
+	"[1]": {"Show VMs"},
+	"[q]": {"Back to Mainmenu"},
 }
 
 // lightweight dispatcher
 func Start(r *bufio.Reader, xmlDir string) {
-    for {
-        printMenu()
-        choice := readChoice(r)
+	for {
+		printMenu()
+		choice := readChoice(r)
 
-        if choice == "q" {
-            fmt.Println(utils.Colourise("\nBack to Mainmenu", utils.ColorYellow))
-            return
-        }
+		if choice == "q" {
+			fmt.Println(utils.Colourise("\nBack to Mainmenu", utils.ColorYellow))
+			return
+		}
 
-        switch choice {
-        case "1":
-            VMMenu(r, xmlDir)
-        default:
-            fmt.Fprintln(os.Stderr,
-                utils.Colourise("Invalid selection", utils.ColorRed))
-        }
-    }
+		switch choice {
+		case "1":
+			VMMenu(r, xmlDir)
+		default:
+			fmt.Fprintln(os.Stderr,
+				utils.Colourise("Invalid selection", utils.ColorRed))
+		}
+	}
 }
 
 // print kvm-tools menu
 func printMenu() {
-	fmt.Println(utils.Box(20, []string{"KVM-TOOLS"}))
-	w := utils.NewTabWriter()
-	for key, info := range menuMap {
-		fmt.Fprintf(w, "%s\t%s\n", key, info.Description)
+	// title
+	titleBox := utils.Box(20, []string{"KVM-TOOLS"})
+	fmt.Println(titleBox)
+
+	// sort menu entrys
+	keys := make([]string, 0, len(menuMap))
+	for k := range menuMap {
+		keys = append(keys, k)
 	}
-	w.Flush()
+	sort.Strings(keys)
+
+	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
+		// optional: header - example
+		//fmt.Fprintln(w, "No.\tDescription")
+		//fmt.Fprintln(w, "------\t------------")
+
+		// print all entrys vom menuMap
+		for _, k := range keys {
+			fmt.Fprintf(w, "%s\t%s\n", k, menuMap[k].Description)
+		}
+	})
+
+	// draw the box
+	menuBox := utils.Box(20, lines)
+	fmt.Println(menuBox)
 }
 
 // Read input and remove whitespace.
@@ -59,4 +80,3 @@ func readChoice(r *bufio.Reader) string {
 	raw, _ := r.ReadString('\n')
 	return strings.TrimSpace(raw)
 }
-// EOF
