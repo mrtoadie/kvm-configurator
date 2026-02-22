@@ -12,6 +12,7 @@ import (
 
 	"configurator/internal/model"
 	"configurator/internal/utils"
+	"configurator/internal/style"
 )
 
 // Helper: validate comma‑separated list against an allow‑list.
@@ -27,54 +28,54 @@ func validateList(input string, allowed map[string]bool) bool {
 // Individual field editors (tiny, testable functions).
 func editNested(r *bufio.Reader, cfg *model.DomainConfig) {
 	if v, err := utils.Prompt(r, os.Stdout,
-		utils.Colourise(">> Nested-Virtualisation (vmx for Intel, smx for AMD): ", utils.ColorBlue)); err == nil && v != "" {
+		style.Colourise(">> Nested-Virtualisation (vmx for Intel, smx for AMD): ", style.ColorBlue)); err == nil && v != "" {
 		cfg.NestedVirt = v
-		utils.Success("Nested-Virtualisation", v, "")
+		style.Success("Nested-Virtualisation", v, "")
 	}
 }
 
 func editBoot(r *bufio.Reader, cfg *model.DomainConfig) {
 	const bootKey = "boot"
 	if v, err := utils.Prompt(r, os.Stdout,
-		utils.Colourise(">> Boot order (comma-separated, e.g. hd,cdrom,network): ", utils.ColorBlue)); err == nil && v != "" {
+		style.Colourise(">> Boot order (comma-separated, e.g. hd,cdrom,network): ", style.ColorBlue)); err == nil && v != "" {
 
 		allowed := map[string]bool{"hd": true, "cdrom": true, "network": true}
 		if !validateList(v, allowed) {
-			utils.RedError("Invalid boot order", v, nil)
+			style.RedError("Invalid boot order", v, nil)
 			return
 		}
 		cfg.BootOrder = v
-		utils.Success("Boot order", v, "")
+		style.Success("Boot order", v, "")
 	}
 }
 
 func editGraphics(r *bufio.Reader, cfg *model.DomainConfig) {
 	if v, err := utils.Prompt(r, os.Stdout,
-		utils.Colourise(">> Graphics (spice (default) or vnc): ", utils.ColorBlue)); err == nil && v != "" {
+		style.Colourise(">> Graphics (spice (default) or vnc): ", style.ColorBlue)); err == nil && v != "" {
 		cfg.Graphics = v
-		utils.Success("Graphics", v, "")
+		style.Success("Graphics", v, "")
 	}
 }
 
 func editSound(r *bufio.Reader, cfg *model.DomainConfig) {
 	if v, err := utils.Prompt(r, os.Stdout,
-		utils.Colourise(">> Sound (none, ac97, ich6, ich9 (default)): ", utils.ColorBlue)); err == nil && v != "" {
+		style.Colourise(">> Sound (none, ac97, ich6, ich9 (default)): ", style.ColorBlue)); err == nil && v != "" {
 		cfg.Sound = v
-		utils.Success("Sound", v, "")
+		style.Success("Sound", v, "")
 	}
 }
 
 func editFilesystem(r *bufio.Reader, cfg *model.DomainConfig) {
 	if v, err := utils.Prompt(r, os.Stdout,
-		utils.Colourise(">> Filesystem / Mount (/src/dir,/guest/dir): ", utils.ColorBlue)); err == nil && v != "" {
+		style.Colourise(">> Filesystem / Mount (/src/dir,/guest/dir): ", style.ColorBlue)); err == nil && v != "" {
 		cfg.FileSystem = v
-		utils.Success("Filesystem", v, "")
+		style.Success("Filesystem", v, "")
 	}
 }
 
 // print menu
 func printAdvancedMenu(cfg *model.DomainConfig) {
-	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
+	lines := style.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintln(w, "Parameter\tCurrent")
 		fmt.Fprintln(w, "---------\t-------")
 		fmt.Fprintf(w, "[a]\tNested-Virtualisation\t%s\n", cfg.NestedVirt)
@@ -84,7 +85,7 @@ func printAdvancedMenu(cfg *model.DomainConfig) {
 		fmt.Fprintf(w, "[e]\tFilesystem\t%s\n", cfg.FileSystem)
 		fmt.Fprintln(w, "[0]\tBack to main menu")
 	})
-	fmt.Println(utils.Box(60, lines))
+	fmt.Println(style.Box(60, lines))
 }
 
 // Main dispatcher
@@ -107,16 +108,16 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 	}
 
 	for {
-		fmt.Println(utils.BoxCenter(51, []string{"=== ADVANCED PARAMETERS ==="}))
+		fmt.Println(style.BoxCenter(51, []string{"=== ADVANCED PARAMETERS ==="}))
 		printAdvancedMenu(cfg)
 
 		choice, err := utils.Prompt(r, os.Stdout,
-			utils.Colourise("\nSelect an option (or press Enter to go back): ", utils.ColorYellow))
+			style.Colourise("\nSelect an option (or press Enter to go back): ", style.ColorYellow))
 		if err != nil {
 			if err == io.EOF {
 				return // user hit Ctrl‑D → graceful exit
 			}
-			utils.RedError("Read error", "", err)
+			style.RedError("Read error", "", err)
 			continue
 		}
 		choice = strings.TrimSpace(strings.ToLower(choice))
@@ -126,7 +127,7 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 		if h, ok := handlers[choice]; ok {
 			h()
 		} else {
-			utils.RedError("Invalid selection", choice, nil)
+			style.RedError("Invalid selection", choice, nil)
 		}
 	}
 }

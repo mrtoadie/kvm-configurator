@@ -12,7 +12,10 @@ import (
 	"strings"
 	// internal
 	"configurator/internal/utils"
+	"configurator/internal/style"
+
 )
+
 
 func getRealDiskPath(vmName string) (string, error) {
 	paths, err := GetDiskPathsViaVirsh(vmName)
@@ -33,7 +36,7 @@ func ResizeDisk(r *bufio.Reader, vmName string) error {
 	}
 
 	sizeStr, _ := utils.Prompt(r, os.Stdout,
-		utils.Colourise("New size (e.g. 10 to add 10 GiB to the disk): ", utils.ColorYellow))
+		style.Colourise("New size (e.g. 10 to add 10 GiB to the disk): ", style.ColorYellow))
 	newSize, err := strconv.Atoi(sizeStr)
 	if err != nil || newSize <= 0 {
 		return fmt.Errorf("please enter a positive integer (e.g. 10 to add 10 GiB to the disk)")
@@ -43,7 +46,7 @@ func ResizeDisk(r *bufio.Reader, vmName string) error {
 	fmt.Println("\n" + imgPath + vmName + "\n")
 	//
 
-	spinner := utils.SpinnerProgress("Resize is running …")
+	spinner := style.SpinnerProgress("Resize is running …")
 	defer spinner.Stop()
 
 	cmd := exec.Command("qemu-img", "resize", imgPath, fmt.Sprintf("+%dG", newSize))
@@ -51,7 +54,7 @@ func ResizeDisk(r *bufio.Reader, vmName string) error {
 	if err != nil {
 		return fmt.Errorf("resize failed: %v – %s", err, string(out))
 	}
-	utils.Successf("Disk %s increased by %dGiB", filepath.Base(imgPath), newSize)
+	style.Successf("Disk %s increased by %dGiB", filepath.Base(imgPath), newSize)
 	return nil
 }
 
@@ -62,13 +65,13 @@ func ConvertDisk(r *bufio.Reader, vmName string) error {
 		return err
 	}
 
-	fmt.Println(utils.Colourise("\nTarget formats:", utils.ColorBlue))
+	fmt.Println(style.Colourise("\nTarget formats:", style.ColorBlue))
 	fmt.Println("[1] qcow2   (Standard, compressed)")
 	fmt.Println("[2] raw     (uncompressed, fast)")
 	fmt.Println("[3] vdi     (VirtualBox-Compatible)")
 
 	choice, _ := utils.Prompt(r, os.Stdout,
-		utils.Colourise("Select format: ", utils.ColorYellow))
+		style.Colourise("Select format: ", style.ColorYellow))
 
 	var tgtFmt string
 	switch choice {
@@ -85,7 +88,7 @@ func ConvertDisk(r *bufio.Reader, vmName string) error {
 	ext := "." + tgtFmt
 	newPath := strings.TrimSuffix(srcPath, filepath.Ext(srcPath)) + ext
 
-	spinner := utils.SpinnerProgress("Conversion is underway …")
+	spinner := style.SpinnerProgress("Conversion is underway …")
 	defer spinner.Stop()
 
 	cmd := exec.Command("qemu-img", "convert", "-O", tgtFmt, srcPath, newPath)
@@ -93,7 +96,7 @@ func ConvertDisk(r *bufio.Reader, vmName string) error {
 	if err != nil {
 		return fmt.Errorf("conversion failed: %v – %s", err, string(out))
 	}
-	utils.Successf("Converted disk %s to %s", filepath.Base(srcPath), tgtFmt)
+	style.Successf("Converted disk %s to %s", filepath.Base(srcPath), tgtFmt)
 
 	// update XML entry (e.g. boot disk from qcow to vdi)
 	updateXMLPath(vmName, newPath, srcPath)
@@ -112,14 +115,14 @@ func RepairDisk(r *bufio.Reader, vmName string) error {
 	checkCmd := exec.Command("qemu-img", "check", imgPath)
 	out, err := checkCmd.CombinedOutput()
 	if err == nil {
-		fmt.Println(utils.Colourise("\nDisk is intact - no intervention required.", utils.ColorGreen))
+		fmt.Println(style.Colourise("\nDisk is intact - no intervention required.", style.ColorGreen))
 		fmt.Printf("%s\n", string(out))
 		return nil
 	}
 
 	// repair (amend is the easiest way)
-	fmt.Println(utils.Colourise("\nInconsistency detected -attempt repair …", utils.ColorRed))
-	spinner := utils.SpinnerProgress("Repair is running …")
+	fmt.Println(style.Colourise("\nInconsistency detected -attempt repair …", style.ColorRed))
+	spinner := style.SpinnerProgress("Repair is running …")
 	defer spinner.Stop()
 
 	repairCmd := exec.Command("qemu-img", "amend", "-f", "qcow2", imgPath)
@@ -127,7 +130,7 @@ func RepairDisk(r *bufio.Reader, vmName string) error {
 	if repErr != nil {
 		return fmt.Errorf("Repair failed: %v – %s", repErr, string(repOut))
 	}
-	utils.Successf("Disk %s repaired", filepath.Base(imgPath))
+	style.Successf("Disk %s repaired", filepath.Base(imgPath))
 	fmt.Printf("%s\n", string(repOut))
 	return nil
 }
@@ -149,27 +152,27 @@ func updateXMLPath(vmName, newPath, oldPath string) {
 		}
 	}
 	if xmlPath == "" {
-		utils.RedError("XML update failed – file not found", vmName, nil)
+		style.RedError("XML update failed – file not found", vmName, nil)
 		return
 	}
 
 	data, err := os.ReadFile(xmlPath)
 	if err != nil {
-		utils.RedError("XML update failed (read)", xmlPath, err)
+		style.RedError("XML update failed (read)", xmlPath, err)
 		return
 	}
 	updated := strings.ReplaceAll(string(data), oldPath, newPath)
 	if err := os.WriteFile(xmlPath, []byte(updated), 0644); err != nil {
-		utils.RedError("XML update failed (write)", xmlPath, err)
+		style.RedError("XML update failed (write)", xmlPath, err)
 	}
 }
 
 // Sub-menu that call up from "vmmenu.go"
 func DiskOpsMenu(r *bufio.Reader, vmName string) error {
 	for {
-		fmt.Println(utils.BoxCenter(55,
+		fmt.Println(style.BoxCenter(55,
 			[]string{"=== DISK-OPERATIONS FOR " + vmName + " ==="}))
-		fmt.Println(utils.Box(55, []string{
+		fmt.Println(style.Box(55, []string{
 			"[1] Resize",
 			"[2] Convert (change file format)",
 			"[3] Repair (check image)",
@@ -177,7 +180,7 @@ func DiskOpsMenu(r *bufio.Reader, vmName string) error {
 		}))
 
 		choice, _ := utils.Prompt(r, os.Stdout, 
-			utils.Colourise("\nSelection: ", utils.ColorYellow))
+			style.Colourise("\nSelection: ", style.ColorYellow))
 
 		switch choice {
 		case "1":
@@ -189,7 +192,7 @@ func DiskOpsMenu(r *bufio.Reader, vmName string) error {
 		case "0", "":
 			return nil
 		default:
-			fmt.Println(utils.Colourise("Invalid selection!", utils.ColorRed))
+			fmt.Println(style.Colourise("Invalid selection!", style.ColorRed))
 		}
 	}
 }

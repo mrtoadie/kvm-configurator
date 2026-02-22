@@ -7,7 +7,8 @@ import (
 	"configurator/internal/config"
 	"configurator/internal/model"
 	"configurator/internal/ui"
-	"configurator/internal/utils"
+
+	"configurator/internal/style"
 	"fmt"
 )
 
@@ -77,12 +78,13 @@ func RunNewVMWorkflow(
 	// Create VM
 	if err := CreateVM(cfg, variant, cfg.ISOPath, xmlDir); err != nil {
 		//return fmt.Errorf("\x1b[31mVM creation failed: %w\x1b[0m", err)
-		utils.RedError("VM creation failed", cfg.Name, err)
+		style.RedError("VM creation failed", cfg.Name, err)
 		// WIP
 		//return ui.Fatal(ui.ErrVMCreationFail, "%w")
 	} else {
-		utils.Success("VM", cfg.Name, "successfully built!")
+		style.Success("VM", cfg.Name, "successfully built!")
 	}
 	return nil
 }
+
 // EOF

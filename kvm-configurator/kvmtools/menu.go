@@ -11,7 +11,7 @@ import (
 	"text/tabwriter"
 
 	// internal
-	"configurator/internal/utils"
+	"configurator/internal/style"
 )
 
 // only one entry - the rest is in vmmenu.go
@@ -39,7 +39,7 @@ func Start(r *bufio.Reader, xmlDir string) {
 			VMMenu(r, xmlDir)
 		default:
 			fmt.Fprintln(os.Stderr,
-				utils.Colourise("Invalid selection", utils.ColorRed))
+				style.Colourise("Invalid selection", style.ColorRed))
 		}
 	}
 }
@@ -47,7 +47,7 @@ func Start(r *bufio.Reader, xmlDir string) {
 // print kvm-tools menu
 func printMenu() {
 	// title
-	titleBox := utils.Box(20, []string{"KVM-TOOLS"})
+	titleBox := style.Box(20, []string{"KVM-TOOLS"})
 	fmt.Println(titleBox)
 
 	// sort menu entrys
@@ -57,7 +57,7 @@ func printMenu() {
 	}
 	sort.Strings(keys)
 
-	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
+	lines := style.MustTableToLines(func(w *tabwriter.Writer) {
 		// optional: header - example
 		//fmt.Fprintln(w, "No.\tDescription")
 		//fmt.Fprintln(w, "------\t------------")
@@ -69,13 +69,13 @@ func printMenu() {
 	})
 
 	// draw the box
-	menuBox := utils.Box(20, lines)
+	menuBox := style.Box(20, lines)
 	fmt.Println(menuBox)
 }
 
 // Read input and remove whitespace.
 func readChoice(r *bufio.Reader) string {
-	fmt.Print(utils.Colourise("\nSelect: ", utils.ColorYellow))
+	fmt.Print(style.Colourise("\nSelect: ", style.ColorYellow))
 	raw, _ := r.ReadString('\n')
 	return strings.TrimSpace(raw)
 }

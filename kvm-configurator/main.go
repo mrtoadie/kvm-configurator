@@ -15,7 +15,8 @@ import (
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
-	"configurator/internal/utils"
+	
+	"configurator/internal/style"
 	"configurator/kvmtools"
 )
 
@@ -24,7 +25,7 @@ func main() {
 	// [Modul: config] validates if (virt‑install, virsh) is installed
 	if err := config.EnsureAll(config.CmdVirtInstall, config.CmdVirsh); err != nil {
 		// exit if virt-install or virsh are not found
-		utils.RedError("virt-install not found", "verify $PATH", err)
+		style.RedError("virt-install not found", "verify $PATH", err)
 		os.Exit(1)
 	}
 	// for debug only
@@ -39,7 +40,7 @@ func main() {
 	cfg, err := config.LoadAll(config.ConfigFilePath())
 	//cfg, err := config.LoadAll(config.FileConfig) // One call, one result
 	if err != nil {
-		utils.RedError("Failed to load configuration", "", err)
+		style.RedError("Failed to load configuration", "", err)
 		os.Exit(1)
 	}
 
@@ -66,14 +67,14 @@ func main() {
 	r := bufio.NewReader(os.Stdin)
 	for {
 		//fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColorBlue))
-		fmt.Println(utils.Box(20, []string{"KVM-CONFIGURATOR"}))
+		fmt.Println(style.Box(20, []string{"KVM-CONFIGURATOR"}))
 
-		fmt.Println(utils.Box(20, []string{
+		fmt.Println(style.Box(20, []string{
 			"[1] New VM",
 			"[2] KVM-Tools",
 			"[0] Exit",
 		}))
-		fmt.Print(utils.Colourise(" Selection: ", utils.ColorYellow))
+		fmt.Print(style.Colourise(" Selection: ", style.ColorYellow))
 
 		var sel string
 		if _, err := fmt.Scanln(&sel); err != nil {
@@ -99,13 +100,13 @@ func main() {
 			); err != nil {
 				// error
 				fmt.Fprintf(os.Stderr, "%sError: %v%s\n",
-					utils.ColorRed, err, utils.ColorReset)
+					style.ColorRed, err, style.ColorReset)
 			}
 		case "2":
 			//kvmtools.Start(r)
 			kvmtools.Start(bufio.NewReader(os.Stdin), xmlDir)
 		default:
-			fmt.Println(utils.Colourise("\nInvalid selection!", utils.ColorRed))
+			fmt.Println(style.Colourise("\nInvalid selection!", style.ColorRed))
 		}
 	}
 }

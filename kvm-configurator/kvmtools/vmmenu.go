@@ -15,7 +15,7 @@ import (
 	"text/tabwriter"
 
 	// internal
-	"configurator/internal/utils"
+	"configurator/internal/style"
 )
 
 // fetchAllVMs -calls `virsh list --all` and returns []*VMInfo
@@ -52,7 +52,7 @@ func parseVMs(raw []byte) ([]*VMInfo, error) {
 
 		id := fields[0]                                    // may be "-"
 		rawStat := fields[len(fields)-1]                   // last column
-		stat := utils.NormalizeStatus(rawStat)             // canonical
+		stat := style.NormalizeStatus(rawStat)             // canonical
 		name := strings.Join(fields[1:len(fields)-1], " ") // everything in between
 
 		vms = append(vms, &VMInfo{Id: id, Name: name, Stat: stat})
@@ -77,15 +77,15 @@ func sortVMsAlphabetically(vms []*VMInfo) []*VMInfo {
 func printVMTable(vms []*VMInfo) {
 	//w := utils.NewTabWriter()
 	//fmt.Fprintln(w, utils.Colourise("\n=== Available VMs ===", utils.ColorBlue))
-	fmt.Println(utils.BoxCenter(51, []string{"AVALABLE VIRTUAL MACHINES"}))
-	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
+	fmt.Println(style.BoxCenter(51, []string{"AVALABLE VIRTUAL MACHINES"}))
+	lines := style.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintln(w, "No.\tName\tState")
 		for i, vm := range vms {
 			fmt.Fprintf(w, "%d\t%s\t%s\n", i+1, vm.Name, vm.Stat)
 		}
 		w.Flush()
 	})
-	fmt.Print(utils.Box(51, lines))
+	fmt.Print(style.Box(51, lines))
 }
 
 // pickAction – only shows permitted actions for the respective status
@@ -107,7 +107,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 	}
 
 	// print actions menu
-	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
+	lines := style.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintln(w, "Action\tDescription")
 		for _, a := range actions {
 			if a.Check != nil && !a.Check(vm) {
@@ -117,9 +117,9 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 		}
 		w.Flush()
 	})
-	fmt.Print(utils.Box(51, lines))
+	fmt.Print(style.Box(51, lines))
 
-	fmt.Print(utils.Colourise("\nSelect action (or q to exit): ", utils.ColorYellow))
+	fmt.Print(style.Colourise("\nSelect action (or q to exit): ", style.ColorYellow))
 	choiceRaw, _ := r.ReadString('\n')
 	choice := strings.TrimSpace(choiceRaw)
 
@@ -128,7 +128,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 			return a.Cmd
 		}
 	}
-	fmt.Fprintln(os.Stderr, utils.Colourise("Invalid selection", utils.ColorRed))
+	fmt.Fprintln(os.Stderr, style.Colourise("Invalid selection", style.ColorRed))
 	return ""
 }
 
@@ -152,12 +152,12 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		vms, err := fetchAllVMs()
 		if err != nil {
 			fmt.Fprintln(os.Stderr,
-				utils.Colourise("Error reading the VM list: "+err.Error(),
-					utils.ColorRed))
+				style.Colourise("Error reading the VM list: "+err.Error(),
+					style.ColorRed))
 			return
 		}
 		if len(vms) == 0 {
-			fmt.Println(utils.Colourise("No VMs found", utils.ColorYellow))
+			fmt.Println(style.Colourise("No VMs found", style.ColorYellow))
 			return
 		}
 
@@ -166,7 +166,7 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		printVMTable(sorted)
 
 		// make selection
-		fmt.Print(utils.Colourise("\nSelect VM number (or q to exit): ", utils.ColorYellow))
+		fmt.Print(style.Colourise("\nSelect VM number (or q to exit): ", style.ColorYellow))
 		choiceRaw, _ := r.ReadString('\n')
 		choice := strings.TrimSpace(choiceRaw)
 		if choice == "q" || choice == "quit" {
@@ -175,7 +175,7 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		idx, err := strconv.Atoi(choice)
 		if err != nil || idx < 1 || idx > len(sorted) {
 			fmt.Fprintln(os.Stderr,
-				utils.Colourise("Invalid selection", utils.ColorRed))
+				style.Colourise("Invalid selection", style.ColorRed))
 			continue
 		}
 		selected := sorted[idx-1]
@@ -189,14 +189,14 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		if action == ActDiskOps {
 			// Start Disk Ops submenu (only pass VM name)
 			if err := DiskOpsMenu(r, selected.Name); err != nil {
-				fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
+				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColorRed))
 			}
 			continue
 		}
 
 		if action == ActRename {
     if err := RenameVM(r, selected.Name, xmlDir); err != nil {
-        fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
+        fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColorRed))
     }
     // zurück zur VM‑Übersicht
     continue
@@ -205,13 +205,13 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		// run – special case “Undefine + Disk Cleanup”
 		if action == ActDelete {
 			if err := deleteVMWithDisks(r, selected.Name, xmlDir); err != nil {
-				fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
+				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColorRed))
 			}
 		} else {
 			if err := runVMAction(action, selected.Name); err != nil {
-				fmt.Fprintln(os.Stderr, utils.Colourise(err.Error(), utils.ColorRed))
+				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColorRed))
 			} else {
-				fmt.Println(utils.Colourise("Action successfully completed", utils.ColorGreen))
+				fmt.Println(style.Colourise("Action successfully completed", style.ColorGreen))
 			}
 		}
 	}

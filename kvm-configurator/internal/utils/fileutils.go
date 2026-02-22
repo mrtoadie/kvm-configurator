@@ -12,7 +12,7 @@ import (
 	"strconv"
 	//"strings"
 	// internal
-	//"configurator/internal/utils"
+	"configurator/internal/style"
 )
 
 const (
@@ -49,12 +49,12 @@ func PromptSelection(r *bufio.Reader, w io.Writer, files []string) (int, error) 
 	}
 
 	// Header – use the shared colour constant
-	fmt.Fprintln(w, Colourise("\n=== Select ISO ===", ColorBlue))
+	fmt.Fprintln(w, style.Colourise("\n=== Select ISO ===", style.ColorBlue))
 
 	for i, f := range files {
 		fmt.Fprintf(w, "[%d] %s\n", i+1, filepath.Base(f))
 	}
-	prompt := Colourise("Please enter number (or 0 to cancel): ", ColorYellow)
+	prompt := style.Colourise("Please enter number (or 0 to cancel): ", style.ColorYellow)
 
 	// Re‑use the universal Prompt helper
 	line, err := Prompt(r, w, prompt)
@@ -66,7 +66,7 @@ func PromptSelection(r *bufio.Reader, w io.Writer, files []string) (int, error) 
 		return InvalidChoice, fmt.Errorf("invalid number %q", line)
 	}
 	if choice < CancelChoice || choice > len(files) {
-		return InvalidChoice, fmt.Errorf("choice %d out of range (0‑%d)", choice, len(files))
+		return InvalidChoice, fmt.Errorf("choice %d out of range (0-%d)", choice, len(files))
 	}
 	return choice, nil
 }

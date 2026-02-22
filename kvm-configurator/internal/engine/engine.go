@@ -13,7 +13,7 @@ import (
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/model"
-	"configurator/internal/utils"
+		"configurator/internal/style"
 )
 
 /*
@@ -55,14 +55,14 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 	}
 	
 	// progress-spinner
-	spinner := utils.SpinnerProgress("\x1b[34mRunning virt-install:")
+	spinner := style.SpinnerProgress("\x1b[34mRunning virt-install:")
 	defer spinner.Stop()
 
 	cmd := exec.Command(config.CmdVirtInstall, args...)
 	var out, errOut bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errOut
 	if err := cmd.Run(); err != nil {
-		utils.RedError("virt-install failed: ", ">", err)
+		style.RedError("virt-install failed: ", ">", err)
 		return err
 	}
 
@@ -73,7 +73,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 	// Find the 'first' </domain> tag – discard everything after it
 	firstEndIdx := strings.Index(xmlStr, "</domain>")
 	if firstEndIdx == -1 {
-		return fmt.Errorf(utils.Colourise("Failed to locate closing </domain> tag in virt-install output", utils.ColorRed))
+		return fmt.Errorf(style.Colourise("Failed to locate closing </domain> tag in virt-install output", style.ColorRed))
 	}
 	// +len("</domain>") includes the tag itself
 	cleanXMLStr := xmlStr[:firstEndIdx+len("</domain>")]
@@ -90,21 +90,20 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 	// save XML
 	if err := os.WriteFile(xmlFullPath, cleanXML, 0644); err != nil {
 		//return fmt.Errorf("\x1b[31mcould not write XML: %w\x1b[0m", err)
-		utils.RedError("Could not write XML", xmlFileName, err)
+		style.RedError("Could not write XML", xmlFileName, err)
 		//os.Exit(1)
 	} else {
 		abs, _ := filepath.Abs(xmlFullPath)
-		utils.Successf("XML definition saved under: %s", abs)
+		style.Successf("XML definition saved under: %s", abs)
 	}
 
 	// define the new VM >> libvirt
 	if err := exec.Command("virsh", "define", xmlFullPath).Run(); err != nil {
 		//return fmt.Errorf("\x1b[31mvirsh define failed: %w\x1b[0m", err)
-		utils.RedError("virsh define failed: %w", ">", err)
+		style.RedError("virsh define failed: %w", ">", err)
 		return err
 
 	}
-	utils.Successf("VM successfully registered with libvirt/qemu (not yet started).")
+	style.Successf("VM successfully registered with libvirt/qemu (not yet started).")
 	return nil
 }
-// EOF

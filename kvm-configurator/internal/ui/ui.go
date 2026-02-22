@@ -16,18 +16,19 @@ import (
 	"configurator/internal/config"
 	"configurator/internal/model"
 	"configurator/internal/utils"
+	"configurator/internal/style"
 )
 
 // Loading distro list from yaml
 func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfig, error) {
-	fmt.Println(utils.BoxCenter(51, []string{"Select an operating system"}))
+	fmt.Println(style.BoxCenter(51, []string{"Select an operating system"}))
 
 	sorted := append([]config.VMConfig(nil), list...)
 	sort.Slice(sorted, func(i, j int) bool {
 		return strings.ToLower(sorted[i].Name) < strings.ToLower(sorted[j].Name)
 	})
 
-	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
+	lines := style.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintln(w, "No.\tName\tCPU\tRAM (MiB)\tDisk (GB)")
 		fmt.Fprintln(w, "---\t----\t---\t---------\t---------")
 		for i, d := range sorted {
@@ -36,9 +37,9 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 		}
 		w.Flush()
 	})
-	fmt.Print(utils.Box(51, lines))
+	fmt.Print(style.Box(51, lines))
 
-	line, err := utils.Prompt(r, os.Stdout, utils.Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", utils.ColorYellow))
+	line, err := utils.Prompt(r, os.Stdout, style.Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", style.ColorYellow))
 	if err != nil {
 		return config.VMConfig{}, err
 	}
@@ -47,7 +48,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 		if i, e := strconv.Atoi(line); e == nil && i >= 1 && i <= len(sorted) {
 			idx = i
 		} else {
-			return config.VMConfig{}, fmt.Errorf(utils.Colourise("Invalid selection", utils.ColorRed))
+			return config.VMConfig{}, fmt.Errorf(style.Colourise("Invalid selection", style.ColorRed))
 		}
 	}
 	return sorted[idx-1], nil
@@ -76,7 +77,7 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 		return "", err
 	}
 	if choice == 0 {
-		return "", fmt.Errorf(utils.Colourise("selection aborted", utils.ColorYellow))
+		return "", fmt.Errorf(style.Colourise("selection aborted", style.ColorYellow))
 	}
 	selected := files[choice-1]
 	// Return the 'absolute path' so that virt‑install can find it reliably
@@ -88,9 +89,9 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath string, isoWorkDir string) {
 	for {
 		isoFile := filepath.Base(cfg.ISOPath)
-		fmt.Println(utils.BoxCenter(51, []string{"VM-CONFIG"}))
+		fmt.Println(style.BoxCenter(51, []string{"VM-CONFIG"}))
 		// Convert menu lines into line slices with Tabwriter
-		lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
+		lines := style.MustTableToLines(func(w *tabwriter.Writer) {
 			fmt.Fprintf(w, "[1] Name:\t%s\n", cfg.Name)
 			fmt.Fprintf(w, "[2] RAM (MiB):\t%d\n", cfg.MemMiB)
 			fmt.Fprintf(w, "[3] vCPU:\t%d\n", cfg.VCPU)
@@ -108,9 +109,9 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			fmt.Fprintf(w, "[0] Advanced Parameters\n")
 		})
 		// Build a box around it and spend it
-		fmt.Println(utils.Box(51, lines))
+		fmt.Println(style.Box(51, lines))
 
-		f, _ := utils.Prompt(r, os.Stdout, utils.Colourise("\nSelect or press Enter to continue: ", utils.ColorYellow))
+		f, _ := utils.Prompt(r, os.Stdout, style.Colourise("\nSelect or press Enter to continue: ", style.ColorYellow))
 		if f == "" {
 			break
 		}
@@ -179,7 +180,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 			}
 		case "6":
 			if err := PromptAddDisk(r, cfg, defaultDiskPath); err != nil {
-				utils.RedError("Add Disk failed", "", err)
+				style.RedError("Add Disk failed", "", err)
 			}
 		case "7":
 			isoPath, err := PromptSelectISO(r, isoWorkDir)
@@ -205,8 +206,8 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	isoFile := filepath.Base(cfg.ISOPath)
 	//isoName := strings.TrimSuffix(isoFile, filepath.Ext(isoFile))
 
-	fmt.Println(utils.BoxCenter(51, []string{"VM-SUMMARY"}))
-	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
+	fmt.Println(style.BoxCenter(51, []string{"VM-SUMMARY"}))
+	lines := style.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "Name:\t%s\n", cfg.Name)
 		fmt.Fprintf(w, "RAM (MiB):\t%d\n", cfg.MemMiB)
 		fmt.Fprintf(w, "vCPU:\t%d\n", cfg.VCPU)
@@ -227,8 +228,8 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 		fmt.Fprintf(w, "Filesystem:\t%s\n", cfg.FileSystem)
 	})
 
-	fmt.Println(utils.Box(51, lines))
+	fmt.Println(style.Box(51, lines))
 
 	_, _ = utils.Prompt(r, os.Stdout,
-		utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
+		style.Colourise("\nPress ENTER to create VM … ", style.ColorYellow))
 }
