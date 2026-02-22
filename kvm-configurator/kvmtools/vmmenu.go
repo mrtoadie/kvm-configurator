@@ -75,8 +75,6 @@ func sortVMsAlphabetically(vms []*VMInfo) []*VMInfo {
 
 // printVMTable – prints the VM list formatted
 func printVMTable(vms []*VMInfo) {
-	//w := utils.NewTabWriter()
-	//fmt.Fprintln(w, utils.Colourise("\n=== Available VMs ===", utils.ColorBlue))
 	fmt.Println(style.BoxCenter(51, []string{"AVALABLE VIRTUAL MACHINES"}))
 	lines := style.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintln(w, "No.\tName\tState")
@@ -143,7 +141,6 @@ func runVMAction(action Action, vmName string) error {
 	return cmd.Run()
 }
 
-
 // VMMenu – public entry point
 // xmlDir: Path in which the libvirt XML files are located (e.g. "./xml")
 func VMMenu(r *bufio.Reader, xmlDir string) {
@@ -195,12 +192,12 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		}
 
 		if action == ActRename {
-    if err := RenameVM(r, selected.Name, xmlDir); err != nil {
-        fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColRed))
-    }
-    //back to the VM overview
-    continue
-}
+			if err := RenameVM(r, selected.Name, xmlDir); err != nil {
+				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColRed))
+			}
+			//back to the VM overview
+			continue
+		}
 
 		// run – special case “Undefine + Disk Cleanup”
 		if action == ActDelete {
@@ -267,4 +264,5 @@ func deleteVMWithDisks(r *bufio.Reader, vmName, xmlDir string) error {
 	fmt.Println("All associated hard drives of " + vmName + " have been successfully removed.")
 	return nil
 }
+
 // EOF

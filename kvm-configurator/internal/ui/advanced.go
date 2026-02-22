@@ -28,7 +28,7 @@ func validateList(input string, allowed map[string]bool) bool {
 // Individual field editors (tiny, testable functions).
 func editNested(r *bufio.Reader, cfg *model.DomainConfig) {
 	if v, err := utils.Prompt(r, os.Stdout,
-		style.Colourise(">> Nested-Virtualisation (vmx for Intel, smx for AMD): ", style.ColBlue)); err == nil && v != "" {
+		style.Hint(">> Nested-Virtualisation (vmx for Intel, smx for AMD): ")); err == nil && v != "" {
 		cfg.NestedVirt = v
 		style.Success("Nested-Virtualisation", v, "")
 	}
@@ -37,7 +37,7 @@ func editNested(r *bufio.Reader, cfg *model.DomainConfig) {
 func editBoot(r *bufio.Reader, cfg *model.DomainConfig) {
 	const bootKey = "boot"
 	if v, err := utils.Prompt(r, os.Stdout,
-		style.Colourise(">> Boot order (comma-separated, e.g. hd,cdrom,network): ", style.ColBlue)); err == nil && v != "" {
+		style.Hint(">> Boot order (comma-separated, e.g. hd,cdrom,network): ")); err == nil && v != "" {
 
 		allowed := map[string]bool{"hd": true, "cdrom": true, "network": true}
 		if !validateList(v, allowed) {
@@ -51,7 +51,7 @@ func editBoot(r *bufio.Reader, cfg *model.DomainConfig) {
 
 func editGraphics(r *bufio.Reader, cfg *model.DomainConfig) {
 	if v, err := utils.Prompt(r, os.Stdout,
-		style.Colourise(">> Graphics (spice (default) or vnc): ", style.ColBlue)); err == nil && v != "" {
+		style.Hint(">> Graphics (spice (default) or vnc): ")); err == nil && v != "" {
 		cfg.Graphics = v
 		style.Success("Graphics", v, "")
 	}
@@ -59,7 +59,7 @@ func editGraphics(r *bufio.Reader, cfg *model.DomainConfig) {
 
 func editSound(r *bufio.Reader, cfg *model.DomainConfig) {
 	if v, err := utils.Prompt(r, os.Stdout,
-		style.Colourise(">> Sound (none, ac97, ich6, ich9 (default)): ", style.ColBlue)); err == nil && v != "" {
+		style.Hint(">> Sound (none, ac97, ich6, ich9 (default)): ")); err == nil && v != "" {
 		cfg.Sound = v
 		style.Success("Sound", v, "")
 	}
@@ -67,7 +67,7 @@ func editSound(r *bufio.Reader, cfg *model.DomainConfig) {
 
 func editFilesystem(r *bufio.Reader, cfg *model.DomainConfig) {
 	if v, err := utils.Prompt(r, os.Stdout,
-		style.Colourise(">> Filesystem / Mount (/src/dir,/guest/dir): ", style.ColBlue)); err == nil && v != "" {
+		style.Hint(">> Filesystem / Mount (/src/dir,/guest/dir): ")); err == nil && v != "" {
 		cfg.FileSystem = v
 		style.Success("Filesystem", v, "")
 	}

@@ -64,7 +64,7 @@ func ConvertDisk(r *bufio.Reader, vmName string) error {
 		return err
 	}
 
-	fmt.Println(style.Colourise("\nTarget formats:", style.ColBlue))
+	fmt.Println(style.Hint("\nTarget formats:"))
 	fmt.Println("[1] qcow2   (Standard, compressed)")
 	fmt.Println("[2] raw     (uncompressed, fast)")
 	fmt.Println("[3] vdi     (VirtualBox-Compatible)")
