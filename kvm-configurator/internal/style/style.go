@@ -5,9 +5,9 @@ import (
 	"io"
 	"os"
 	"strings"
+	"text/tabwriter"
 	"time"
 	"unicode/utf8"
-	"text/tabwriter"
 )
 
 const (
@@ -16,16 +16,24 @@ const (
 	borderReset = "\033[0m"
 	BoxStdWidth = 60
 	// colours
-	  ColorReset  = "\033[0m"
-    ColorRed    = "\033[31m"
-    ColorGreen  = "\033[32m"
-    ColorYellow = "\033[33m"
-    ColorBlue   = "\033[34m"
-    ColorMagenta = "\033[35m"
-    ColorCyan   = "\033[36m"
-    ColorWhite  = "\033[37m"
-    ColorBold   = "\033[1m"
-			// DefaultTabOpts mirrors the historic parameters (0,10,2,' ')
+	ColReset   = "\033[0m"
+	ColRed     = "\x1b[31m"
+	ColGreen   = "\x1b[32m"
+	ColYellow  = "\x1b[33m"
+	ColBlue    = "\x1b[34m"
+	ColMagenta = "\x1b[35m"
+	ColCyan    = "\x1b[36m"
+	ColWhite   = "\x1b[37m"
+	ColBold    = "\x1b[1m"
+
+	// Kombinierte Stile für häufige UI‑Elemente
+	ColError   = ColRed
+	ColSuccess = ColGreen
+	ColInfo    = ColBlue
+	ColPrompt  = ColYellow
+	ColHeader  = ColCyan
+	ColBorder  = ColBlue // bereits in style.go als borderBlue definiert – jetzt alias
+	// DefaultTabOpts mirrors the historic parameters (0,10,2,' ')
 	DefaultMinWidth = 0
 	DefaultTabWidth = 10
 	DefaultPadding  = 2
@@ -123,12 +131,12 @@ func truncateOrWrap(s string, max int) []string {
 // COLOURS
 // Colourise wraps a plain string in the given colour code
 func Colourise(text, colour string) string {
-    return colour + text + ColorReset
+	return colour + text + ColReset
 }
 
 // combines colour & bold
 func ColouriseBold(text, colour string) string {
-    return colour + ColorBold + text + ColorReset
+	return colour + ColBold + text + ColReset
 }
 
 // SimpleError
@@ -138,7 +146,7 @@ func SimpleError(prefix, ctx string, err error) {
 	}
 	// Example: “❗️Config missing – while loading: <original error>”
 	msg := fmt.Sprintf("❗️%s >%s %v", prefix, ctx, err)
-	fmt.Fprintln(os.Stderr, Colourise(msg, ColorRed))
+	fmt.Fprintln(os.Stderr, Colourise(msg, ColRed))
 }
 
 // Convenience wrapper for the usual red error
@@ -147,28 +155,43 @@ func RedError(prefix, ctx string, err error) {
 }
 
 /*
-	Success – displays a green success message.
-	prefix = short title (e.g., “✅ VM created”)
-	ctx = additional information (e.g., “my-vm-01”)
-	extra = optional additional text (can be empty)
+Success – displays a green success message.
+prefix = short title (e.g., “✅ VM created”)
+ctx = additional information (e.g., “my-vm-01”)
+extra = optional additional text (can be empty)
 */
 func Success(prefix, ctx, extra string) {
 	msg := fmt.Sprintf("%s – %s", prefix, ctx)
 	if extra != "" {
 		msg = fmt.Sprintf("%s – %s", msg, extra)
 	}
-	fmt.Fprintln(os.Stdout, Colourise(msg, ColorGreen))
+	fmt.Fprintln(os.Stdout, Colourise(msg, ColGreen))
 }
 
 // Successf – fmt.Sprintf but colourised
 func Successf(format string, a ...interface{}) {
-	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf(format, a...), ColorGreen))
+	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf(format, a...), ColGreen))
 }
 
 // Info – neutral colour
 func Info(prefix, ctx string) {
-	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf("%s – %s", prefix, ctx), ColorBlue))
+	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf("%s – %s", prefix, ctx), ColBlue))
 }
+
+// Fehler‑Message (rot)
+func Err(text string) string { return Colourise(text, ColError) }
+
+// Erfolg‑Message (grün)
+func Ok(text string) string { return Colourise(text, ColSuccess) }
+
+// Hinweis‑Message (blau)
+func Hint(text string) string { return Colourise(text, ColInfo) }
+
+// Prompt‑Message (gelb)
+func PromptMsg(text string) string { return Colourise(text, ColPrompt) }
+
+// Header‑Zeile (cyan)
+func Header(text string) string { return Colourise(text, ColHeader) }
 
 // SPINNER / PROGRESS
 // Progress encapsulates a Spinner go-routine

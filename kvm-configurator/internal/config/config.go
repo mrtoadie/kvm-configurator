@@ -75,4 +75,3 @@ func LoadAll(path string) (*FullConfig, error) {
 		OSList:   raw.OSList,
 	}, nil
 }
-// EOF

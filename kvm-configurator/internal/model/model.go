@@ -100,4 +100,3 @@ func (c *DomainConfig) PrimaryDisk() *DiskSpec {
 	}
 	return &c.Disks[0] // the first element is considered the “system disk”
 }
-// EOF

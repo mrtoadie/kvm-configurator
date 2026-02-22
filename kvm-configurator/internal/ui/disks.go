@@ -16,7 +16,7 @@ func PromptAddDisk(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath str
 	fmt.Println(style.BoxCenter(55, []string{"=== ADD DISK ==="}))
 
 	// disk name
-	name, _ := utils.Prompt(r, os.Stdout, style.Colourise("Disk name (e.g. swap, data, backup): ", style.ColorYellow))
+	name, _ := utils.Prompt(r, os.Stdout, style.PromptMsg("Disk name (e.g. swap, data, backup): "))
 	if name == "" {
 		return nil
 	}
@@ -29,18 +29,18 @@ func PromptAddDisk(r *bufio.Reader, cfg *model.DomainConfig, defaultDiskPath str
 		suggestedPath = defaultDiskPath // global default if no disk exists yet
 	}
 	prompt := fmt.Sprintf("Disk path (default: %s): ", suggestedPath)
-	path, _ := utils.Prompt(r, os.Stdout, style.Colourise(prompt, style.ColorYellow))
+	path, _ := utils.Prompt(r, os.Stdout, style.Colourise(prompt, style.ColYellow))
 	if path == "" {
 		// User has not entered anything > using default
 		path = suggestedPath
 	}
 
 	// size
-	sizeStr, _ := utils.Prompt(r, os.Stdout, style.Colourise("Size in GiB (0 = default): ", style.ColorYellow))
+	sizeStr, _ := utils.Prompt(r, os.Stdout, style.PromptMsg("Size in GiB (0 = default): "))
 	size, _ := strconv.Atoi(sizeStr)
 
 	// Bus‑Typ (optional)
-	bus, _ := utils.Prompt(r, os.Stdout, style.Colourise("Bus (virtio|scsi|sata|usb, default virtio): ", style.ColorYellow))
+	bus, _ := utils.Prompt(r, os.Stdout, style.PromptMsg("Bus (virtio|scsi|sata|usb, default virtio): "))
 	if bus == "" {
 		bus = "virtio"
 	}

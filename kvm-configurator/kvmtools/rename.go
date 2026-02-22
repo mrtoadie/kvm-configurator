@@ -22,7 +22,7 @@ func RenameVM(r *bufio.Reader, oldName, xmlDir string) error {
 
 	// ask for new name
 	newName, err := utils.Prompt(r, os.Stdout,
-		style.Colourise(fmt.Sprintf("New name for VM %q: ", oldName), style.ColorYellow))
+		style.PromptMsg(fmt.Sprintf("New name for VM %q: ", oldName)))
 	if err != nil {
 		return fmt.Errorf("Entry failed: %w", err)
 	}

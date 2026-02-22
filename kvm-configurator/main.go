@@ -25,7 +25,7 @@ func main() {
 	// [Modul: config] validates if (virt‑install, virsh) is installed
 	if err := config.EnsureAll(config.CmdVirtInstall, config.CmdVirsh); err != nil {
 		// exit if virt-install or virsh are not found
-		style.RedError("virt-install not found", "verify $PATH", err)
+		style.Err("virt-install not found - verify $PATH")
 		os.Exit(1)
 	}
 	// for debug only
@@ -40,7 +40,7 @@ func main() {
 	cfg, err := config.LoadAll(config.ConfigFilePath())
 	//cfg, err := config.LoadAll(config.FileConfig) // One call, one result
 	if err != nil {
-		style.RedError("Failed to load configuration", "", err)
+		style.Err("Failed to load configuration")
 		os.Exit(1)
 	}
 
@@ -66,15 +66,15 @@ func main() {
 	// main menu loop
 	r := bufio.NewReader(os.Stdin)
 	for {
-		//fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColorBlue))
-		fmt.Println(style.Box(20, []string{"KVM-CONFIGURATOR"}))
+		//fmt.Println(utils.Colourise("\n=== MAIN MENU ===", utils.ColBlue))
+		fmt.Println(style.BoxCenter(20, []string{"KVM-CONFIGURATOR"}))
 
 		fmt.Println(style.Box(20, []string{
 			"[1] New VM",
 			"[2] KVM-Tools",
 			"[0] Exit",
 		}))
-		fmt.Print(style.Colourise(" Selection: ", style.ColorYellow))
+		fmt.Print(style.PromptMsg(" Selection: "))
 
 		var sel string
 		if _, err := fmt.Scanln(&sel); err != nil {
@@ -84,7 +84,7 @@ func main() {
 
 		switch sel {
 		case "0", "q", "Q":
-			fmt.Println("Bye!")
+			fmt.Println(style.Ok(" Bye!"))
 			return
 
 		case "1":
@@ -100,13 +100,13 @@ func main() {
 			); err != nil {
 				// error
 				fmt.Fprintf(os.Stderr, "%sError: %v%s\n",
-					style.ColorRed, err, style.ColorReset)
+					style.ColRed, err, style.ColReset)
 			}
 		case "2":
 			//kvmtools.Start(r)
 			kvmtools.Start(bufio.NewReader(os.Stdin), xmlDir)
 		default:
-			fmt.Println(style.Colourise("\nInvalid selection!", style.ColorRed))
+			fmt.Println(style.Err("\nInvalid selection!"))
 		}
 	}
 }

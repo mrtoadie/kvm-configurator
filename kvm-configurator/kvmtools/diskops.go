@@ -10,12 +10,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
 	// internal
-	"configurator/internal/utils"
 	"configurator/internal/style"
-
+	"configurator/internal/utils"
 )
-
 
 func getRealDiskPath(vmName string) (string, error) {
 	paths, err := GetDiskPathsViaVirsh(vmName)
@@ -36,12 +35,12 @@ func ResizeDisk(r *bufio.Reader, vmName string) error {
 	}
 
 	sizeStr, _ := utils.Prompt(r, os.Stdout,
-		style.Colourise("New size (e.g. 10 to add 10 GiB to the disk): ", style.ColorYellow))
+		style.Colourise("New size (e.g. 10 to add 10 GiB to the disk): ", style.ColYellow))
 	newSize, err := strconv.Atoi(sizeStr)
 	if err != nil || newSize <= 0 {
 		return fmt.Errorf("please enter a positive integer (e.g. 10 to add 10 GiB to the disk)")
 	}
-	
+
 	/// test output
 	fmt.Println("\n" + imgPath + vmName + "\n")
 	//
@@ -65,13 +64,13 @@ func ConvertDisk(r *bufio.Reader, vmName string) error {
 		return err
 	}
 
-	fmt.Println(style.Colourise("\nTarget formats:", style.ColorBlue))
+	fmt.Println(style.Colourise("\nTarget formats:", style.ColBlue))
 	fmt.Println("[1] qcow2   (Standard, compressed)")
 	fmt.Println("[2] raw     (uncompressed, fast)")
 	fmt.Println("[3] vdi     (VirtualBox-Compatible)")
 
 	choice, _ := utils.Prompt(r, os.Stdout,
-		style.Colourise("Select format: ", style.ColorYellow))
+		style.PromptMsg("Select format: "))
 
 	var tgtFmt string
 	switch choice {
@@ -115,13 +114,13 @@ func RepairDisk(r *bufio.Reader, vmName string) error {
 	checkCmd := exec.Command("qemu-img", "check", imgPath)
 	out, err := checkCmd.CombinedOutput()
 	if err == nil {
-		fmt.Println(style.Colourise("\nDisk is intact - no intervention required.", style.ColorGreen))
+		fmt.Println(style.Colourise("\nDisk is intact - no intervention required.", style.ColGreen))
 		fmt.Printf("%s\n", string(out))
 		return nil
 	}
 
 	// repair (amend is the easiest way)
-	fmt.Println(style.Colourise("\nInconsistency detected -attempt repair …", style.ColorRed))
+	fmt.Println(style.Colourise("\nInconsistency detected -attempt repair …", style.ColRed))
 	spinner := style.SpinnerProgress("Repair is running …")
 	defer spinner.Stop()
 
@@ -179,8 +178,8 @@ func DiskOpsMenu(r *bufio.Reader, vmName string) error {
 			"[0] Back",
 		}))
 
-		choice, _ := utils.Prompt(r, os.Stdout, 
-			style.Colourise("\nSelection: ", style.ColorYellow))
+		choice, _ := utils.Prompt(r, os.Stdout,
+			style.PromptMsg("\nSelection: "))
 
 		switch choice {
 		case "1":
@@ -192,8 +191,7 @@ func DiskOpsMenu(r *bufio.Reader, vmName string) error {
 		case "0", "":
 			return nil
 		default:
-			fmt.Println(style.Colourise("Invalid selection!", style.ColorRed))
+			fmt.Println(style.Err("Invalid selection!"))
 		}
 	}
 }
-// EOF

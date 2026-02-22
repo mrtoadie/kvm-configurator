@@ -10,10 +10,11 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/model"
-		"configurator/internal/style"
+	"configurator/internal/style"
 )
 
 /*
@@ -30,7 +31,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 	if strings.TrimSpace(cfg.NestedVirt) != "" {
 		cpuArg = fmt.Sprintf("%s,+%s", cpuBase, cfg.NestedVirt)
 	}
-	
+
 	// base arguments
 	args := []string{
 		"--name", cfg.Name,
@@ -53,7 +54,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 	for _, da := range diskArgs {
 		args = append(args, "--disk", da)
 	}
-	
+
 	// progress-spinner
 	spinner := style.SpinnerProgress("\x1b[34mRunning virt-install:")
 	defer spinner.Stop()
@@ -73,7 +74,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 	// Find the 'first' </domain> tag – discard everything after it
 	firstEndIdx := strings.Index(xmlStr, "</domain>")
 	if firstEndIdx == -1 {
-		return fmt.Errorf(style.Colourise("Failed to locate closing </domain> tag in virt-install output", style.ColorRed))
+		return fmt.Errorf(style.Colourise("Failed to locate closing </domain> tag in virt-install output", style.ColRed))
 	}
 	// +len("</domain>") includes the tag itself
 	cleanXMLStr := xmlStr[:firstEndIdx+len("</domain>")]

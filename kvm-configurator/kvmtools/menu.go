@@ -39,7 +39,7 @@ func Start(r *bufio.Reader, xmlDir string) {
 			VMMenu(r, xmlDir)
 		default:
 			fmt.Fprintln(os.Stderr,
-				style.Colourise("Invalid selection", style.ColorRed))
+				style.Err("Invalid selection"))
 		}
 	}
 }
@@ -75,7 +75,7 @@ func printMenu() {
 
 // Read input and remove whitespace.
 func readChoice(r *bufio.Reader) string {
-	fmt.Print(style.Colourise("\nSelect: ", style.ColorYellow))
+	fmt.Print(style.PromptMsg("\nSelect: "))
 	raw, _ := r.ReadString('\n')
 	return strings.TrimSpace(raw)
 }

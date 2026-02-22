@@ -15,12 +15,12 @@ import (
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/model"
-	"configurator/internal/utils"
 	"configurator/internal/style"
+	"configurator/internal/utils"
 )
 
 // Loading distro list from yaml
-func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfig, error) {
+func SelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfig, error) {
 	fmt.Println(style.BoxCenter(51, []string{"Select an operating system"}))
 
 	sorted := append([]config.VMConfig(nil), list...)
@@ -39,7 +39,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 	})
 	fmt.Print(style.Box(51, lines))
 
-	line, err := utils.Prompt(r, os.Stdout, style.Colourise("\nPlease enter a number (or press ENTER for default Arch Linux): ", style.ColorYellow))
+	line, err := utils.Prompt(r, os.Stdout, style.PromptMsg("\nPlease enter a number (or press ENTER for default Arch Linux): "))
 	if err != nil {
 		return config.VMConfig{}, err
 	}
@@ -48,7 +48,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 		if i, e := strconv.Atoi(line); e == nil && i >= 1 && i <= len(sorted) {
 			idx = i
 		} else {
-			return config.VMConfig{}, fmt.Errorf(style.Colourise("Invalid selection", style.ColorRed))
+			return config.VMConfig{}, fmt.Errorf(style.Err("Invalid selection"))
 		}
 	}
 	return sorted[idx-1], nil
@@ -58,7 +58,7 @@ func PromptSelectDistro(r *bufio.Reader, list []config.VMConfig) (config.VMConfi
 PromptSelectISO – selects an ISO file from the specified directory
 The return value is the 'absolute path' to the file (for virt‑install)
 */
-func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
+func SelectISO(r *bufio.Reader, workDir string) (string, error) {
 	// workDir is directory from filepaths.isopath
 	files, err := utils.ListFiles(workDir)
 	if err != nil {
@@ -77,7 +77,7 @@ func PromptSelectISO(r *bufio.Reader, workDir string) (string, error) {
 		return "", err
 	}
 	if choice == 0 {
-		return "", fmt.Errorf(style.Colourise("selection aborted", style.ColorYellow))
+		return "", fmt.Errorf(style.PromptMsg("selection aborted"))
 	}
 	selected := files[choice-1]
 	// Return the 'absolute path' so that virt‑install can find it reliably
@@ -111,7 +111,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		// Build a box around it and spend it
 		fmt.Println(style.Box(51, lines))
 
-		f, _ := utils.Prompt(r, os.Stdout, style.Colourise("\nSelect or press Enter to continue: ", style.ColorYellow))
+		f, _ := utils.Prompt(r, os.Stdout, style.PromptMsg("\nSelect or press Enter to continue: "))
 		if f == "" {
 			break
 		}
@@ -183,7 +183,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 				style.RedError("Add Disk failed", "", err)
 			}
 		case "7":
-			isoPath, err := PromptSelectISO(r, isoWorkDir)
+			isoPath, err := SelectISO(r, isoWorkDir)
 			if err != nil {
 				fmt.Printf("\x1b[31mISO selection failed: %v\x1b[0m\n", err)
 				continue
@@ -231,5 +231,5 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Println(style.Box(51, lines))
 
 	_, _ = utils.Prompt(r, os.Stdout,
-		style.Colourise("\nPress ENTER to create VM … ", style.ColorYellow))
+		style.PromptMsg("\nPress ENTER to create VM … "))
 }

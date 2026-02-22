@@ -49,12 +49,12 @@ func PromptSelection(r *bufio.Reader, w io.Writer, files []string) (int, error) 
 	}
 
 	// Header – use the shared colour constant
-	fmt.Fprintln(w, style.Colourise("\n=== Select ISO ===", style.ColorBlue))
+	fmt.Fprintln(w, style.Colourise("\n=== Select ISO ===", style.ColBlue))
 
 	for i, f := range files {
 		fmt.Fprintf(w, "[%d] %s\n", i+1, filepath.Base(f))
 	}
-	prompt := style.Colourise("Please enter number (or 0 to cancel): ", style.ColorYellow)
+	prompt := style.Colourise("Please enter number (or 0 to cancel): ", style.ColYellow)
 
 	// Re‑use the universal Prompt helper
 	line, err := Prompt(r, w, prompt)

@@ -26,7 +26,7 @@ func RunNewVMWorkflow(
 	xmlDir string, // Destination directory for the libvirt XML file
 ) error {
 	// choosing distribution
-	distro, err := ui.PromptSelectDistro(r, osList)
+	distro, err := ui.SelectDistro(r, osList)
 	if err != nil {
 		return fmt.Errorf("\x1b[31mOS selection failed: %w\x1b[0m", err)
 	}

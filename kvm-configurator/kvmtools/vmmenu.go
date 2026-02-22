@@ -119,7 +119,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 	})
 	fmt.Print(style.Box(51, lines))
 
-	fmt.Print(style.Colourise("\nSelect action (or q to exit): ", style.ColorYellow))
+	fmt.Print(style.PromptMsg("\nSelect action (or q to exit): "))
 	choiceRaw, _ := r.ReadString('\n')
 	choice := strings.TrimSpace(choiceRaw)
 
@@ -128,7 +128,7 @@ func pickAction(r *bufio.Reader, vm *VMInfo) Action {
 			return a.Cmd
 		}
 	}
-	fmt.Fprintln(os.Stderr, style.Colourise("Invalid selection", style.ColorRed))
+	fmt.Fprintln(os.Stderr, style.Err("Invalid selection"))
 	return ""
 }
 
@@ -153,11 +153,11 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		if err != nil {
 			fmt.Fprintln(os.Stderr,
 				style.Colourise("Error reading the VM list: "+err.Error(),
-					style.ColorRed))
+					style.ColRed))
 			return
 		}
 		if len(vms) == 0 {
-			fmt.Println(style.Colourise("No VMs found", style.ColorYellow))
+			fmt.Println(style.Err("No VMs found"))
 			return
 		}
 
@@ -166,7 +166,7 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		printVMTable(sorted)
 
 		// make selection
-		fmt.Print(style.Colourise("\nSelect VM number (or q to exit): ", style.ColorYellow))
+		fmt.Print(style.PromptMsg("\nSelect VM number (or q to exit): "))
 		choiceRaw, _ := r.ReadString('\n')
 		choice := strings.TrimSpace(choiceRaw)
 		if choice == "q" || choice == "quit" {
@@ -175,7 +175,7 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		idx, err := strconv.Atoi(choice)
 		if err != nil || idx < 1 || idx > len(sorted) {
 			fmt.Fprintln(os.Stderr,
-				style.Colourise("Invalid selection", style.ColorRed))
+				style.Err("Invalid selection"))
 			continue
 		}
 		selected := sorted[idx-1]
@@ -189,29 +189,29 @@ func VMMenu(r *bufio.Reader, xmlDir string) {
 		if action == ActDiskOps {
 			// Start Disk Ops submenu (only pass VM name)
 			if err := DiskOpsMenu(r, selected.Name); err != nil {
-				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColorRed))
+				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColRed))
 			}
 			continue
 		}
 
 		if action == ActRename {
     if err := RenameVM(r, selected.Name, xmlDir); err != nil {
-        fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColorRed))
+        fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColRed))
     }
-    // zurück zur VM‑Übersicht
+    //back to the VM overview
     continue
 }
 
 		// run – special case “Undefine + Disk Cleanup”
 		if action == ActDelete {
 			if err := deleteVMWithDisks(r, selected.Name, xmlDir); err != nil {
-				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColorRed))
+				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColRed))
 			}
 		} else {
 			if err := runVMAction(action, selected.Name); err != nil {
-				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColorRed))
+				fmt.Fprintln(os.Stderr, style.Colourise(err.Error(), style.ColRed))
 			} else {
-				fmt.Println(style.Colourise("Action successfully completed", style.ColorGreen))
+				fmt.Println(style.Ok("Action successfully completed"))
 			}
 		}
 	}
