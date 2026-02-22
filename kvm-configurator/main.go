@@ -3,7 +3,7 @@
 // GitHub: 	https://github.com/mrtoadie/
 // Repo: 		https://github.com/mrtoadie/kvm-configurator
 // License: MIT
-// last modification: Feb 17 2026
+// last modification: Feb 22 2026
 package main
 
 import (
@@ -15,7 +15,6 @@ import (
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
-	"configurator/internal/ui"
 	"configurator/internal/utils"
 	"configurator/kvmtools"
 )
@@ -80,7 +79,6 @@ func main() {
 		fmt.Println(utils.Box(20, []string{
 			"[1] New VM",
 			"[2] KVM-Tools",
-			"[h] Help",
 			"[0] Exit",
 		}))
 		fmt.Print(utils.Colourise(" Selection: ", utils.ColorYellow))
@@ -114,8 +112,6 @@ func main() {
 		case "2":
 			//kvmtools.Start(r)
 			kvmtools.Start(bufio.NewReader(os.Stdin), xmlDir)
-		case "h":
-			ui.PrintHelp()
 		default:
 			fmt.Println(utils.Colourise("\nInvalid selection!", utils.ColorRed))
 		}
