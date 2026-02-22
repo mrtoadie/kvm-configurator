@@ -1,5 +1,5 @@
 // utils/display.go
-// last modification: Feb 21 2026
+// last modified: Feb 22 2026
 package utils
 
 import (
@@ -24,8 +24,9 @@ func BoxCenter(width int, lines []string) string {
 	return drawBox(width, lines, true)
 }
 
-// internal helper – shared rendering logic.
-func drawBox(width int, lines []string, centre bool) string {
+// drawBox prints a box with optional centering.
+// width ≤0 → uses BoxStdWidth.
+func drawBox(width int, lines []string, center bool) string {
 	if width <= 0 {
 		width = BoxStdWidth
 	}
@@ -39,11 +40,11 @@ func drawBox(width int, lines []string, centre bool) string {
 		wrapped = append(wrapped, truncateOrWrap(l, width)...)
 	}
 
-	// longest line > maxLen
+	// longest line (Unicode‑aware)
 	maxLen := width
 	for _, l := range wrapped {
-		if len(l) > maxLen {
-			maxLen = len(l)
+		if utf8.RuneCountInString(l) > maxLen {
+			maxLen = utf8.RuneCountInString(l)
 		}
 	}
 
@@ -54,10 +55,11 @@ func drawBox(width int, lines []string, centre bool) string {
 	var b strings.Builder
 	b.WriteString(top + "\n")
 	for _, l := range wrapped {
-		if centre {
-			// centre the line
-			left := (maxLen - len(l)) / 2
-			right := maxLen - len(l) - left
+		if center {
+			// centre the line (Unicode‑aware length)
+			padding := maxLen - utf8.RuneCountInString(l)
+			left := padding / 2
+			right := padding - left
 			centered := strings.Repeat(" ", left) + l + strings.Repeat(" ", right)
 			b.WriteString(fmt.Sprintf("%s│ %s │%s\n", borderBlue, centered, borderReset))
 		} else {
@@ -97,4 +99,3 @@ func truncateOrWrap(s string, max int) []string {
 	}
 	return parts
 }
-// EOF

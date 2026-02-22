@@ -1,5 +1,5 @@
 // engine/engine.go
-// last modification: Feb 14 2026
+// last modified: Feb 22 2026
 package engine
 
 import (
@@ -62,7 +62,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 	var out, errOut bytes.Buffer
 	cmd.Stdout, cmd.Stderr = &out, &errOut
 	if err := cmd.Run(); err != nil {
-		utils.RedError("virt-install failed: %w – %s", ">", err)
+		utils.RedError("virt-install failed: ", ">", err)
 		return err
 	}
 

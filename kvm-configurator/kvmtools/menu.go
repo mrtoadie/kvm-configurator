@@ -1,5 +1,5 @@
 // kvmtools/menu.go
-// last modification: Feb 22 2026
+// last modified: Feb 22 2026
 package kvmtools
 
 import (
@@ -31,7 +31,6 @@ func Start(r *bufio.Reader, xmlDir string) {
 		choice := readChoice(r)
 
 		if choice == "q" {
-			fmt.Println(utils.Colourise("\nBack to Mainmenu", utils.ColorYellow))
 			return
 		}
 
@@ -65,7 +64,7 @@ func printMenu() {
 
 		// print all entrys vom menuMap
 		for _, k := range keys {
-			fmt.Fprintf(w, "%s\t%s\n", k, menuMap[k].Description)
+			fmt.Fprintf(w, "%s %s\n", k, menuMap[k].Description)
 		}
 	})
 

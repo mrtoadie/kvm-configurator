@@ -1,5 +1,5 @@
 // internal/constants.go
-// last modification: February 14 2026
+// last modified: Feb 14 2026
 package config
 
 import (

@@ -1,5 +1,5 @@
 // ui/advanced.go
-// last modification: Feb 22 2026
+// last modified: Feb 22 2026
 package ui
 
 import (
@@ -77,7 +77,7 @@ func printAdvancedMenu(cfg *model.DomainConfig) {
 	lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintln(w, "Parameter\tCurrent")
 		fmt.Fprintln(w, "---------\t-------")
-		fmt.Fprintf(w, "[a]\tNeste-‑Virtualisation\t%s\n", cfg.NestedVirt)
+		fmt.Fprintf(w, "[a]\tNested-Virtualisation\t%s\n", cfg.NestedVirt)
 		fmt.Fprintf(w, "[b]\tBoot-Order\t%s\n", cfg.BootOrder)
 		fmt.Fprintf(w, "[c]\tGraphics\t%s\n", cfg.Graphics)
 		fmt.Fprintf(w, "[d]\tSound\t%s\n", cfg.Sound)

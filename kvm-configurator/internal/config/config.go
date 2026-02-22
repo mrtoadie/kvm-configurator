@@ -1,5 +1,5 @@
 // internal/config/config.go
-// last modification: Feb 10 2026
+// last modified: Feb 22 2026
 package config
 
 import (

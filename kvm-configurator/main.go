@@ -32,14 +32,6 @@ func main() {
 
 	// verify that the configuration file exists in $HOME/.config/kvm-configurator
 	if ok, err := config.Exists(); err != nil || !ok {
-		// Give the user a friendly hint where the file should be.
-		/*utils.RedError(
-			"Configuration not found",
-			"expected at "+config.ConfigFilePath(),
-			err,
-		)
-		os.Exit(1)*/
-
 		config.EnsureConfig()
 	}
 
@@ -117,5 +109,3 @@ func main() {
 		}
 	}
 }
-
-// EOF

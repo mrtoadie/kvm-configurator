@@ -1,5 +1,5 @@
 // ui/ui.go
-// last modification: February 22 2026
+// last modified: Feb 22 2026
 package ui
 
 import (
@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
+
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/model"
@@ -91,7 +92,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 		// Convert menu lines into line slices with Tabwriter
 		lines := utils.MustTableToLines(func(w *tabwriter.Writer) {
 			fmt.Fprintf(w, "[1] Name:\t%s\n", cfg.Name)
-			fmt.Fprintf(w, "[2] RAM (MiB):\t%d\t\n", cfg.MemMiB)
+			fmt.Fprintf(w, "[2] RAM (MiB):\t%d\n", cfg.MemMiB)
 			fmt.Fprintf(w, "[3] vCPU:\t%d\n", cfg.VCPU)
 			// show first disk
 			if primary := cfg.PrimaryDisk(); primary != nil {
@@ -193,7 +194,7 @@ func PromptEditDomainConfig(r *bufio.Reader, cfg *model.DomainConfig, defaultDis
 				cfg.Network = v
 			}
 		case "0":
-			editAdvanced(r, cfg)		
+			editAdvanced(r, cfg)
 		}
 	}
 }
@@ -229,6 +230,5 @@ func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	fmt.Println(utils.Box(51, lines))
 
 	_, _ = utils.Prompt(r, os.Stdout,
-    utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
+		utils.Colourise("\nPress ENTER to create VM … ", utils.ColorYellow))
 }
-// EOF
