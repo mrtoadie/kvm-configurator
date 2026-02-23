@@ -1,24 +1,27 @@
-// fileutils/fileutils.go
-// last modified: Feb 22 2026
+// utils/utils.go
+// last modified: Feb 23 2026
 package utils
 
 import (
 	"bufio"
-	//"configurator/internal/ui"
 	"fmt"
-	"os"
 	"io"
+	"os"
 	"path/filepath"
+	"reflect"
 	"strconv"
-	//"strings"
+	"strings"
+
 	// internal
 	"configurator/internal/style"
 )
 
 const (
-	CancelChoice   = 0  // user typed 0 → abort
-	InvalidChoice  = -1 // parsing error or out‑of‑range
+	CancelChoice  = 0  // user typed 0 > abort
+	InvalidChoice = -1 // parsing error or out‑of‑range
 )
+
+// FILE UTILS
 
 // ListFiles returns the absolute paths of regular files inside dir.
 // If the directory cannot be read, the error is propagated to the caller.
@@ -69,4 +72,68 @@ func PromptSelection(r *bufio.Reader, w io.Writer, files []string) (int, error) 
 		return InvalidChoice, fmt.Errorf("choice %d out of range (0-%d)", choice, len(files))
 	}
 	return choice, nil
+}
+
+// HELPER
+
+/*
+ExpandEnvInStruct recursively expands environment variables in all string fields
+of structs, slices, maps, and their nested contents using os.ExpandEnv.
+*/
+func ExpandEnvInStruct(v any) {
+	if v == nil {
+		return
+	}
+	val := reflect.ValueOf(v)
+	if val.Kind() != reflect.Ptr || val.IsNil() {
+		return
+	}
+	expandValue(val.Elem())
+}
+
+func expandValue(val reflect.Value) {
+	switch val.Kind() {
+	case reflect.Struct:
+		for i := 0; i < val.NumField(); i++ {
+			f := val.Field(i)
+			if f.CanSet() {
+				expandValue(f)
+			}
+		}
+	case reflect.Slice, reflect.Array:
+		for i := 0; i < val.Len(); i++ {
+			expandValue(val.Index(i))
+		}
+	case reflect.Map:
+		iter := val.MapRange()
+		for iter.Next() {
+			k := iter.Key()
+			v := iter.Value()
+			if v.Kind() == reflect.String {
+				newStr := os.ExpandEnv(v.String())
+				val.SetMapIndex(k, reflect.ValueOf(newStr))
+			} else {
+				expandValue(v)
+			}
+			// Keys are usually static strings, we leave them untouched.
+			_ = k
+		}
+	case reflect.String:
+		val.SetString(os.ExpandEnv(val.String()))
+	}
+}
+
+// INPUT
+
+// Prompt reads a line from r after printing prompt to w.
+// Returns the trimmed line and any I/O error (including io.EOF).
+func Prompt(r *bufio.Reader, w io.Writer, prompt string) (string, error) {
+	if _, err := fmt.Fprint(w, prompt); err != nil {
+		return "", err
+	}
+	line, err := r.ReadString('\n')
+	if err != nil {
+		return "", err // propagate EOF / other errors
+	}
+	return strings.TrimSpace(line), nil
 }
