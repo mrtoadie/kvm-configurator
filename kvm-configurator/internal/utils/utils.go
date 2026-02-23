@@ -137,3 +137,43 @@ func Prompt(r *bufio.Reader, w io.Writer, prompt string) (string, error) {
 	}
 	return strings.TrimSpace(line), nil
 }
+
+// ASK
+
+// -------------------------------------------------------------------
+// 1️⃣ ask – ein einheitlicher Prompt‑Wrapper
+// -------------------------------------------------------------------
+// label   – das eigentliche Prompt‑Text (z. B. "RAM (MiB)")
+// defVal  – optionaler Default‑Wert, der im Prompt angezeigt wird
+// r,w     – Reader/Writer, damit wir später leicht mocken können
+//
+// Rückgabe: (Antwort, error).  Leere Antwort → "" (der Aufrufer entscheidet,
+// ob er den Default übernehmen will oder nicht).
+// -------------------------------------------------------------------
+func Ask(r *bufio.Reader, w io.Writer, label string, defVal string) (string, error) {
+	// Baue den Prompt‑String zusammen:
+	//   ">> RAM (MiB) (default: 2048): "
+	prompt := fmt.Sprintf(">> %s", label)
+	if defVal != "" {
+		prompt = fmt.Sprintf("%s (default: %s)", prompt, defVal)
+	}
+	prompt = style.PromptMsg(prompt + ": ")
+
+	// Nutze das bereits vorhandene Prompt‑Utility, das nur das Schreiben übernimmt.
+	// (Wir delegieren, damit wir nicht zweimal die gleiche Logik pflegen.)
+	return Prompt(r, w, prompt)
+}
+
+// -------------------------------------------------------------------
+// 2️⃣ MustInt – konvertiert eine Eingabe in ein int, prüft >0.
+// -------------------------------------------------------------------
+func MustInt(input string) (int, error) {
+	if strings.TrimSpace(input) == "" {
+		return 0, fmt.Errorf("empty input")
+	}
+	i, err := strconv.Atoi(input)
+	if err != nil || i <= 0 {
+		return 0, fmt.Errorf("please enter a positive integer")
+	}
+	return i, nil
+}

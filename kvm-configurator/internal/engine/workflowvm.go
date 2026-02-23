@@ -10,6 +10,7 @@ import (
 
 	"configurator/internal/style"
 	"fmt"
+	"os"
 )
 
 // Workflow "New VM"
@@ -70,7 +71,14 @@ func RunNewVMWorkflow(
 	}
 
 	// Optional Edit Menu for last edits
-	ui.PromptEditDomainConfig(r, &cfg, defaultDiskPath, isoWorkDir)
+	//ui.PromptEditDomainConfig(r, &cfg, defaultDiskPath, isoWorkDir)
+
+	// ---------- NEW PART ----------
+	// Instead of the old PromptEditDomainConfig function we now spin up the
+	// editor object that bundles all the edit‑logic.
+	editor := ui.NewEditor(r, os.Stdout, &cfg, defaultDiskPath, isoWorkDir)
+	editor.Run()
+	// --------------------------------
 
 	// Summary
 	ui.ShowSummary(r, &cfg, cfg.ISOPath)
