@@ -2,28 +2,26 @@ package ui
 
 import (
 	"bufio"
-	"fmt"
-	"os"
-	"path/filepath"
-	"io"
-"text/tabwriter"
 	"configurator/internal/model"
 	"configurator/internal/style"
 	"configurator/internal/utils"
+	"fmt"
+	"io"
+	"os"
+	"path/filepath"
+	"text/tabwriter"
 )
 
-// -------------------------------------------------------------------
-// Editor – kapselt den gesamten „Edit‑Domain‑Config“-Workflow.
-// -------------------------------------------------------------------
+// Editor – encapsulates the entire “Edit‑Domain‑Config” workflow
 type Editor struct {
-	in          *bufio.Reader   // Eingabe‑Stream (z. B. os.Stdin)
-	out         io.Writer       // Ausgabe‑Stream (z. B. os.Stdout)
+	in          *bufio.Reader
+	out         io.Writer
 	cfg         *model.DomainConfig
-	defaultDisk string // globaler Default‑Pfad, kommt aus dem Config‑File
-	isoDir      string // Verzeichnis, in dem die ISOs liegen
+	defaultDisk string
+	isoDir      string
 }
 
-// NewEditor ist der Konstruktor – nice und explizit.
+// NewEditor
 func NewEditor(r *bufio.Reader, w io.Writer,
 	cfg *model.DomainConfig, defaultDisk, isoDir string) *Editor {
 
@@ -36,16 +34,14 @@ func NewEditor(r *bufio.Reader, w io.Writer,
 	}
 }
 
-// -------------------------------------------------------------------
-// Run – die eigentliche Schleife, die das alte Switch‑Monster ersetzt.
-// -------------------------------------------------------------------
+// Run – the actual loop that replaces the old switch monster
 func (e *Editor) Run() {
 	for {
 		e.drawMenu()
 		choice, _ := utils.Prompt(e.in, e.out,
 			style.PromptMsg("\nSelect or press Enter to continue: "))
 		if choice == "" {
-			break // fertig – zurück zum Caller
+			break
 		}
 		switch choice {
 		case "1":
@@ -65,16 +61,14 @@ func (e *Editor) Run() {
 		case "8":
 			e.editNetwork()
 		case "0":
-			editAdvanced(e.in, e.cfg) // bleibt unverändert
+			editAdvanced(e.in, e.cfg)
 		default:
 			fmt.Fprintln(e.out, style.Err("Invalid selection!"))
 		}
 	}
 }
 
-// -------------------------------------------------------------------
-// Einzelne Edit‑Methoden – jeweils nur ein Prompt + ein Update.
-// -------------------------------------------------------------------
+// Individual edit methods – only one prompt + one update each
 func (e *Editor) editName() {
 	if v, _ := utils.Prompt(e.in, e.out, ">> New Name: "); v != "" {
 		e.cfg.Name = v
@@ -99,7 +93,7 @@ func (e *Editor) editVCPU() {
 	}
 }
 
-// Disk‑Path – nutzt den Default‑Pfad, wenn nichts eingegeben wird.
+// Disk‑Path – uses the default path if nothing is entered
 func (e *Editor) editDiskPath() {
 	def := e.defaultDisk
 	if primary := e.cfg.PrimaryDisk(); primary != nil && primary.Path != "" {
@@ -121,7 +115,7 @@ func (e *Editor) editDiskPath() {
 		e.cfg.PrimaryDisk().Path)
 }
 
-// Disk‑Size – nur für das erste (System‑)Disk.
+// Disk‑Size – only for the first (system) disk
 func (e *Editor) editDiskSize() {
 	ans, _ := utils.Ask(e.in, e.out, "Disk size (GB)", "")
 	if ans == "" {
@@ -139,14 +133,14 @@ func (e *Editor) editDiskSize() {
 	}
 }
 
-// Add a secondary disk – delegiert an das bereits vorhandene PromptAddDisk.
+// Add a secondary disk – delegated to the already existing PromptAddDisk
 func (e *Editor) addExtraDisk() {
 	if err := PromptAddDisk(e.in, e.cfg, e.defaultDisk); err != nil {
 		style.RedError("Add Disk failed", "", err)
 	}
 }
 
-// ISO‑Auswahl – nutzt die bereits existierende SelectISO‑Funktion.
+// ISO selection – uses the existing SelectISO function
 func (e *Editor) selectISO() {
 	isoPath, err := SelectISO(e.in, e.isoDir)
 	if err != nil {
@@ -157,16 +151,14 @@ func (e *Editor) selectISO() {
 	fmt.Fprintf(e.out, "\x1b[32mSelected ISO: %s\x1b[0m\n", isoPath)
 }
 
-// Netzwerk‑Parameter
+// network
 func (e *Editor) editNetwork() {
 	if v, _ := utils.Prompt(e.in, e.out, ">> Network (none or default): "); true {
 		e.cfg.Network = v
 	}
 }
 
-// -------------------------------------------------------------------
-// UI‑Hilfsfunktion: Menü‑Box zeichnen (identisch zu alter Version)
-// -------------------------------------------------------------------
+// UI helper function: draw menu box
 func (e *Editor) drawMenu() {
 	isoFile := filepath.Base(e.cfg.ISOPath)
 	lines := style.MustTableToLines(func(w *tabwriter.Writer) {
