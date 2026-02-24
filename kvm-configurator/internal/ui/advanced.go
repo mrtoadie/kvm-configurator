@@ -27,102 +27,34 @@ func validateList(input string, allowed map[string]bool) bool {
 
 // editNested promts for nested virtualsiation driver
 func editNested(r *bufio.Reader, cfg *model.DomainConfig) {
-	raw, err := utils.Prompt(r, os.Stdout,
-		style.Hint(">> Nested-Virtualisation (vmx for Intel, smx for AMD): "))
-	if err != nil {
-		fmt.Fprintln(os.Stderr, style.Err("Failed to read virtualisation input:"), err)
-		return
-	}
-
-	if raw == "" {
-		return
-	}
-
-	v := strings.TrimSpace(strings.ToLower(raw))
-	allowed := map[string]bool{"vmx": true, "smx": true}
-
-	if !allowed[v] {
-		fmt.Fprintln(os.Stderr, style.Err("Invalid virtualisation – allowed values: vmx, smx (you entered: %s)\n"), v)
-		return
-	}
-
-	cfg.NestedVirt = v
-	style.Success("Nested-Virtualisation", v, "")
+	editEnum(r, cfg, &cfg.NestedVirt,
+		">> Nested-Virtualisation (vmx for Intel, smx for AMD): ",
+		"Nested-Virtualisation",
+		map[string]bool{"vmx": true, "smx": true})
 }
 
 // editBoot promts for the vm boot order
 func editBoot(r *bufio.Reader, cfg *model.DomainConfig) {
-	const bootKey = "boot"
-	raw, err := utils.Prompt(r, os.Stdout,
-		style.Hint(">> Boot order (comma-separated, e.g. hd,cdrom,network): "))
-	if err != nil {
-		fmt.Fprintln(os.Stderr, style.Err("Failed to read boot order input:"), err)
-		return
-	}
-
-	if raw == "" {
-		return
-	}
-
-	v := strings.TrimSpace(strings.ToLower(raw))
-	allowed := map[string]bool{"hd": true, "cdrom": true, "network": true}
-	if !allowed[v] {
-		fmt.Fprintln(os.Stderr, style.Err("Invalid boot order – allowed values: hd, cdrom, network (you entered: %s)\n"), v)
-		return
-	}
-
-	cfg.BootOrder = v
-	style.Success("Boot order", v, "")
+	editEnum(r, cfg, &cfg.BootOrder,
+		">> Boot order (comma-separated, e.g. hd,cdrom,network): ",
+		"Boot order",
+		map[string]bool{"hd": true, "cdrom": true, "network": true})
 }
 
 // editGraphics prompts for the graphics driver
 func editGraphics(r *bufio.Reader, cfg *model.DomainConfig) {
-	raw, err := utils.Prompt(r, os.Stdout,
-		style.Hint(">> Graphics (spice (default) or vnc): "))
-	if err != nil {
-		fmt.Fprintln(os.Stderr, style.Err("Failed to read graphics input:"), err)
-		return
-	}
-
-	if raw == "" {
-		return
-	}
-
-	v := strings.TrimSpace(strings.ToLower(raw))
-	allowed := map[string]bool{"spice": true, "vnc": true}
-
-	if !allowed[v] {
-		fmt.Fprintln(os.Stderr, style.Err("Invalid graphics driver – allowed values: spice, vnc (you entered: %s)\n"), v)
-		return
-	}
-
-	cfg.Graphics = v
-	style.Success("Graphics", v, "")
+	editEnum(r, cfg, &cfg.Graphics,
+		">> Graphics (spice (default) or vnc): ",
+		"Graphics",
+		map[string]bool{"spice": true, "vnc": true})
 }
 
 // editSound promts for sound driver
 func editSound(r *bufio.Reader, cfg *model.DomainConfig) {
-	raw, err := utils.Prompt(r, os.Stdout,
-		style.Hint(">> Sound (none, ac97, ich6, ich9 (default)): "))
-	if err != nil {
-		fmt.Fprintln(os.Stderr, style.Err("Failed to read sound input:"), err)
-		return
-	}
-
-	if raw == "" {
-		return
-	}
-
-	v := strings.TrimSpace(strings.ToLower(raw))
-	allowed := map[string]bool{"none": true, "ac97": true, "ich6": true, "ich9": true}
-
-	if !allowed[v] {
-		fmt.Fprintln(os.Stderr, style.Err("Invalid sound driver – allowed values: none, ac97, ich6, ich9 (you entered: %s)\n"), v)
-		return
-	}
-
-	cfg.Sound = v
-	style.Success("Sound", v, "")
+	editEnum(r, cfg, &cfg.Sound,
+		">> Sound (none, ac97, ich6, ich9 (default)): ",
+		"Sound",
+		map[string]bool{"none": true, "ac97": true, "ich6": true, "ich9": true})
 }
 
 // editFilesystem promts for mounting fielsystems
