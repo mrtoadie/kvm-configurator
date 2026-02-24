@@ -94,5 +94,3 @@ func RunNewVMWorkflow(
 	}
 	return nil
 }
-
-// EOF

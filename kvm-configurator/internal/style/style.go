@@ -151,6 +151,11 @@ func SimpleError(prefix, ctx string, err error) {
 
 // Convenience wrapper for the usual red error
 func RedError(prefix, ctx string, err error) {
+	if err == nil {
+		msg := fmt.Sprintf("❗️%s >%s", prefix, ctx)
+		fmt.Fprintln(os.Stderr, Colourise(msg, ColRed))
+		return
+	}
 	SimpleError(prefix, ctx, err)
 }
 
