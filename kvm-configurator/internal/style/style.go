@@ -11,9 +11,6 @@ import (
 )
 
 const (
-	// borders
-	borderBlue  = "\033[34m"
-	borderReset = "\033[0m"
 	BoxStdWidth = 60
 	// colours
 	ColReset   = "\033[0m"
@@ -77,8 +74,8 @@ func drawBox(width int, lines []string, center bool) string {
 	}
 
 	// top / bottom border
-	top := borderBlue + "╭" + borderReset + strings.Repeat(borderBlue+"─"+borderReset, maxLen+2) + borderBlue + "╮" + borderReset
-	bottom := borderBlue + "╰" + borderReset + strings.Repeat(borderBlue+"─"+borderReset, maxLen+2) + borderBlue + "╯" + borderReset
+	top := ColBlue + "╭" + ColReset + strings.Repeat(ColBlue+"─"+ColReset, maxLen+2) + ColBlue + "╮" + ColReset
+	bottom := ColBlue + "╰" + ColReset + strings.Repeat(ColBlue+"─"+ColReset, maxLen+2) + ColBlue + "╯" + ColReset
 
 	var b strings.Builder
 	b.WriteString(top + "\n")
@@ -89,9 +86,9 @@ func drawBox(width int, lines []string, center bool) string {
 			left := padding / 2
 			right := padding - left
 			centered := strings.Repeat(" ", left) + l + strings.Repeat(" ", right)
-			b.WriteString(fmt.Sprintf("%s│ %s │%s\n", borderBlue, centered, borderReset))
+			b.WriteString(fmt.Sprintf("%s│ %s │%s\n", ColBlue, centered, ColReset))
 		} else {
-			b.WriteString(fmt.Sprintf("%s│%s %-*s %s│%s\n", borderBlue, borderReset, maxLen, l, borderBlue, borderReset))
+			b.WriteString(fmt.Sprintf("%s│%s %-*s %s│%s\n", ColBlue, ColReset, maxLen, l, ColBlue, ColReset))
 		}
 	}
 	b.WriteString(bottom)
@@ -166,9 +163,9 @@ ctx = additional information (e.g., “my-vm-01”)
 extra = optional additional text (can be empty)
 */
 func Success(prefix, ctx, extra string) {
-	msg := fmt.Sprintf("%s – %s", prefix, ctx)
+	msg := fmt.Sprintf("%s %s", prefix, ctx)
 	if extra != "" {
-		msg = fmt.Sprintf("%s – %s", msg, extra)
+		msg = fmt.Sprintf("%s %s", msg, extra)
 	}
 	fmt.Fprintln(os.Stdout, Colourise(msg, ColGreen))
 }
@@ -183,19 +180,19 @@ func Info(prefix, ctx string) {
 	fmt.Fprintln(os.Stdout, Colourise(fmt.Sprintf("%s – %s", prefix, ctx), ColBlue))
 }
 
-// Fehler‑Message (rot)
+// Error message (red)
 func Err(text string) string { return Colourise(text, ColError) }
 
-// Erfolg‑Message (grün)
+// Success message (green)
 func Ok(text string) string { return Colourise(text, ColSuccess) }
 
-// Hinweis‑Message (blau)
+// Note message (blue)
 func Hint(text string) string { return Colourise(text, ColInfo) }
 
 // Prompt‑Message (gelb)
 func PromptMsg(text string) string { return Colourise(text, ColPrompt) }
 
-// Header‑Zeile (cyan)
+// Header line (cyan)
 func Header(text string) string { return Colourise(text, ColHeader) }
 
 // SPINNER / PROGRESS

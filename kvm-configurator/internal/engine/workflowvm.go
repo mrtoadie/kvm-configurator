@@ -1,5 +1,5 @@
 // engine/workflowvm.go
-// last modified: Feb 22 2026
+// last modified: Feb 24 2026
 package engine
 
 import (
@@ -49,7 +49,7 @@ func RunNewVMWorkflow(
 		MemMiB: distro.RAM,
 		VCPU:   distro.CPU,
 		/*
-			We create the *system disk*(first element).
+			create the *system disk*(first element).
 			The path can be a directory (later becomes <vm>-system.qcow2)
 			or a complete file name
 		*/
@@ -71,11 +71,6 @@ func RunNewVMWorkflow(
 	}
 
 	// Optional Edit Menu for last edits
-	//ui.PromptEditDomainConfig(r, &cfg, defaultDiskPath, isoWorkDir)
-
-	// ---------- NEW PART ----------
-	// Instead of the old PromptEditDomainConfig function we now spin up the
-	// editor object that bundles all the edit‑logic.
 	editor := ui.NewEditor(r, os.Stdout, &cfg, defaultDiskPath, isoWorkDir)
 	editor.Run()
 	// --------------------------------

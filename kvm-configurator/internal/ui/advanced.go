@@ -42,7 +42,7 @@ func editNested(r *bufio.Reader, cfg *model.DomainConfig) {
 	allowed := map[string]bool{"vmx": true, "smx": true}
 
 	if !allowed[v] {
-		fmt.Fprintf(os.Stderr, style.Err("Invalid virtualisation – allowed values: vmx, smx (you entered: %s)\n"), v)
+		fmt.Fprintln(os.Stderr, style.Err("Invalid virtualisation – allowed values: vmx, smx (you entered: %s)\n"), v)
 		return
 	}
 
@@ -67,7 +67,7 @@ func editBoot(r *bufio.Reader, cfg *model.DomainConfig) {
 	v := strings.TrimSpace(strings.ToLower(raw))
 	allowed := map[string]bool{"hd": true, "cdrom": true, "network": true}
 	if !allowed[v] {
-		fmt.Fprintf(os.Stderr, style.Err("Invalid boot order – allowed values: hd, cdrom, network (you entered: %s)\n"), v)
+		fmt.Fprintln(os.Stderr, style.Err("Invalid boot order – allowed values: hd, cdrom, network (you entered: %s)\n"), v)
 		return
 	}
 
@@ -92,7 +92,7 @@ func editGraphics(r *bufio.Reader, cfg *model.DomainConfig) {
 	allowed := map[string]bool{"spice": true, "vnc": true}
 
 	if !allowed[v] {
-		fmt.Fprintf(os.Stderr, style.Err("Invalid graphics driver – allowed values: spice, vnc (you entered: %s)\n"), v)
+		fmt.Fprintln(os.Stderr, style.Err("Invalid graphics driver – allowed values: spice, vnc (you entered: %s)\n"), v)
 		return
 	}
 
@@ -117,7 +117,7 @@ func editSound(r *bufio.Reader, cfg *model.DomainConfig) {
 	allowed := map[string]bool{"none": true, "ac97": true, "ich6": true, "ich9": true}
 
 	if !allowed[v] {
-		fmt.Fprintf(os.Stderr, style.Err("Invalid sound driver – allowed values: none, ac97, ich6, ich9 (you entered: %s)\n"), v)
+		fmt.Fprintln(os.Stderr, style.Err("Invalid sound driver – allowed values: none, ac97, ich6, ich9 (you entered: %s)\n"), v)
 		return
 	}
 

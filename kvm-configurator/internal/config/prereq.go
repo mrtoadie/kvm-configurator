@@ -51,4 +51,3 @@ func Exists() (bool, error) {
   }
   return false, err
 }
-// EOF

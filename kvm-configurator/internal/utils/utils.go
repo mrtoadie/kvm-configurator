@@ -1,5 +1,5 @@
 // utils/utils.go
-// last modified: Feb 23 2026
+// last modified: Feb 24 2026
 package utils
 
 import (
@@ -140,33 +140,27 @@ func Prompt(r *bufio.Reader, w io.Writer, prompt string) (string, error) {
 
 // ASK
 
-// -------------------------------------------------------------------
-// 1️⃣ ask – ein einheitlicher Prompt‑Wrapper
-// -------------------------------------------------------------------
-// label   – das eigentliche Prompt‑Text (z. B. "RAM (MiB)")
-// defVal  – optionaler Default‑Wert, der im Prompt angezeigt wird
-// r,w     – Reader/Writer, damit wir später leicht mocken können
+/*
+// label – the actual prompt text (e.g. “RAM (MiB)”)
+// defVal – optional default value displayed in the prompt
+// r,w – Reader/Writer so we can easily mock later
 //
-// Rückgabe: (Antwort, error).  Leere Antwort → "" (der Aufrufer entscheidet,
-// ob er den Default übernehmen will oder nicht).
-// -------------------------------------------------------------------
+// Returns: (response, error).  Empty answer > "" (the caller decides
+// whether he wants to adopt the default or not).
+*/
 func Ask(r *bufio.Reader, w io.Writer, label string, defVal string) (string, error) {
-	// Baue den Prompt‑String zusammen:
-	//   ">> RAM (MiB) (default: 2048): "
+	// Assemble the prompt string:
+	// ">> RAM (MiB) (default: 2048): "
 	prompt := fmt.Sprintf(">> %s", label)
 	if defVal != "" {
 		prompt = fmt.Sprintf("%s (default: %s)", prompt, defVal)
 	}
 	prompt = style.PromptMsg(prompt + ": ")
 
-	// Nutze das bereits vorhandene Prompt‑Utility, das nur das Schreiben übernimmt.
-	// (Wir delegieren, damit wir nicht zweimal die gleiche Logik pflegen.)
 	return Prompt(r, w, prompt)
 }
 
-// -------------------------------------------------------------------
-// 2️⃣ MustInt – konvertiert eine Eingabe in ein int, prüft >0.
-// -------------------------------------------------------------------
+// MustInt – converts an input to an int, checks >0
 func MustInt(input string) (int, error) {
 	if strings.TrimSpace(input) == "" {
 		return 0, fmt.Errorf("empty input")

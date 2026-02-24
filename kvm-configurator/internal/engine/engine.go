@@ -56,7 +56,7 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 	}
 
 	// progress-spinner
-	spinner := style.SpinnerProgress("\x1b[34mRunning virt-install:")
+	spinner := style.SpinnerProgress("\x1b[34mCreation of the VM " + cfg.Name + " is in progress")
 	defer spinner.Stop()
 
 	cmd := exec.Command(config.CmdVirtInstall, args...)
@@ -95,7 +95,10 @@ func CreateVM(cfg model.DomainConfig, variant, isoPath, xmlDir string) error {
 		//os.Exit(1)
 	} else {
 		abs, _ := filepath.Abs(xmlFullPath)
-		style.Successf("XML definition saved under: %s", abs)
+		if err != nil {
+			abs = xmlFullPath // fallback
+		}
+		style.Successf("\n\nXML definition saved under: %s", abs)
 	}
 
 	// define the new VM >> libvirt

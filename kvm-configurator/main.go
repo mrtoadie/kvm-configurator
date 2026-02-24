@@ -78,7 +78,7 @@ func main() {
 
 		var sel string
 		if _, err := fmt.Scanln(&sel); err != nil {
-			// Invalid entry → we simply ask again
+			r.ReadString('\n') // empty buffer
 			continue
 		}
 
@@ -103,8 +103,7 @@ func main() {
 					style.ColRed, err, style.ColReset)
 			}
 		case "2":
-			//kvmtools.Start(r)
-			kvmtools.Start(bufio.NewReader(os.Stdin), xmlDir)
+			kvmtools.Start(r, xmlDir)
 		default:
 			fmt.Println(style.Err("\nInvalid selection!"))
 		}

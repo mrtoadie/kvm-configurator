@@ -17,7 +17,6 @@ const (
     FileConfig      = "oslist.yaml"
 		InstalledTemplate = "/usr/share/doc/kvm-configurator/oslist.yaml"
 )
-//var PrereqCommands = []string{CmdVirtInstall, CmdVirsh}
 
 func ConfigFilePath() string {
 	home, err := os.UserHomeDir()
@@ -71,4 +70,3 @@ func EnsureConfig() error {
 	fmt.Printf("Configuration copied to %s.\n", targetFile)
 	return nil
 }
-// EOF
