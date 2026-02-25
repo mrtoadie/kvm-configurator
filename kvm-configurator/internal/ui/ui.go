@@ -20,7 +20,7 @@ import (
 	"configurator/internal/utils"
 )
 
-// PUBLIC API (functions used by the rest of the program) 
+// PUBLIC API (functions used by the rest of the program)
 
 // NewEditor creates the interactive “customise VM” editor
 func NewEditor(r *bufio.Reader, w io.Writer,
@@ -48,7 +48,6 @@ func SelectISO(r *bufio.Reader, workDir string) (string, error) {
 func ShowSummary(r *bufio.Reader, cfg *model.DomainConfig, isoPath string) {
 	showSummaryImpl(r, cfg, isoPath)
 }
-
 
 // EDITOR (the “CUSTOMIZE VM” loop)
 type Editor struct {
