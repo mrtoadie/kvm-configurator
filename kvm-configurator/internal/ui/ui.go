@@ -75,6 +75,8 @@ func SelectISO(r *bufio.Reader, workDir string) (string, error) {
 		return strings.ToLower(files[i]) < strings.ToLower(files[j])
 	})
 
+
+	fmt.Println(style.BoxCenter(60, []string{"Select ISO"}))
 	// The user can decide – we use what is already there
 	// PromptSelection‑Helper that outputs a numbered list.
 	choice, err := utils.PromptSelection(bufio.NewReader(os.Stdin), os.Stdout, files)

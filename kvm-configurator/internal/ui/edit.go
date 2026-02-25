@@ -161,6 +161,7 @@ func (e *Editor) editNetwork() {
 // UI helper function: draw menu box
 func (e *Editor) drawMenu() {
 	isoFile := filepath.Base(e.cfg.ISOPath)
+	fmt.Println(style.BoxCenter(51, []string{"CUSTOMIZE VM"}))
 	lines := style.MustTableToLines(func(w *tabwriter.Writer) {
 		fmt.Fprintf(w, "[1] Name:\t%s\n", e.cfg.Name)
 		fmt.Fprintf(w, "[2] RAM (MiB):\t%d\n", e.cfg.MemMiB)
