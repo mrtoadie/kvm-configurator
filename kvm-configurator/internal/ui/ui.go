@@ -135,7 +135,7 @@ func (e *Editor) editDiskPath() {
 			Path: os.ExpandEnv(ans),
 		})
 	}
-	fmt.Fprintf(e.out, "\x1b[32mDisk will be stored at: %s\x1b[0m\n",
+	fmt.Fprintf(e.out, style.Ok("Disk will be stored at: %s"),
 		e.cfg.PrimaryDisk().Path)
 }
 
