@@ -13,8 +13,8 @@ import (
 const (
     CmdVirtInstall  = "virt-install"
     CmdVirsh        = "virsh"
-    ConfigDir       = ".config/kvm-configurator"
-    FileConfig      = "oslist.yaml"
+    ConfigFolder       = ".config/kvm-configurator"
+    ConfigFile      = "oslist.yaml"
 		InstalledTemplate = "/usr/share/doc/kvm-configurator/oslist.yaml"
 )
 
@@ -23,9 +23,9 @@ func ConfigFilePath() string {
 	if err != nil {
 		// if cannot resolve $HOME, fall back to the current working directory
 		// the subsequent Exists() check will surface the problem.
-		return FileConfig
+		return ConfigFile
 	}
-	return filepath.Join(home, ConfigDir, FileConfig)
+	return filepath.Join(home, ConfigFolder, ConfigFile)
 }
 
 // copy default config to user home

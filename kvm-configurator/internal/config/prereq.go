@@ -44,7 +44,7 @@ func Exists() (bool, error) {
     return false, err
   }
 	//path := filepath.Join(home, fileName)
-	path := filepath.Join(home, ConfigDir, FileConfig)
+	path := filepath.Join(home, ConfigFolder, ConfigFile)
   info, err := os.Stat(path)
   if err == nil {
     return !info.IsDir(), nil

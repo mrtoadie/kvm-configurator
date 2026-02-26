@@ -252,28 +252,28 @@ func editAdvanced(r *bufio.Reader, cfg *model.DomainConfig) {
 
 // sub‑functions for each advanced option
 func editNested(r *bufio.Reader, cfg *model.DomainConfig) {
-	editEnum(r, cfg, &cfg.NestedVirt,
+	setChoice(r, cfg, &cfg.NestedVirt,
 		">> Nested-Virtualisation (vmx for Intel, smx for AMD): ",
 		"Nested-Virtualisation",
 		map[string]bool{"vmx": true, "smx": true})
 }
 
 func editBoot(r *bufio.Reader, cfg *model.DomainConfig) {
-	editEnum(r, cfg, &cfg.BootOrder,
+	setChoice(r, cfg, &cfg.BootOrder,
 		">> Boot order (comma-separated, e.g. hd,cdrom,network): ",
 		"Boot order",
 		map[string]bool{"hd": true, "cdrom": true, "network": true})
 }
 
 func editGraphics(r *bufio.Reader, cfg *model.DomainConfig) {
-	editEnum(r, cfg, &cfg.Graphics,
+	setChoice(r, cfg, &cfg.Graphics,
 		">> Graphics (spice (default) or vnc): ",
 		"Graphics",
 		map[string]bool{"spice": true, "vnc": true})
 }
 
 func editSound(r *bufio.Reader, cfg *model.DomainConfig) {
-	editEnum(r, cfg, &cfg.Sound,
+	setChoice(r, cfg, &cfg.Sound,
 		">> Sound (none, ac97, ich6, ich9 (default)): ",
 		"Sound",
 		map[string]bool{"none": true, "ac97": true, "ich6": true, "ich9": true})

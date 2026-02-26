@@ -15,7 +15,6 @@ import (
 	// internal
 	"configurator/internal/config"
 	"configurator/internal/engine"
-	
 	"configurator/internal/style"
 	"configurator/kvmtools"
 )

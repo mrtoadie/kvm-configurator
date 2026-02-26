@@ -13,12 +13,12 @@ import (
 	"configurator/internal/utils"
 )
 
-// normalize trims whitespace and forces lower‑case.
+// normalize trims whitespace and forces lower‑case
 func normalize(s string) string { return strings.TrimSpace(strings.ToLower(s)) }
 
-// editEnum prompts for a value that must belong to an allow‑list.
-// fieldPtr points to the struct field that shall be updated.
-func editEnum(r *bufio.Reader, cfg *model.DomainConfig,
+// setChoice prompts for a value that must belong to an allow‑list
+// fieldPtr points to the struct field that shall be updated
+func setChoice(r *bufio.Reader, cfg *model.DomainConfig,
 	fieldPtr *string, prompt, label string, allowed map[string]bool) {
 
 	raw, err := utils.Prompt(r, os.Stdout, style.Hint(prompt))
@@ -26,7 +26,7 @@ func editEnum(r *bufio.Reader, cfg *model.DomainConfig,
 		fmt.Fprintln(os.Stderr, style.Err("Read error:"), err)
 		return
 	}
-	if raw == "" { // user pressed <Enter> → keep current value
+	if raw == "" { // <Enter> = keep current value
 		return
 	}
 
