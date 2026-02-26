@@ -1,12 +1,6 @@
 # kvm-configurator
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) ![GitHub License](https://img.shields.io/github/license/mrtoadie/kvm-configurator) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/mrtoadie/kvm-configurator/total)
 
-  ___ ___  _  _ ___ ___ ___ _   _ ___    _ _____ ___  ___ 
- / __/ _ \| \| | __|_ _/ __| | | | _ \  /_\_   _/ _ \| _ \
-| (_| (_) | .` | _| | | (_ | |_| |   / / _ \| || (_) |   /
- \___\___/|_|\_|_| |___\___|\___/|_|_\/_/ \_\_| \___/|_|_\
-                                                          
-
 
 **kvm-configurator** creates a **virtual machine** and registers it with qemu. In addition, the definition is saved as an **XML** file.
 
