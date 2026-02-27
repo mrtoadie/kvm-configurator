@@ -1,5 +1,5 @@
 // internal/constants.go
-// last modified: Feb 14 2026
+// last modified: Feb 27 2026
 package config
 
 import (
@@ -34,8 +34,8 @@ func EnsureConfig() error {
 	if err != nil {
 		return fmt.Errorf("could not determine home directory: %w", err)
 	}
-	targetDir := filepath.Join(home, ".config", "kvm-configurator")
-	targetFile := filepath.Join(targetDir, "oslist.yaml")
+	targetDir := filepath.Join(home, ConfigFolder)
+	targetFile := filepath.Join(targetDir, ConfigFile)
 
 	// does the file already exist? Then we're done.
 	if info, err := os.Stat(targetFile); err == nil && !info.IsDir() {
