@@ -1,7 +1,7 @@
 ![assets/kvm-configurator-header.png](assets/kvm-configurator-header.png)
 ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) ![GitHub License](https://img.shields.io/github/license/mrtoadie/kvm-configurator) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/mrtoadie/kvm-configurator/total) ![GitHub Release](https://img.shields.io/github/v/release/mrtoadie/kvm-configurator)
 
-**kvm-configurator** creates a **virtual machine** and registers it with qemu. In addition, the definition is saved as an **XML** file.
+**kvm-configurator** creates a **virtual machines** and registers it with qemu.
 
 The program can help you if you don't want to or can't use tools like virt-manager. Or if you don't feel like using commands like this:
 ```bash
@@ -13,7 +13,6 @@ virt-install \
   --cdrom /path/to/rhel7.iso \
   --os-variant rhel7
 ```
-**kvm-configurator** is my first ![Go](https://img.shields.io/badge/go-%2300ADD8.svg?style=flat&logo=go&logoColor=white) project that goes beyond just playing around.
 
 ![kvm-configurator-demo](assets/kvm-configurator_demo.gif)
 
