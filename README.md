@@ -86,3 +86,8 @@ and start the program with
 
 ## Release Notes
 [Release notes](https://github.com/mrtoadie/kvm-configurator/wiki/Release-Notes)
+
+## License
+kvm-configurator is licensed under the [MIT License](LICENSE).
+
+
